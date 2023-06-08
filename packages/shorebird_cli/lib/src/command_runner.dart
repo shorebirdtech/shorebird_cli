@@ -43,12 +43,14 @@ class ShorebirdCliCommandRunner extends CompletionCommandRunner<int> {
       ..addOption(
         'local-engine-src-path',
         hide: true,
+        defaultsTo: '/Users/eseidel/Documents/GitHub/engine/src',
         help: 'Path to your engine src directory, if you are building Flutter '
             'locally.',
       )
       ..addOption(
         'local-engine',
         hide: true,
+        defaultsTo: 'ios_release_unopt_arm64',
         help: 'Name of a build output within the engine out directory, if you '
             'are building Flutter locally.',
       );
