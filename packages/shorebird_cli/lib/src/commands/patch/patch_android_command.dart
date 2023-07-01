@@ -87,6 +87,24 @@ class PatchAndroidCommand extends ShorebirdCommand
   final HashFunction _hashFn;
   final http.Client _httpClient;
 
+  static String _artifactPathFor({
+    required String archPath,
+    required String? flavor,
+  }) {
+    return p.join(
+      Directory.current.path,
+      'build',
+      'app',
+      'intermediates',
+      'stripped_native_libs',
+      flavor != null ? '${flavor}Release' : 'release',
+      'out',
+      'lib',
+      archPath,
+      'libapp.so',
+    );
+  }
+
   @override
   Future<int> run() async {
     try {
@@ -281,18 +299,8 @@ If you believe you're seeing this in error, please reach out to us for support a
 
     for (final releaseArtifactPath in releaseArtifactPaths.entries) {
       final archMetadata = architectures[releaseArtifactPath.key]!;
-      final patchArtifactPath = p.join(
-        Directory.current.path,
-        'build',
-        'app',
-        'intermediates',
-        'stripped_native_libs',
-        flavor != null ? '${flavor}Release' : 'release',
-        'out',
-        'lib',
-        archMetadata.path,
-        'libapp.so',
-      );
+      final patchArtifactPath =
+          _artifactPathFor(archPath: archMetadata.path, flavor: flavor);
       logger.detail('Creating artifact for $patchArtifactPath');
       final patchArtifact = File(patchArtifactPath);
       final hash = _hashFn(await patchArtifact.readAsBytes());
@@ -353,6 +361,26 @@ ${summary.join('\n')}
       platform: platformName,
       channelName: channelName,
       patchArtifactBundles: patchArtifactBundles,
+    );
+
+    final arm64Arch = architectures[Arch.arm64]!;
+    final aotFile =
+        File(_artifactPathFor(archPath: arm64Arch.path, flavor: flavor));
+    final aotFileSize = aotFile.statSync().size;
+
+    await codePushClientWrapper.publishPatch(
+      appId: appId,
+      releaseId: release.id,
+      platform: 'ios',
+      channelName: channelName,
+      patchArtifactBundles: {
+        Arch.arm64: PatchArtifactBundle(
+          arch: 'aarch64',
+          path: aotFile.path,
+          hash: _hashFn(aotFile.readAsBytesSync()),
+          size: aotFileSize,
+        ),
+      },
     );
 
     logger.success('\n✅ Published Patch!');
