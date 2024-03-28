@@ -340,8 +340,6 @@ flutter:
           outputPath: any(named: 'outputPath'),
         ),
       ).thenAnswer((_) async {});
-      when(() => aotTools.isGeneratePatchDiffBaseSupported())
-          .thenAnswer((_) async => false);
       when(
         () => aotTools.generatePatchDiffBase(
           releaseSnapshot: any(named: 'releaseSnapshot'),
@@ -1128,28 +1126,6 @@ Please re-run the release command for this version or create a new release.'''),
       );
     });
 
-    group('when the engine revision is pre-linker', () {
-      setUp(() {
-        setUpProjectRoot();
-        setUpProjectRootArtifacts();
-      });
-
-      test('we do not attempt to link the AOT file', () async {
-        await runWithOverrides(command.run);
-
-        verifyNever(
-          () => aotTools.link(
-            base: any(named: 'base'),
-            patch: any(named: 'patch'),
-            analyzeSnapshot: any(named: 'analyzeSnapshot'),
-            workingDirectory: any(named: 'workingDirectory'),
-            outputPath: any(named: 'outputPath'),
-          ),
-        );
-        verifyNever(() => aotTools.isGeneratePatchDiffBaseSupported());
-      });
-    });
-
     group('when the engine revision supports the linker', () {
       setUp(() {
         setUpProjectRoot();
@@ -1264,8 +1240,6 @@ Please re-run the release command for this version or create a new release.'''),
             releaseVersion: any(named: 'releaseVersion'),
           ),
         ).thenAnswer((_) async => postLinkerRelease);
-        when(() => aotTools.isGeneratePatchDiffBaseSupported())
-            .thenAnswer((_) async => true);
         when(
           () => artifactManager.createDiff(
             releaseArtifactPath: any(named: 'releaseArtifactPath'),

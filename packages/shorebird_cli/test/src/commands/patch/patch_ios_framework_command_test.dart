@@ -272,8 +272,6 @@ flutter:
           runInShell: any(named: 'runInShell'),
         ),
       ).thenAnswer((_) async => aotBuildProcessResult);
-      when(() => aotTools.isGeneratePatchDiffBaseSupported())
-          .thenAnswer((_) async => false);
       when(
         () => aotTools.generatePatchDiffBase(
           releaseSnapshot: any(named: 'releaseSnapshot'),
@@ -1094,8 +1092,6 @@ Please re-run the release command for this version or create a new release.'''),
         setUpProjectRoot();
         setUpProjectRootArtifacts();
 
-        when(() => aotTools.isGeneratePatchDiffBaseSupported())
-            .thenAnswer((_) async => true);
         when(
           () => artifactManager.createDiff(
             releaseArtifactPath: any(named: 'releaseArtifactPath'),

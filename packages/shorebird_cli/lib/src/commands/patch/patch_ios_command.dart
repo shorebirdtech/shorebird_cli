@@ -304,16 +304,10 @@ Current Flutter Revision: $currentFlutterRevision
             'App',
           ),
         );
+        final exitCode = await _runLinker(releaseArtifact: releaseArtifactFile);
 
-        final useLinker = AotTools.usesLinker(release.flutterRevision);
-        if (useLinker) {
-          final exitCode = await _runLinker(
-            releaseArtifact: releaseArtifactFile,
-          );
-
-          if (exitCode != ExitCode.success.code) {
-            return exitCode;
-          }
+        if (exitCode != ExitCode.success.code) {
+          return exitCode;
         }
 
         if (dryRun) {
@@ -323,39 +317,32 @@ Current Flutter Revision: $currentFlutterRevision
           return ExitCode.success.code;
         }
 
-        final patchBuildFile =
-            File(useLinker ? _vmcodeOutputPath : _aotOutputPath);
-        final File patchFile;
-        if (useLinker && await aotTools.isGeneratePatchDiffBaseSupported()) {
-          final patchBaseProgress =
-              logger.progress('Generating patch diff base');
-          final analyzeSnapshotPath = shorebirdArtifacts.getArtifactPath(
-            artifact: ShorebirdArtifact.analyzeSnapshot,
-          );
+        final patchBuildFile = File(_vmcodeOutputPath);
+        final patchBaseProgress = logger.progress('Generating patch diff base');
+        final analyzeSnapshotPath = shorebirdArtifacts.getArtifactPath(
+          artifact: ShorebirdArtifact.analyzeSnapshot,
+        );
 
-          final File patchBaseFile;
-          try {
-            // If the aot_tools executable supports the dump_blobs command, we
-            // can generate a stable diff base and use that to create a patch.
-            patchBaseFile = await aotTools.generatePatchDiffBase(
-              analyzeSnapshotPath: analyzeSnapshotPath,
-              releaseSnapshot: releaseArtifactFile,
-            );
-            patchBaseProgress.complete();
-          } catch (error) {
-            patchBaseProgress.fail('$error');
-            return ExitCode.software.code;
-          }
-
-          patchFile = File(
-            await artifactManager.createDiff(
-              releaseArtifactPath: patchBaseFile.path,
-              patchArtifactPath: patchBuildFile.path,
-            ),
+        final File patchBaseFile;
+        try {
+          // If the aot_tools executable supports the dump_blobs command, we
+          // can generate a stable diff base and use that to create a patch.
+          patchBaseFile = await aotTools.generatePatchDiffBase(
+            analyzeSnapshotPath: analyzeSnapshotPath,
+            releaseSnapshot: releaseArtifactFile,
           );
-        } else {
-          patchFile = patchBuildFile;
+          patchBaseProgress.complete();
+        } catch (error) {
+          patchBaseProgress.fail('$error');
+          return ExitCode.software.code;
         }
+
+        final patchFile = File(
+          await artifactManager.createDiff(
+            releaseArtifactPath: patchBaseFile.path,
+            patchArtifactPath: patchBuildFile.path,
+          ),
+        );
 
         final patchFileSize = patchFile.statSync().size;
 
