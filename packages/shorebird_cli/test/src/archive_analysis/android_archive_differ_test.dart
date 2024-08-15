@@ -7,21 +7,31 @@ void main() {
   group(AndroidArchiveDiffer, () {
     final aabFixturesBasePath = p.join('test', 'fixtures', 'aabs');
     final baseAabPath = p.join(aabFixturesBasePath, 'base.aab');
-    final changedAssetAabPath =
-        p.join(aabFixturesBasePath, 'changed_asset.aab');
+    final changedAssetAabPath = p.join(
+      aabFixturesBasePath,
+      'changed_asset.aab',
+    );
     final changedDartAabPath = p.join(aabFixturesBasePath, 'changed_dart.aab');
-    final changedKotlinAabPath =
-        p.join(aabFixturesBasePath, 'changed_kotlin.aab');
-    final changedDartAndAssetAabPath =
-        p.join(aabFixturesBasePath, 'changed_dart_and_asset.aab');
+    final changedKotlinAabPath = p.join(
+      aabFixturesBasePath,
+      'changed_kotlin.aab',
+    );
+    final changedDartAndAssetAabPath = p.join(
+      aabFixturesBasePath,
+      'changed_dart_and_asset.aab',
+    );
 
     final aarFixturesBasePath = p.join('test', 'fixtures', 'aars');
     final baseAarPath = p.join(aarFixturesBasePath, 'base.aar');
-    final changedAssetAarPath =
-        p.join(aarFixturesBasePath, 'changed_asset.aar');
+    final changedAssetAarPath = p.join(
+      aarFixturesBasePath,
+      'changed_asset.aar',
+    );
     final changedDartAarPath = p.join(aarFixturesBasePath, 'changed_dart.aar');
-    final changedDartAndAssetAarPath =
-        p.join(aarFixturesBasePath, 'changed_dart_and_asset.aar');
+    final changedDartAndAssetAarPath = p.join(
+      aarFixturesBasePath,
+      'changed_dart_and_asset.aar',
+    );
 
     late AndroidArchiveDiffer differ;
 
@@ -38,18 +48,15 @@ void main() {
         test('finds differences between two different aabs', () async {
           final fileSetDiff =
               await differ.changedFiles(baseAabPath, changedDartAabPath);
-          expect(
-            fileSetDiff.changedPaths,
-            {
-              'BUNDLE-METADATA/com.android.tools.build.libraries/dependencies.pb',
-              'base/lib/arm64-v8a/libapp.so',
-              'base/lib/armeabi-v7a/libapp.so',
-              'base/lib/x86_64/libapp.so',
-              'META-INF/ANDROIDD.SF',
-              'META-INF/ANDROIDD.RSA',
-              'META-INF/MANIFEST.MF',
-            },
-          );
+          expect(fileSetDiff.changedPaths, {
+            'BUNDLE-METADATA/com.android.tools.build.libraries/dependencies.pb',
+            'base/lib/arm64-v8a/libapp.so',
+            'base/lib/armeabi-v7a/libapp.so',
+            'base/lib/x86_64/libapp.so',
+            'META-INF/ANDROIDD.SF',
+            'META-INF/ANDROIDD.RSA',
+            'META-INF/MANIFEST.MF',
+          });
         });
       });
 
@@ -83,10 +90,11 @@ void main() {
         });
 
         test('detects dart and asset changes', () async {
-          final fileSetDiff = await differ.changedFiles(
-            baseAabPath,
-            changedDartAndAssetAabPath,
-          );
+          final fileSetDiff =
+              await differ.changedFiles(
+                baseAabPath,
+                changedDartAndAssetAabPath,
+              );
           expect(differ.assetsFileSetDiff(fileSetDiff), isNotEmpty);
           expect(differ.dartFileSetDiff(fileSetDiff), isNotEmpty);
           expect(differ.nativeFileSetDiff(fileSetDiff), isEmpty);
@@ -129,10 +137,11 @@ void main() {
         });
 
         test('detects dart and asset changes', () async {
-          final fileSetDiff = await differ.changedFiles(
-            baseAarPath,
-            changedDartAndAssetAarPath,
-          );
+          final fileSetDiff =
+              await differ.changedFiles(
+                baseAarPath,
+                changedDartAndAssetAarPath,
+              );
           expect(differ.assetsFileSetDiff(fileSetDiff), isNotEmpty);
           expect(differ.dartFileSetDiff(fileSetDiff), isNotEmpty);
           expect(differ.nativeFileSetDiff(fileSetDiff), isEmpty);
@@ -141,11 +150,9 @@ void main() {
 
       group('containsPotentiallyBreakingAssetDiffs', () {
         test('returns true if assets were added', () {
-          final fileSetDiff = FileSetDiff(
-            addedPaths: {'base/assets/flutter_assets/file.json'},
-            removedPaths: {},
-            changedPaths: {},
-          );
+          final fileSetDiff = FileSetDiff(addedPaths: {
+            'base/assets/flutter_assets/file.json',
+          }, removedPaths: {}, changedPaths: {});
           expect(
             differ.containsPotentiallyBreakingAssetDiffs(fileSetDiff),
             isTrue,
@@ -169,15 +176,12 @@ void main() {
         });
 
         test('returns false if changed assets are in the ignore list', () {
-          final fileSetDiff = FileSetDiff(
-            addedPaths: {},
-            removedPaths: {},
-            changedPaths: {
-              'base/assets/flutter_assets/AssetManifest.bin',
-              'base/assets/flutter_assets/AssetManifest.json',
-              'base/assets/flutter_assets/NOTICES.Z',
-            },
-          );
+          final fileSetDiff =
+              FileSetDiff(addedPaths: {}, removedPaths: {}, changedPaths: {
+                'base/assets/flutter_assets/AssetManifest.bin',
+                'base/assets/flutter_assets/AssetManifest.json',
+                'base/assets/flutter_assets/NOTICES.Z',
+              });
           expect(
             differ.containsPotentiallyBreakingAssetDiffs(fileSetDiff),
             isFalse,
@@ -187,11 +191,9 @@ void main() {
 
       group('containsPotentiallyBreakingNativeDiffs', () {
         test('returns true if any native files have been added', () {
-          final fileSetDiff = FileSetDiff(
-            addedPaths: {'base/lib/arm64-v8a/test.dex'},
-            removedPaths: {},
-            changedPaths: {},
-          );
+          final fileSetDiff = FileSetDiff(addedPaths: {
+            'base/lib/arm64-v8a/test.dex',
+          }, removedPaths: {}, changedPaths: {});
           expect(
             differ.containsPotentiallyBreakingNativeDiffs(fileSetDiff),
             isTrue,
@@ -199,11 +201,9 @@ void main() {
         });
 
         test('returns true if any native files have been removed', () {
-          final fileSetDiff = FileSetDiff(
-            addedPaths: {},
-            removedPaths: {'base/lib/arm64-v8a/test.dex'},
-            changedPaths: {},
-          );
+          final fileSetDiff = FileSetDiff(addedPaths: {}, removedPaths: {
+            'base/lib/arm64-v8a/test.dex',
+          }, changedPaths: {});
           expect(
             differ.containsPotentiallyBreakingNativeDiffs(fileSetDiff),
             isTrue,

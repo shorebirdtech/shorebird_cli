@@ -47,14 +47,13 @@ class AndroidPatcher extends Patcher {
     required ReleaseArtifact releaseArtifact,
     required File releaseArchive,
     required File patchArchive,
-  }) =>
-      patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
-        localArchive: patchArchive,
-        releaseArchive: releaseArchive,
-        archiveDiffer: const AndroidArchiveDiffer(),
-        allowAssetChanges: allowAssetDiffs,
-        allowNativeChanges: allowNativeDiffs,
-      );
+  }) => patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
+    localArchive: patchArchive,
+    releaseArchive: releaseArchive,
+    archiveDiffer: const AndroidArchiveDiffer(),
+    allowAssetChanges: allowAssetDiffs,
+    allowNativeChanges: allowNativeDiffs,
+  );
 
   @override
   Future<void> assertPreconditions() async {
@@ -73,17 +72,20 @@ class AndroidPatcher extends Patcher {
   Future<File> buildPatchArtifact({String? releaseVersion}) async {
     final File aabFile;
     final flutterVersionString = await shorebirdFlutter.getVersionAndRevision();
-    final buildProgress =
-        logger.progress('Building patch with Flutter $flutterVersionString');
+    final buildProgress = logger.progress(
+      'Building patch with Flutter $flutterVersionString',
+    );
 
     try {
-      aabFile = await artifactBuilder.buildAppBundle(
-        flavor: flavor,
-        target: target,
-        args: argResults.forwardedArgs +
-            buildNameAndNumberArgsFromReleaseVersion(releaseVersion),
-        base64PublicKey: argResults.encodedPublicKey,
-      );
+      aabFile =
+          await artifactBuilder.buildAppBundle(
+            flavor: flavor,
+            target: target,
+            args:
+                argResults.forwardedArgs +
+                buildNameAndNumberArgsFromReleaseVersion(releaseVersion),
+            base64PublicKey: argResults.encodedPublicKey,
+          );
       buildProgress.complete();
     } on ArtifactBuildException catch (error) {
       buildProgress.fail(error.message);
@@ -98,8 +100,7 @@ class AndroidPatcher extends Patcher {
     if (patchArchsBuildDir == null) {
       logger
         ..err('Cannot find patch build artifacts.')
-        ..info(
-          '''
+        ..info('''
 Please run `shorebird cache clean` and try again. If the issue persists, please
 file a bug report at https://github.com/shorebirdtech/shorebird/issues/new.
 
@@ -107,8 +108,7 @@ Looked in:
   - build/app/intermediates/stripped_native_libs/stripReleaseDebugSymbols/release/out/lib
   - build/app/intermediates/stripped_native_libs/strip{flavor}ReleaseDebugSymbols/{flavor}Release/out/lib
   - build/app/intermediates/stripped_native_libs/release/out/lib
-  - build/app/intermediates/stripped_native_libs/{flavor}Release/out/lib''',
-        );
+  - build/app/intermediates/stripped_native_libs/{flavor}Release/out/lib''');
       throw ProcessExit(ExitCode.software.code);
     }
     return aabFile;
@@ -120,12 +120,13 @@ Looked in:
     required int releaseId,
     required File releaseArtifact,
   }) async {
-    final releaseArtifacts = await codePushClientWrapper.getReleaseArtifacts(
-      appId: appId,
-      releaseId: releaseId,
-      architectures: AndroidArch.availableAndroidArchs,
-      platform: releaseType.releasePlatform,
-    );
+    final releaseArtifacts =
+        await codePushClientWrapper.getReleaseArtifacts(
+          appId: appId,
+          releaseId: releaseId,
+          architectures: AndroidArch.availableAndroidArchs,
+          platform: releaseType.releasePlatform,
+        );
     final releaseArtifactPaths = <Arch, String>{};
     final downloadReleaseArtifactProgress = logger.progress(
       'Downloading release artifacts',
@@ -133,9 +134,10 @@ Looked in:
 
     for (final releaseArtifact in releaseArtifacts.entries) {
       try {
-        final releaseArtifactFile = await artifactManager.downloadFile(
-          Uri.parse(releaseArtifact.value.url),
-        );
+        final releaseArtifactFile =
+            await artifactManager.downloadFile(
+              Uri.parse(releaseArtifact.value.url),
+            );
         releaseArtifactPaths[releaseArtifact.key] = releaseArtifactFile.path;
       } catch (error) {
         downloadReleaseArtifactProgress.fail('$error');
@@ -170,18 +172,20 @@ Looked in:
       final privateKeyFile = argResults.file(
         CommonArguments.privateKeyArg.name,
       );
-      final hashSignature = privateKeyFile != null
-          ? codeSigner.sign(
-              message: hash,
-              privateKeyPemFile: privateKeyFile,
-            )
-          : null;
+      final hashSignature =
+          privateKeyFile != null
+              ? codeSigner.sign(
+                message: hash,
+                privateKeyPemFile: privateKeyFile,
+              )
+              : null;
 
       try {
-        final diffPath = await artifactManager.createDiff(
-          releaseArtifactPath: releaseArtifactPath.value,
-          patchArtifactPath: patchArtifactPath,
-        );
+        final diffPath =
+            await artifactManager.createDiff(
+              releaseArtifactPath: releaseArtifactPath.value,
+              patchArtifactPath: patchArtifactPath,
+            );
         patchArtifactBundles[releaseArtifactPath.key] = PatchArtifactBundle(
           arch: arch.arch,
           path: diffPath,

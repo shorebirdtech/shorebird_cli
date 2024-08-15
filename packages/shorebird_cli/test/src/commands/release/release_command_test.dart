@@ -63,17 +63,14 @@ void main() {
     late ReleaseCommand command;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          cacheRef.overrideWith(() => cache),
-          codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
-          loggerRef.overrideWith(() => logger),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-        },
-      );
+      return runScoped(body, values: {
+        cacheRef.overrideWith(() => cache),
+        codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+        loggerRef.overrideWith(() => logger),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+      });
     }
 
     setUpAll(() {
@@ -179,9 +176,8 @@ void main() {
         () => shorebirdFlutter.getVersionAndRevision(),
       ).thenAnswer((_) async => flutterRevision);
       when(
-        () => shorebirdFlutter.installRevision(
-          revision: any(named: 'revision'),
-        ),
+        () =>
+            shorebirdFlutter.installRevision(revision: any(named: 'revision')),
       ).thenAnswer((_) async => {});
 
       when(
@@ -204,14 +200,8 @@ void main() {
           command.getReleaser(ReleaseType.android),
           isA<AndroidReleaser>(),
         );
-        expect(
-          command.getReleaser(ReleaseType.aar),
-          isA<AarReleaser>(),
-        );
-        expect(
-          command.getReleaser(ReleaseType.ios),
-          isA<IosReleaser>(),
-        );
+        expect(command.getReleaser(ReleaseType.aar), isA<AarReleaser>());
+        expect(command.getReleaser(ReleaseType.ios), isA<IosReleaser>());
         expect(
           command.getReleaser(ReleaseType.iosFramework),
           isA<IosFrameworkReleaser>(),
@@ -231,25 +221,20 @@ void main() {
         () => codePushClientWrapper.getApp(appId: appId),
         releaser.buildReleaseArtifacts,
         () => releaser.getReleaseVersion(
-              releaseArtifactRoot: any(named: 'releaseArtifactRoot'),
-            ),
-        () => releaser.uploadReleaseArtifacts(
-              release: release,
-              appId: appId,
-            ),
+          releaseArtifactRoot: any(named: 'releaseArtifactRoot'),
+        ),
+        () => releaser.uploadReleaseArtifacts(release: release, appId: appId),
         () => logger.success('''
 
 ✅ Published Release ${release.version}!'''),
         () => logger.info(postReleaseInstructions),
         () => logger.info(
-              '''To create a patch for this release, run ${lightCyan.wrap('shorebird patch --platforms=android --release-version=${release.version}')}''',
-            ),
-        () => logger.info(
-              '''
+          '''To create a patch for this release, run ${lightCyan.wrap('shorebird patch --platforms=android --release-version=${release.version}')}''',
+        ),
+        () => logger.info('''
 
 Note: ${lightCyan.wrap('shorebird patch --platforms=android')} without the --release-version option will patch the current version of the app.
-''',
-            ),
+'''),
       ]);
     });
 
@@ -283,20 +268,20 @@ Note: ${lightCyan.wrap('shorebird patch --platforms=android')} without the --rel
         when(() => releaser.requiresReleaseVersionArg).thenReturn(true);
       });
 
-      test('does not print patch instructions for no release version',
-          () async {
-        final exitCode = await runWithOverrides(command.run);
-        expect(exitCode, equals(ExitCode.success.code));
+      test(
+        'does not print patch instructions for no release version',
+        () async {
+          final exitCode = await runWithOverrides(command.run);
+          expect(exitCode, equals(ExitCode.success.code));
 
-        verifyNever(
-          () => logger.info(
-            '''
+          verifyNever(
+            () => logger.info('''
 
 Note: ${lightCyan.wrap('shorebird patch --platforms=android')} without the --release-version option will patch the current version of the app.
-''',
-          ),
-        );
-      });
+'''),
+          );
+        },
+      );
     });
 
     group('when flavor and target are provided', () {
@@ -320,27 +305,20 @@ Note: ${lightCyan.wrap('shorebird patch --platforms=android')} without the --rel
           () => codePushClientWrapper.getApp(appId: appId),
           releaser.buildReleaseArtifacts,
           () => releaser.getReleaseVersion(
-                releaseArtifactRoot: any(named: 'releaseArtifactRoot'),
-              ),
-          () => releaser.uploadReleaseArtifacts(
-                release: release,
-                appId: appId,
-              ),
-          () => logger.success(
-                '''
+            releaseArtifactRoot: any(named: 'releaseArtifactRoot'),
+          ),
+          () => releaser.uploadReleaseArtifacts(release: release, appId: appId),
+          () => logger.success('''
 
-✅ Published Release ${release.version}!''',
-              ),
+✅ Published Release ${release.version}!'''),
           () => logger.info(postReleaseInstructions),
           () => logger.info(
-                '''To create a patch for this release, run ${lightCyan.wrap('shorebird patch --platforms=android --flavor=$flavor --target=$target --release-version=${release.version}')}''',
-              ),
-          () => logger.info(
-                '''
+            '''To create a patch for this release, run ${lightCyan.wrap('shorebird patch --platforms=android --flavor=$flavor --target=$target --release-version=${release.version}')}''',
+          ),
+          () => logger.info('''
 
 Note: ${lightCyan.wrap('shorebird patch --platforms=android --flavor=$flavor --target=$target')} without the --release-version option will patch the current version of the app.
-''',
-              ),
+'''),
         ]);
       });
     });
@@ -449,11 +427,9 @@ Note: ${lightCyan.wrap('shorebird patch --platforms=android --flavor=$flavor --t
             exitsWithCode(ExitCode.software),
           );
           verify(
-            () => logger.err(
-              '''
+            () => logger.err('''
 Unable to determine revision for Flutter version: $flutterVersion.
-$exception''',
-            ),
+$exception'''),
           ).called(1);
         });
       });
@@ -486,8 +462,7 @@ $exception''',
           ).thenAnswer((_) async => revision);
         });
 
-        test(
-            'uses specified flutter version to build '
+        test('uses specified flutter version to build '
             'and reverts to original flutter version', () async {
           when(releaser.buildReleaseArtifacts).thenAnswer((_) async {
             // Ensure we're using the correct flutter version.
@@ -497,8 +472,9 @@ $exception''',
 
           await runWithOverrides(command.run);
 
-          verify(() => shorebirdFlutter.installRevision(revision: revision))
-              .called(1);
+          verify(
+            () => shorebirdFlutter.installRevision(revision: revision),
+          ).called(1);
         });
 
         group('when flutter version install fails', () {
@@ -528,19 +504,21 @@ $exception''',
           });
 
           test(
-              '''installs the flutter version with the provided revision and completes''',
-              () async {
-            await runWithOverrides(command.run);
+            '''installs the flutter version with the provided revision and completes''',
+            () async {
+              await runWithOverrides(command.run);
 
-            verify(() => shorebirdFlutter.installRevision(revision: revision))
-                .called(1);
-            // We should never attempt to treat this as a semver version.
-            verifyNever(
-              () => shorebirdFlutter.getVersionForRevision(
-                flutterRevision: any(named: 'flutterRevision'),
-              ),
-            );
-          });
+              verify(
+                () => shorebirdFlutter.installRevision(revision: revision),
+              ).called(1);
+              // We should never attempt to treat this as a semver version.
+              verifyNever(
+                () => shorebirdFlutter.getVersionForRevision(
+                  flutterRevision: any(named: 'flutterRevision'),
+                ),
+              );
+            },
+          );
         });
       });
     });
@@ -550,13 +528,11 @@ $exception''',
       group('when the key exists', () {
         setUp(() {
           final file = File(
-            p.join(
-              Directory.systemTemp.createTempSync().path,
-              keyName,
-            ),
+            p.join(Directory.systemTemp.createTempSync().path, keyName),
           )..writeAsStringSync('KEY');
-          when(() => argResults[CommonArguments.publicKeyArg.name])
-              .thenReturn(file.path);
+          when(
+            () => argResults[CommonArguments.publicKeyArg.name],
+          ).thenReturn(file.path);
         });
 
         test('completes successfully', () async {

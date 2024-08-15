@@ -33,14 +33,13 @@ class BuildEnvironmentMetadata extends Equatable {
     String operatingSystem = 'macos',
     String operatingSystemVersion = '1.2.3',
     String? xcodeVersion = '15.0',
-  }) =>
-      BuildEnvironmentMetadata(
-        flutterRevision: flutterRevision,
-        shorebirdVersion: shorebirdVersion,
-        operatingSystem: operatingSystem,
-        operatingSystemVersion: operatingSystemVersion,
-        xcodeVersion: xcodeVersion,
-      );
+  }) => BuildEnvironmentMetadata(
+    flutterRevision: flutterRevision,
+    shorebirdVersion: shorebirdVersion,
+    operatingSystem: operatingSystem,
+    operatingSystemVersion: operatingSystemVersion,
+    xcodeVersion: xcodeVersion,
+  );
   // coverage:ignore-end
 
   /// Converts a Map<String, dynamic> to a [BuildEnvironmentMetadata]
@@ -83,10 +82,10 @@ class BuildEnvironmentMetadata extends Equatable {
 
   @override
   List<Object?> get props => [
-        flutterRevision,
-        shorebirdVersion,
-        operatingSystem,
-        operatingSystemVersion,
-        xcodeVersion,
-      ];
+    flutterRevision,
+    shorebirdVersion,
+    operatingSystem,
+    operatingSystemVersion,
+    xcodeVersion,
+  ];
 }

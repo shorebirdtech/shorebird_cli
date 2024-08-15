@@ -12,7 +12,6 @@ part 'apple_device.g.dart';
 /// `xcrun devicectl list devices`.
 /// {@endtemplate}
 @JsonSerializable(createToJson: false, fieldRename: FieldRename.none)
-
 /// {@macro apple_device}
 class AppleDevice {
   const AppleDevice({

@@ -34,12 +34,14 @@ class AndroidReleaser extends Releaser {
   ReleaseType get releaseType => ReleaseType.android;
 
   /// The architectures to build for.
-  Set<Arch> get architectures => (argResults['target-platform'] as List<String>)
-      .map(
-        (platform) => AndroidArch.availableAndroidArchs
-            .firstWhere((arch) => arch.targetPlatformCliArg == platform),
-      )
-      .toSet();
+  Set<Arch> get architectures =>
+      (argResults['target-platform'] as List<String>)
+          .map(
+            (platform) => AndroidArch.availableAndroidArchs.firstWhere(
+              (arch) => arch.targetPlatformCliArg == platform,
+            ),
+          )
+          .toSet();
 
   /// Whether to generate an APK in addition to the AAB.
   late bool generateApk = argResults['artifact'] as String == 'apk';
@@ -93,30 +95,34 @@ Please comment and upvote ${link(uri: Uri.parse('https://github.com/shorebirdtec
 
   @override
   Future<FileSystemEntity> buildReleaseArtifacts() async {
-    final architectures = (argResults['target-platform'] as List<String>)
-        .map(
-          (platform) => AndroidArch.availableAndroidArchs
-              .firstWhere((arch) => arch.targetPlatformCliArg == platform),
-        )
-        .toSet();
+    final architectures =
+        (argResults['target-platform'] as List<String>)
+            .map(
+              (platform) => AndroidArch.availableAndroidArchs.firstWhere(
+                (arch) => arch.targetPlatformCliArg == platform,
+              ),
+            )
+            .toSet();
 
     final flutterVersionString = await shorebirdFlutter.getVersionAndRevision();
 
-    final buildAppBundleProgress = logger
-        .progress('Building app bundle with Flutter $flutterVersionString');
+    final buildAppBundleProgress = logger.progress(
+      'Building app bundle with Flutter $flutterVersionString',
+    );
 
     final File aab;
 
     final base64PublicKey = argResults.encodedPublicKey;
 
     try {
-      aab = await artifactBuilder.buildAppBundle(
-        flavor: flavor,
-        target: target,
-        targetPlatforms: architectures,
-        args: argResults.forwardedArgs,
-        base64PublicKey: base64PublicKey,
-      );
+      aab =
+          await artifactBuilder.buildAppBundle(
+            flavor: flavor,
+            target: target,
+            targetPlatforms: architectures,
+            args: argResults.forwardedArgs,
+            base64PublicKey: base64PublicKey,
+          );
     } on ArtifactBuildException catch (e) {
       buildAppBundleProgress.fail(e.message);
       throw ProcessExit(ExitCode.software.code);
@@ -125,8 +131,9 @@ Please comment and upvote ${link(uri: Uri.parse('https://github.com/shorebirdtec
     buildAppBundleProgress.complete();
 
     if (generateApk) {
-      final buildApkProgress =
-          logger.progress('Building APK with Flutter $flutterVersionString');
+      final buildApkProgress = logger.progress(
+        'Building APK with Flutter $flutterVersionString',
+      );
       try {
         await artifactBuilder.buildApk(
           flavor: flavor,
@@ -149,15 +156,16 @@ Please comment and upvote ${link(uri: Uri.parse('https://github.com/shorebirdtec
   Future<String> getReleaseVersion({
     required FileSystemEntity releaseArtifactRoot,
   }) async {
-    final releaseVersionProgress =
-        logger.progress('Determining release version');
+    final releaseVersionProgress = logger.progress(
+      'Determining release version',
+    );
     final String releaseVersion;
 
     try {
       releaseVersion =
           await shorebirdAndroidArtifacts.extractReleaseVersionFromAppBundle(
-        releaseArtifactRoot.path,
-      );
+            releaseArtifactRoot.path,
+          );
       releaseVersionProgress.complete('Release version: $releaseVersion');
     } catch (error) {
       releaseVersionProgress.fail('$error');
@@ -215,13 +223,14 @@ Please comment and upvote ${link(uri: Uri.parse('https://github.com/shorebirdtec
         project: projectRoot,
         flavor: flavor,
       );
-      apkText = generateApk
-          ? '''
+      apkText =
+          generateApk
+              ? '''
 
 Or distribute the apk:
 ${lightCyan.wrap(apkFile.path)}
 '''
-          : '';
+              : '';
     } else {
       apkText = '';
     }

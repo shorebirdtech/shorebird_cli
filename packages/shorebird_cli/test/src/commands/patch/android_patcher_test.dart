@@ -57,10 +57,7 @@ void main() {
 
     late AndroidPatcher patcher;
 
-    File patchArtifactForArch(
-      Arch arch, {
-      String? flavor,
-    }) {
+    File patchArtifactForArch(Arch arch, {String? flavor}) {
       return File(
         p.join(
           projectRoot.path,
@@ -86,26 +83,24 @@ void main() {
     }
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          artifactBuilderRef.overrideWith(() => artifactBuilder),
-          artifactManagerRef.overrideWith(() => artifactManager),
-          codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
-          codeSignerRef.overrideWith(() => codeSigner),
-          doctorRef.overrideWith(() => doctor),
-          engineConfigRef.overrideWith(() => const EngineConfig.empty()),
-          loggerRef.overrideWith(() => logger),
-          patchDiffCheckerRef.overrideWith(() => patchDiffChecker),
-          platformRef.overrideWith(() => platform),
-          processRef.overrideWith(() => shorebirdProcess),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-          shorebirdAndroidArtifactsRef
-              .overrideWith(() => shorebirdAndroidArtifacts),
-        },
-      );
+      return runScoped(body, values: {
+        artifactBuilderRef.overrideWith(() => artifactBuilder),
+        artifactManagerRef.overrideWith(() => artifactManager),
+        codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+        codeSignerRef.overrideWith(() => codeSigner),
+        doctorRef.overrideWith(() => doctor),
+        engineConfigRef.overrideWith(() => const EngineConfig.empty()),
+        loggerRef.overrideWith(() => logger),
+        patchDiffCheckerRef.overrideWith(() => patchDiffChecker),
+        platformRef.overrideWith(() => platform),
+        processRef.overrideWith(() => shorebirdProcess),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+        shorebirdAndroidArtifactsRef.overrideWith(
+          () => shorebirdAndroidArtifacts,
+        ),
+      });
     }
 
     setUpAll(() {
@@ -161,8 +156,9 @@ void main() {
 
     group('assertPreconditions', () {
       setUp(() {
-        when(() => doctor.androidCommandValidators)
-            .thenReturn([flutterValidator]);
+        when(
+          () => doctor.androidCommandValidators,
+        ).thenReturn([flutterValidator]);
         when(flutterValidator.validate).thenAnswer((_) async => []);
       });
 
@@ -171,11 +167,13 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
-              supportedOperatingSystems:
-                  any(named: 'supportedOperatingSystems'),
+              supportedOperatingSystems: any(
+                named: 'supportedOperatingSystems',
+              ),
             ),
           ).thenAnswer((_) async {});
         });
@@ -194,8 +192,9 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
             ),
           ).thenThrow(exception);
@@ -206,8 +205,9 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
             ),
           ).thenThrow(exception);
@@ -245,13 +245,14 @@ void main() {
       });
 
       test('forwards result from patchDiffChecker', () async {
-        final result = await runWithOverrides(
-          () => patcher.assertUnpatchableDiffs(
-            releaseArtifact: FakeReleaseArtifact(),
-            releaseArchive: File(''),
-            patchArchive: File(''),
-          ),
-        );
+        final result =
+            await runWithOverrides(
+              () => patcher.assertUnpatchableDiffs(
+                releaseArtifact: FakeReleaseArtifact(),
+                releaseArchive: File(''),
+                patchArchive: File(''),
+              ),
+            );
         expect(result, equals(diffStatus));
         verify(
           () => patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
@@ -320,8 +321,7 @@ void main() {
             () => logger.err('Cannot find patch build artifacts.'),
           ).called(1);
           verify(
-            () => logger.info(
-              '''
+            () => logger.info('''
 Please run `shorebird cache clean` and try again. If the issue persists, please
 file a bug report at https://github.com/shorebirdtech/shorebird/issues/new.
 
@@ -329,8 +329,7 @@ Looked in:
   - build/app/intermediates/stripped_native_libs/stripReleaseDebugSymbols/release/out/lib
   - build/app/intermediates/stripped_native_libs/strip{flavor}ReleaseDebugSymbols/{flavor}Release/out/lib
   - build/app/intermediates/stripped_native_libs/release/out/lib
-  - build/app/intermediates/stripped_native_libs/{flavor}Release/out/lib''',
-            ),
+  - build/app/intermediates/stripped_native_libs/{flavor}Release/out/lib'''),
           ).called(1);
         });
       });
@@ -367,33 +366,33 @@ Looked in:
             final result = await runWithOverrides(patcher.buildPatchArtifact);
             expect(result, equals(aabFile));
             verify(
-              () => artifactBuilder.buildAppBundle(
-                args: ['--verbose'],
-              ),
+              () => artifactBuilder.buildAppBundle(args: ['--verbose']),
             ).called(1);
           });
         });
 
         group('when the key pair is provided', () {
           setUp(() {
-            when(() => codeSigner.base64PublicKey(any()))
-                .thenReturn('public_key_encoded');
+            when(
+              () => codeSigner.base64PublicKey(any()),
+            ).thenReturn('public_key_encoded');
           });
 
           test('calls buildIpa with the provided key', () async {
-            when(() => argResults.wasParsed(CommonArguments.publicKeyArg.name))
-                .thenReturn(true);
+            when(
+              () => argResults.wasParsed(CommonArguments.publicKeyArg.name),
+            ).thenReturn(true);
 
             final key = createTempFile('public.der')
               ..writeAsStringSync('public_key');
 
-            when(() => argResults[CommonArguments.publicKeyArg.name])
-                .thenReturn(key.path);
-            when(() => argResults[CommonArguments.publicKeyArg.name])
-                .thenReturn(key.path);
-            await runWithOverrides(
-              patcher.buildPatchArtifact,
-            );
+            when(
+              () => argResults[CommonArguments.publicKeyArg.name],
+            ).thenReturn(key.path);
+            when(
+              () => argResults[CommonArguments.publicKeyArg.name],
+            ).thenReturn(key.path);
+            await runWithOverrides(patcher.buildPatchArtifact);
 
             verify(
               () => artifactBuilder.buildAppBundle(
@@ -442,8 +441,9 @@ Looked in:
             Arch.x86_64: releaseArtifact,
           },
         );
-        when(() => artifactManager.downloadFile(any()))
-            .thenAnswer((_) async => File(''));
+        when(
+          () => artifactManager.downloadFile(any()),
+        ).thenAnswer((_) async => File(''));
       });
 
       group('when release artifact fails to download', () {
@@ -533,13 +533,14 @@ Looked in:
         });
 
         test('returns patch artifact bundles', () async {
-          final result = await runWithOverrides(
-            () => patcher.createPatchArtifacts(
-              appId: 'appId',
-              releaseId: 0,
-              releaseArtifact: File('release.aab'),
-            ),
-          );
+          final result =
+              await runWithOverrides(
+                () => patcher.createPatchArtifacts(
+                  appId: 'appId',
+                  releaseId: 0,
+                  releaseArtifact: File('release.aab'),
+                ),
+              );
 
           expect(result, hasLength(Arch.values.length));
           for (final bundle in result.values) {
@@ -556,8 +557,9 @@ Looked in:
               ),
             )..createSync();
 
-            when(() => argResults[CommonArguments.privateKeyArg.name])
-                .thenReturn(privateKey.path);
+            when(
+              () => argResults[CommonArguments.privateKeyArg.name],
+            ).thenReturn(privateKey.path);
 
             when(
               () => codeSigner.sign(
@@ -570,28 +572,34 @@ Looked in:
             });
           });
 
-          test('returns patch artifact bundles with proper hash signatures',
-              () async {
-            final result = await runWithOverrides(
-              () => patcher.createPatchArtifacts(
-                appId: 'appId',
-                releaseId: 0,
-                releaseArtifact: File('release.aab'),
-              ),
-            );
+          test(
+            'returns patch artifact bundles with proper hash signatures',
+            () async {
+              final result =
+                  await runWithOverrides(
+                    () => patcher.createPatchArtifacts(
+                      appId: 'appId',
+                      releaseId: 0,
+                      releaseArtifact: File('release.aab'),
+                    ),
+                  );
 
-            // Hash the patch artifacts and append '-signature' to get the
-            // expected signatures, per the mock of [codeSigner.sign] above.
-            final expectedSignatures = Arch.values
-                .map(patchArtifactForArch)
-                .map((f) => sha256.convert(f.readAsBytesSync()).toString())
-                .map((hash) => '$hash-signature')
-                .toList();
+              // Hash the patch artifacts and append '-signature' to get the
+              // expected signatures, per the mock of [codeSigner.sign] above.
+              final expectedSignatures =
+                  Arch.values
+                      .map(patchArtifactForArch)
+                      .map(
+                        (f) => sha256.convert(f.readAsBytesSync()).toString(),
+                      )
+                      .map((hash) => '$hash-signature')
+                      .toList();
 
-            final signatures =
-                result.values.map((bundle) => bundle.hashSignature).toList();
-            expect(signatures, equals(expectedSignatures));
-          });
+              final signatures =
+                  result.values.map((bundle) => bundle.hashSignature).toList();
+              expect(signatures, equals(expectedSignatures));
+            },
+          );
         });
       });
     });
@@ -606,15 +614,16 @@ Looked in:
       });
 
       test(
-          '''returns value of shorebirdAndroidArtifacts.extractReleaseVersionFromAppBundle''',
-          () async {
-        expect(
-          await runWithOverrides(
-            () => patcher.extractReleaseVersionFromArtifact(File('')),
-          ),
-          equals('1.0.0'),
-        );
-      });
+        '''returns value of shorebirdAndroidArtifacts.extractReleaseVersionFromAppBundle''',
+        () async {
+          expect(
+            await runWithOverrides(
+              () => patcher.extractReleaseVersionFromArtifact(File('')),
+            ),
+            equals('1.0.0'),
+          );
+        },
+      );
     });
 
     group('patchArtifactForDiffCheck', () {
@@ -655,9 +664,10 @@ Looked in:
           hasNativeChanges: false,
         );
 
-        final metadata = await runWithOverrides(
-          () => patcher.createPatchMetadata(diffStatus),
-        );
+        final metadata =
+            await runWithOverrides(
+              () => patcher.createPatchMetadata(diffStatus),
+            );
 
         expect(
           metadata,

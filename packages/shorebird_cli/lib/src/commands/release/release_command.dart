@@ -84,11 +84,8 @@ class ReleaseCommand extends ShorebirdCommand {
             method.argName: method.description,
         },
       )
-      ..addOption(
-        'flutter-version',
-        help:
-            '''The Flutter version to use when building the app (e.g: 3.16.3). This option also accepts Flutter commit hashes.''',
-      )
+      ..addOption('flutter-version', help:
+          '''The Flutter version to use when building the app (e.g: 3.16.3). This option also accepts Flutter commit hashes.''')
       ..addOption(
         'artifact',
         help:
@@ -110,17 +107,15 @@ class ReleaseCommand extends ShorebirdCommand {
       )
       ..addFlag(
         'split-per-abi',
-        help: 'Whether to split the APKs per ABIs (Android only). '
+        help:
+            'Whether to split the APKs per ABIs (Android only). '
             'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
         hide: true,
         negatable: false,
       )
-      ..addOption(
-        'release-version',
-        help: '''
+      ..addOption('release-version', help: '''
 The version of the associated release (e.g. "1.0.0"). This should be the version
-of the iOS app that is using this module. (aar and ios-framework only)''',
-      )
+of the iOS app that is using this module. (aar and ios-framework only)''')
       ..addMultiOption(
         'target-platform',
         help: 'The target platform(s) for which the app is compiled.',
@@ -151,8 +146,9 @@ of the iOS app that is using this module. (aar and ios-framework only)''',
       return ExitCode.usage.code;
     }
 
-    final releaserFutures =
-        results.releaseTypes.map(_resolveReleaser).map(createRelease);
+    final releaserFutures = results.releaseTypes
+        .map(_resolveReleaser)
+        .map(createRelease);
 
     for (final future in releaserFutures) {
       await future;
@@ -172,11 +168,7 @@ of the iOS app that is using this module. (aar and ios-framework only)''',
           target: target,
         );
       case ReleaseType.ios:
-        return IosReleaser(
-          argResults: results,
-          flavor: flavor,
-          target: target,
-        );
+        return IosReleaser(argResults: results, flavor: flavor, target: target);
       case ReleaseType.iosFramework:
         return IosFrameworkReleaser(
           argResults: results,
@@ -184,11 +176,7 @@ of the iOS app that is using this module. (aar and ios-framework only)''',
           target: target,
         );
       case ReleaseType.aar:
-        return AarReleaser(
-          argResults: results,
-          flavor: flavor,
-          target: target,
-        );
+        return AarReleaser(argResults: results, flavor: flavor, target: target);
     }
   }
 
@@ -239,9 +227,10 @@ of the iOS app that is using this module. (aar and ios-framework only)''',
         await cache.updateAll();
 
         final releaseArtifact = await releaser.buildReleaseArtifacts();
-        final releaseVersion = await releaser.getReleaseVersion(
-          releaseArtifactRoot: releaseArtifact,
-        );
+        final releaseVersion =
+            await releaser.getReleaseVersion(
+              releaseArtifactRoot: releaseArtifact,
+            );
 
         // Ensure we can create a release from what we've built.
         await ensureVersionIsReleasable(
@@ -266,10 +255,11 @@ of the iOS app that is using this module. (aar and ios-framework only)''',
           releasePlatform: releaser.releaseType.releasePlatform,
         );
 
-        final release = await getOrCreateRelease(
-          version: releaseVersion,
-          releasePlatform: releaser.releaseType.releasePlatform,
-        );
+        final release =
+            await getOrCreateRelease(
+              version: releaseVersion,
+              releasePlatform: releaser.releaseType.releasePlatform,
+            );
         await prepareRelease(release: release, releaser: releaser);
         await releaser.uploadReleaseArtifacts(release: release, appId: appId);
         await finalizeRelease(release: release, releaser: releaser);
@@ -288,9 +278,7 @@ of the iOS app that is using this module. (aar and ios-framework only)''',
           target: target,
         );
       },
-      values: {
-        shorebirdEnvRef.overrideWith(() => releaseFlutterShorebirdEnv),
-      },
+      values: {shorebirdEnvRef.overrideWith(() => releaseFlutterShorebirdEnv)},
     );
   }
 
@@ -312,15 +300,12 @@ of the iOS app that is using this module. (aar and ios-framework only)''',
 
     final String? revision;
     try {
-      revision = await shorebirdFlutter.getRevisionForVersion(
-        flutterVersionArg!,
-      );
+      revision =
+          await shorebirdFlutter.getRevisionForVersion(flutterVersionArg!);
     } catch (error) {
-      logger.err(
-        '''
+      logger.err('''
 Unable to determine revision for Flutter version: $flutterVersionArg.
-$error''',
-      );
+$error''');
       throw ProcessExit(ExitCode.software.code);
     }
 
@@ -331,12 +316,10 @@ $error''',
         ),
         message: 'open an issue',
       );
-      logger.err(
-        '''
+      logger.err('''
 Version $flutterVersionArg not found. Please $openIssueLink to request a new version.
 Use `shorebird flutter versions list` to list available versions.
-''',
-      );
+''');
       throw ProcessExit(ExitCode.software.code);
     }
 
@@ -353,10 +336,11 @@ Use `shorebird flutter versions list` to list available versions.
     required String flutterRevision,
     required ReleasePlatform releasePlatform,
   }) async {
-    final existingRelease = await codePushClientWrapper.maybeGetRelease(
-      appId: appId,
-      releaseVersion: version,
-    );
+    final existingRelease =
+        await codePushClientWrapper.maybeGetRelease(
+          appId: appId,
+          releaseVersion: version,
+        );
 
     if (existingRelease != null) {
       codePushClientWrapper.ensureReleaseIsNotActive(
@@ -367,9 +351,10 @@ Use `shorebird flutter versions list` to list available versions.
       // All artifacts associated with a given release must be built
       // with the same Flutter revision.
       if (existingRelease.flutterRevision != flutterRevision) {
-        final flutterVersion = await shorebirdFlutter.getVersionForRevision(
-          flutterRevision: flutterRevision,
-        );
+        final flutterVersion =
+            await shorebirdFlutter.getVersionForRevision(
+              flutterRevision: flutterRevision,
+            );
 
         final formattedCurrentReleaseVersion = shorebirdFlutter.formatVersion(
           revision: flutterRevision,
@@ -385,7 +370,8 @@ Use `shorebird flutter versions list` to list available versions.
           ..err('''
 ${styleBold.wrap(lightRed.wrap('A release with version $version already exists but was built using a different Flutter revision.'))}
 ''')
-          ..info('''
+          ..info(
+            '''
 
   Existing release built with: ${lightCyan.wrap(formattedExistingReleaseVersion)}
   Current release built with: ${lightCyan.wrap(formattedCurrentReleaseVersion)}
@@ -395,7 +381,8 @@ ${styleBold.wrap(lightRed.wrap('All platforms for a given release must be built 
 To resolve this issue, you can:
   * Re-run the release command with "${lightCyan.wrap('--flutter-version=${existingRelease.flutterRevision}')}".
   * Delete the existing release and re-run the release command with the desired Flutter version.
-  * Bump the release version and re-run the release command with the desired Flutter version.''');
+  * Bump the release version and re-run the release command with the desired Flutter version.''',
+          );
         throw ProcessExit(ExitCode.software.code);
       }
     }
@@ -504,12 +491,10 @@ ${summary.join('\n')}
     );
 
     if (!releaser.requiresReleaseVersionArg) {
-      logger.info(
-        '''
+      logger.info('''
 
 Note: ${lightCyan.wrap(baseCommand)} without the --release-version option will patch the current version of the app.
-''',
-      );
+''');
     }
   }
 }

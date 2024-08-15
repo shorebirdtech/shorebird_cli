@@ -16,12 +16,9 @@ void main() {
     late Git git;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          processRef.overrideWith(() => process),
-        },
-      );
+      return runScoped(() => body(), values: {
+        processRef.overrideWith(() => process),
+      });
     }
 
     setUp(() {
@@ -46,35 +43,32 @@ void main() {
 
       test('executes correct command (no args)', () async {
         await runWithOverrides(
-          () => git.clone(
-            url: url,
-            outputDirectory: outputDirectory,
-          ),
+          () => git.clone(url: url, outputDirectory: outputDirectory),
         );
         verify(
-          () => process.run(
-            'git',
-            ['clone', url, outputDirectory],
-            runInShell: true,
-          ),
+          () => process.run('git', [
+            'clone',
+            url,
+            outputDirectory,
+          ], runInShell: true),
         ).called(1);
       });
 
       test('executes correct command (with args)', () async {
         const args = <String>['--filter-tree:0', '--no-checkout'];
         await runWithOverrides(
-          () => git.clone(
-            url: url,
-            args: ['--filter-tree:0', '--no-checkout'],
-            outputDirectory: outputDirectory,
-          ),
+          () => git.clone(url: url, args: [
+            '--filter-tree:0',
+            '--no-checkout',
+          ], outputDirectory: outputDirectory),
         );
         verify(
-          () => process.run(
-            'git',
-            ['clone', url, ...args, outputDirectory],
-            runInShell: true,
-          ),
+          () => process.run('git', [
+            'clone',
+            url,
+            ...args,
+            outputDirectory,
+          ], runInShell: true),
         ).called(1);
       });
 
@@ -84,10 +78,7 @@ void main() {
         when(() => processResult.stderr).thenReturn(error);
         expect(
           () => runWithOverrides(
-            () => git.clone(
-              url: url,
-              outputDirectory: outputDirectory,
-            ),
+            () => git.clone(url: url, outputDirectory: outputDirectory),
           ),
           throwsA(
             isA<ProcessException>().having((e) => e.message, 'message', error),
@@ -105,18 +96,14 @@ void main() {
           () => git.checkout(directory: directory, revision: revision),
         );
         verify(
-          () => process.run(
-            'git',
-            [
-              '-C',
-              directory,
-              '-c',
-              'advice.detachedHead=false',
-              'checkout',
-              revision,
-            ],
-            runInShell: true,
-          ),
+          () => process.run('git', [
+            '-C',
+            directory,
+            '-c',
+            'advice.detachedHead=false',
+            'checkout',
+            revision,
+          ], runInShell: true),
         ).called(1);
       });
 
@@ -126,10 +113,7 @@ void main() {
         when(() => processResult.stderr).thenReturn(error);
         expect(
           () => runWithOverrides(
-            () => git.checkout(
-              directory: directory,
-              revision: revision,
-            ),
+            () => git.checkout(directory: directory, revision: revision),
           ),
           throwsA(
             isA<ProcessException>().having((e) => e.message, 'message', error),
@@ -146,11 +130,7 @@ void main() {
           completes,
         );
         verify(
-          () => process.run(
-            'git',
-            ['fetch'],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', ['fetch'], workingDirectory: directory),
         ).called(1);
       });
 
@@ -161,11 +141,10 @@ void main() {
           completes,
         );
         verify(
-          () => process.run(
-            'git',
-            ['fetch', ...args],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', [
+            'fetch',
+            ...args,
+          ], workingDirectory: directory),
         ).called(1);
       });
 
@@ -208,11 +187,12 @@ origin/flutter_release/3.10.6''';
           completion(equals(output.trim())),
         );
         verify(
-          () => process.run(
-            'git',
-            ['for-each-ref', '--format', format, pattern],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', [
+            'for-each-ref',
+            '--format',
+            format,
+            pattern,
+          ], workingDirectory: directory),
         ).called(1);
       });
 
@@ -231,18 +211,14 @@ origin/flutter_release/3.10.6''';
           completion(equals(output.trim())),
         );
         verify(
-          () => process.run(
-            'git',
-            [
-              'for-each-ref',
-              '--contains',
-              contains,
-              '--format',
-              format,
-              pattern,
-            ],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', [
+            'for-each-ref',
+            '--contains',
+            contains,
+            '--format',
+            format,
+            pattern,
+          ], workingDirectory: directory),
         ).called(1);
       });
 
@@ -277,11 +253,10 @@ origin/flutter_release/3.10.6''';
           completes,
         );
         verify(
-          () => process.run(
-            'git',
-            ['reset', revision],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', [
+            'reset',
+            revision,
+          ], workingDirectory: directory),
         ).called(1);
       });
 
@@ -289,20 +264,17 @@ origin/flutter_release/3.10.6''';
         const args = ['--hard'];
         await expectLater(
           runWithOverrides(
-            () => git.reset(
-              directory: directory,
-              revision: revision,
-              args: args,
-            ),
+            () =>
+                git.reset(directory: directory, revision: revision, args: args),
           ),
           completes,
         );
         verify(
-          () => process.run(
-            'git',
-            ['reset', ...args, revision],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', [
+            'reset',
+            ...args,
+            revision,
+          ], workingDirectory: directory),
         ).called(1);
       });
 
@@ -312,10 +284,7 @@ origin/flutter_release/3.10.6''';
         when(() => processResult.stderr).thenReturn(error);
         expect(
           () => runWithOverrides(
-            () => git.reset(
-              directory: directory,
-              revision: revision,
-            ),
+            () => git.reset(directory: directory, revision: revision),
           ),
           throwsA(
             isA<ProcessException>().having((e) => e.message, 'message', error),
@@ -329,37 +298,25 @@ origin/flutter_release/3.10.6''';
 
       test('executes correct command', () async {
         await expectLater(
-          runWithOverrides(
-            () => git.remote(directory: directory),
-          ),
+          runWithOverrides(() => git.remote(directory: directory)),
           completes,
         );
         verify(
-          () => process.run(
-            'git',
-            ['remote'],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', ['remote'], workingDirectory: directory),
         ).called(1);
       });
 
       test('executes correct command w/args', () async {
         const args = ['prune', 'origin'];
         await expectLater(
-          runWithOverrides(
-            () => git.remote(
-              directory: directory,
-              args: args,
-            ),
-          ),
+          runWithOverrides(() => git.remote(directory: directory, args: args)),
           completes,
         );
         verify(
-          () => process.run(
-            'git',
-            ['remote', ...args],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', [
+            'remote',
+            ...args,
+          ], workingDirectory: directory),
         ).called(1);
       });
 
@@ -390,11 +347,11 @@ origin/flutter_release/3.10.6''';
           completion(equals(output)),
         );
         verify(
-          () => process.run(
-            'git',
-            ['rev-parse', '--verify', revision],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', [
+            'rev-parse',
+            '--verify',
+            revision,
+          ], workingDirectory: directory),
         ).called(1);
       });
 
@@ -404,10 +361,7 @@ origin/flutter_release/3.10.6''';
         when(() => processResult.stderr).thenReturn(error);
         expect(
           () => runWithOverrides(
-            () => git.revParse(
-              directory: directory,
-              revision: revision,
-            ),
+            () => git.revParse(directory: directory, revision: revision),
           ),
           throwsA(
             isA<ProcessException>().having((e) => e.message, 'message', error),
@@ -440,11 +394,10 @@ origin/flutter_release/3.10.6''';
           completion(equals(output)),
         );
         verify(
-          () => process.run(
-            'git',
-            ['status', ...args],
-            workingDirectory: directory,
-          ),
+          () => process.run('git', [
+            'status',
+            ...args,
+          ], workingDirectory: directory),
         ).called(1);
       });
 
@@ -476,11 +429,10 @@ origin/flutter_release/3.10.6''';
           completion(equals('refs/heads/main')),
         );
         verify(
-          () => process.run(
-            'git',
-            ['symbolic-ref', '1234'],
-            workingDirectory: directory.path,
-          ),
+          () => process.run('git', [
+            'symbolic-ref',
+            '1234',
+          ], workingDirectory: directory.path),
         ).called(1);
       });
 
@@ -491,11 +443,10 @@ origin/flutter_release/3.10.6''';
           completion(equals('refs/heads/main')),
         );
         verify(
-          () => process.run(
-            'git',
-            ['symbolic-ref', 'HEAD'],
-            workingDirectory: directory.path,
-          ),
+          () => process.run('git', [
+            'symbolic-ref',
+            'HEAD',
+          ], workingDirectory: directory.path),
         ).called(1);
       });
     });

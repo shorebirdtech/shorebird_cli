@@ -29,16 +29,13 @@ void main() {
     late ShorebirdValidator shorebirdValidator;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          artifactBuilderRef.overrideWith(() => artifactBuilder),
-          doctorRef.overrideWith(() => doctor),
-          engineConfigRef.overrideWith(() => const EngineConfig.empty()),
-          loggerRef.overrideWith(() => logger),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-        },
-      );
+      return runScoped(body, values: {
+        artifactBuilderRef.overrideWith(() => artifactBuilder),
+        doctorRef.overrideWith(() => doctor),
+        engineConfigRef.overrideWith(() => const EngineConfig.empty()),
+        loggerRef.overrideWith(() => logger),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+      });
     }
 
     setUpAll(() {
@@ -108,19 +105,13 @@ void main() {
 
     test('exits with code 70 when building appbundle fails', () async {
       when(
-        () => artifactBuilder.buildAppBundle(
-          args: any(named: 'args'),
-        ),
-      ).thenThrow(
-        ArtifactBuildException('Failed to build: oops'),
-      );
+        () => artifactBuilder.buildAppBundle(args: any(named: 'args')),
+      ).thenThrow(ArtifactBuildException('Failed to build: oops'));
 
       final exitCode = await runWithOverrides(command.run);
 
       expect(exitCode, equals(ExitCode.software.code));
-      verify(
-        () => artifactBuilder.buildAppBundle(args: []),
-      ).called(1);
+      verify(() => artifactBuilder.buildAppBundle(args: [])).called(1);
     });
 
     group('when platform was specified via arg results rest', () {
@@ -133,9 +124,7 @@ void main() {
 
         expect(exitCode, equals(ExitCode.success.code));
         verify(
-          () => artifactBuilder.buildAppBundle(
-            args: ['--verbose'],
-          ),
+          () => artifactBuilder.buildAppBundle(args: ['--verbose']),
         ).called(1);
 
         verify(
@@ -152,11 +141,7 @@ ${lightCyan.wrap(p.join('build', 'app', 'outputs', 'bundle', 'release', 'app-rel
       final exitCode = await runWithOverrides(command.run);
 
       expect(exitCode, equals(ExitCode.success.code));
-      verify(
-        () => artifactBuilder.buildAppBundle(
-          args: [],
-        ),
-      ).called(1);
+      verify(() => artifactBuilder.buildAppBundle(args: [])).called(1);
 
       verify(
         () => logger.info(
@@ -167,8 +152,7 @@ ${lightCyan.wrap(p.join('build', 'app', 'outputs', 'bundle', 'release', 'app-rel
       ).called(1);
     });
 
-    test(
-        'exits with code 0 when building appbundle succeeds '
+    test('exits with code 0 when building appbundle succeeds '
         'with flavor and target', () async {
       const flavor = 'development';
       final target = p.join('lib', 'main_development.dart');
@@ -201,35 +185,30 @@ ${lightCyan.wrap(p.join('build', 'app', 'outputs', 'bundle', '${flavor}Release',
       );
 
       expect(
-        runScoped(
-          () => AndroidArch.availableAndroidArchs.length,
-          values: {
-            engineConfigRef.overrideWith(
-              () => const EngineConfig(
-                localEngine: 'android_release_arm64',
-                localEngineSrcPath: 'path/to/engine/src',
-                localEngineHost: 'host_release',
-              ),
+        runScoped(() => AndroidArch.availableAndroidArchs.length, values: {
+          engineConfigRef.overrideWith(
+            () => const EngineConfig(
+              localEngine: 'android_release_arm64',
+              localEngineSrcPath: 'path/to/engine/src',
+              localEngineHost: 'host_release',
             ),
-          },
-        ),
+          ),
+        }),
         equals(1),
       );
 
       // We only support a few release configs for now.
       expect(
-        () => runScoped(
-          () => AndroidArch.availableAndroidArchs.length,
-          values: {
-            engineConfigRef.overrideWith(
-              () => const EngineConfig(
-                localEngine: 'android_debug_unopt',
-                localEngineSrcPath: 'path/to/engine/src',
-                localEngineHost: 'host_debug_unopt',
+        () =>
+            runScoped(() => AndroidArch.availableAndroidArchs.length, values: {
+              engineConfigRef.overrideWith(
+                () => const EngineConfig(
+                  localEngine: 'android_debug_unopt',
+                  localEngineSrcPath: 'path/to/engine/src',
+                  localEngineHost: 'host_debug_unopt',
+                ),
               ),
-            ),
-          },
-        ),
+            }),
         throwsException,
       );
     });

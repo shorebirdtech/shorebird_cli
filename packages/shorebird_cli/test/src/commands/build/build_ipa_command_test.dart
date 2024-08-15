@@ -33,18 +33,15 @@ void main() {
     late ShorebirdValidator shorebirdValidator;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          artifactBuilderRef.overrideWith(() => artifactBuilder),
-          doctorRef.overrideWith(() => doctor),
-          iosRef.overrideWith(() => ios),
-          loggerRef.overrideWith(() => logger),
-          osInterfaceRef.overrideWith(() => operatingSystemInterface),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-        },
-      );
+      return runScoped(body, values: {
+        artifactBuilderRef.overrideWith(() => artifactBuilder),
+        doctorRef.overrideWith(() => doctor),
+        iosRef.overrideWith(() => ios),
+        loggerRef.overrideWith(() => logger),
+        osInterfaceRef.overrideWith(() => operatingSystemInterface),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+      });
     }
 
     setUpAll(() {
@@ -76,8 +73,9 @@ void main() {
       when(() => ios.createExportOptionsPlist()).thenReturn(File('.'));
       when(() => logger.progress(any())).thenReturn(MockProgress());
       when(() => logger.info(any())).thenReturn(null);
-      when(() => operatingSystemInterface.which('flutter'))
-          .thenReturn('/path/to/flutter');
+      when(
+        () => operatingSystemInterface.which('flutter'),
+      ).thenReturn('/path/to/flutter');
       when(() => doctor.iosCommandValidators).thenReturn([flutterValidator]);
       when(() => shorebirdEnv.flutterRevision).thenReturn('1234');
       when(
@@ -131,11 +129,7 @@ void main() {
       final exitCode = await runWithOverrides(command.run);
 
       expect(exitCode, equals(ExitCode.software.code));
-      verify(
-        () => artifactBuilder.buildIpa(
-          args: [],
-        ),
-      ).called(1);
+      verify(() => artifactBuilder.buildIpa(args: [])).called(1);
     });
 
     group('when platform was specified via arg results rest', () {
@@ -148,21 +142,15 @@ void main() {
 
         expect(exitCode, equals(ExitCode.success.code));
 
-        verify(
-          () => artifactBuilder.buildIpa(args: ['--verbose']),
-        ).called(1);
+        verify(() => artifactBuilder.buildIpa(args: ['--verbose'])).called(1);
 
         verifyInOrder([
-          () => logger.info(
-                '''
+          () => logger.info('''
 📦 Generated an xcode archive at:
-${lightCyan.wrap(p.join('build', 'ios', 'archive', 'Runner.xcarchive'))}''',
-              ),
-          () => logger.info(
-                '''
+${lightCyan.wrap(p.join('build', 'ios', 'archive', 'Runner.xcarchive'))}'''),
+          () => logger.info('''
 📦 Generated an ipa at:
-${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}''',
-              ),
+${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}'''),
         ]);
       });
     });
@@ -175,21 +163,16 @@ ${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}''',
       verify(() => artifactBuilder.buildIpa(args: [])).called(1);
 
       verifyInOrder([
-        () => logger.info(
-              '''
+        () => logger.info('''
 📦 Generated an xcode archive at:
-${lightCyan.wrap(p.join('build', 'ios', 'archive', 'Runner.xcarchive'))}''',
-            ),
-        () => logger.info(
-              '''
+${lightCyan.wrap(p.join('build', 'ios', 'archive', 'Runner.xcarchive'))}'''),
+        () => logger.info('''
 📦 Generated an ipa at:
-${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}''',
-            ),
+${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}'''),
       ]);
     });
 
-    test(
-        'exits with code 0 when building ipa succeeds '
+    test('exits with code 0 when building ipa succeeds '
         'with flavor and target', () async {
       const flavor = 'development';
       final target = p.join('lib', 'main_development.dart');
@@ -200,29 +183,21 @@ ${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}''',
       expect(exitCode, equals(ExitCode.success.code));
 
       verify(
-        () => artifactBuilder.buildIpa(
-          flavor: flavor,
-          target: target,
-          args: [],
-        ),
+        () =>
+            artifactBuilder.buildIpa(flavor: flavor, target: target, args: []),
       ).called(1);
 
       verifyInOrder([
-        () => logger.info(
-              '''
+        () => logger.info('''
 📦 Generated an xcode archive at:
-${lightCyan.wrap(p.join('build', 'ios', 'archive', 'Runner.xcarchive'))}''',
-            ),
-        () => logger.info(
-              '''
+${lightCyan.wrap(p.join('build', 'ios', 'archive', 'Runner.xcarchive'))}'''),
+        () => logger.info('''
 📦 Generated an ipa at:
-${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}''',
-            ),
+${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}'''),
       ]);
     });
 
-    test(
-        'exits with code 0 when building ipa succeeds '
+    test('exits with code 0 when building ipa succeeds '
         'with --no-codesign', () async {
       when(() => argResults['codesign']).thenReturn(false);
       final exitCode = await runWithOverrides(command.run);
@@ -234,19 +209,15 @@ ${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}''',
       ).called(1);
 
       verify(
-        () => logger.info(
-          '''
+        () => logger.info('''
 📦 Generated an xcode archive at:
-${lightCyan.wrap(p.join('build', 'ios', 'archive', 'Runner.xcarchive'))}''',
-        ),
+${lightCyan.wrap(p.join('build', 'ios', 'archive', 'Runner.xcarchive'))}'''),
       ).called(1);
 
       verifyNever(
-        () => logger.info(
-          '''
+        () => logger.info('''
 📦 Generated an ipa at:
-${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}''',
-        ),
+${lightCyan.wrap(p.join('build', 'ios', 'ipa', 'Runner.ipa'))}'''),
       );
     });
   });

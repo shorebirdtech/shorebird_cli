@@ -60,15 +60,11 @@ class Cache {
         continue;
       }
 
-      await retry(
-        artifact.update,
-        maxAttempts: 3,
-        onRetry: (e) {
-          logger
-            ..detail('Failed to update ${artifact.fileName}, retrying...')
-            ..detail(e.toString());
-        },
-      );
+      await retry(artifact.update, maxAttempts: 3, onRetry: (e) {
+        logger
+          ..detail('Failed to update ${artifact.fileName}, retrying...')
+          ..detail(e.toString());
+      });
     }
   }
 
@@ -90,23 +86,17 @@ class Cache {
 
   /// The Shorebird cache directory.
   static Directory get shorebirdCacheDirectory {
-    return Directory(
-      p.join(shorebirdEnv.shorebirdRoot.path, 'bin', 'cache'),
-    );
+    return Directory(p.join(shorebirdEnv.shorebirdRoot.path, 'bin', 'cache'));
   }
 
   /// The Shorebird cached previews directory.
   static Directory get shorebirdPreviewsDirectory {
-    return Directory(
-      p.join(shorebirdCacheDirectory.path, 'previews'),
-    );
+    return Directory(p.join(shorebirdCacheDirectory.path, 'previews'));
   }
 
   /// The Shorebird cached artifacts directory.
   static Directory get shorebirdArtifactsDirectory {
-    return Directory(
-      p.join(shorebirdCacheDirectory.path, 'artifacts'),
-    );
+    return Directory(p.join(shorebirdCacheDirectory.path, 'artifacts'));
   }
 
   final List<CachedArtifact> _artifacts = [];
@@ -185,12 +175,10 @@ abstract class CachedArtifact {
     try {
       response = await httpClient.send(request);
     } catch (error) {
-      throw CacheUpdateFailure(
-        '''
+      throw CacheUpdateFailure('''
 Failed to download $fileName: $error
 If you're behind a firewall/proxy, please, make sure shorebird_cli is
-allowed to access $storageUrl.''',
-      );
+allowed to access $storageUrl.''');
     }
 
     if (response.statusCode != HttpStatus.ok) {
@@ -265,12 +253,12 @@ class AotToolsArtifact extends CachedArtifact {
 
   @override
   File get file => File(
-        p.join(
-          cache.getArtifactDirectory(fileName).path,
-          shorebirdEnv.shorebirdEngineRevision,
-          fileName,
-        ),
-      );
+    p.join(
+      cache.getArtifactDirectory(fileName).path,
+      shorebirdEnv.shorebirdEngineRevision,
+      fileName,
+    ),
+  );
 
   @override
   String get storageUrl =>
@@ -337,11 +325,11 @@ class BundleToolArtifact extends CachedArtifact {
 
   @override
   String? get checksum =>
-      // SHA-256 checksum of the bundletool.jar file.
-      // When updating the bundletool version, be sure to update this checksum.
-      // This can be done by running the following command:
-      // ```shell
-      // shasum --algorithm 256 /path/to/file
-      // ```
-      '''38ae8a10bcdacef07ecce8211188c5c92b376be96da38ff3ee1f2cf4895b2cb8''';
+  // SHA-256 checksum of the bundletool.jar file.
+  // When updating the bundletool version, be sure to update this checksum.
+  // This can be done by running the following command:
+  // ```shell
+  // shasum --algorithm 256 /path/to/file
+  // ```
+  '''38ae8a10bcdacef07ecce8211188c5c92b376be96da38ff3ee1f2cf4895b2cb8''';
 }

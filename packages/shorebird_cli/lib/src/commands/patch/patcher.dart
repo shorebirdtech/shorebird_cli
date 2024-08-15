@@ -162,9 +162,6 @@ ${iOSLinkPercentageUrl.toLink()}
     }
 
     final parts = releaseVersion.split('+');
-    return [
-      '--build-name=${parts[0]}',
-      '--build-number=${parts[1]}',
-    ];
+    return ['--build-name=${parts[0]}', '--build-number=${parts[1]}'];
   }
 }

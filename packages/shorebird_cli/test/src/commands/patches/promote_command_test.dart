@@ -54,14 +54,11 @@ void main() {
     late PromoteCommand command;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
-          loggerRef.overrideWith(() => logger),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(body, values: {
+        codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+        loggerRef.overrideWith(() => logger),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUpAll(() {
@@ -147,12 +144,14 @@ void main() {
         ).thenAnswer((_) async => [prodPatch]);
       });
 
-      test('tells user patch is already in prod, exits with usage code',
-          () async {
-        final result = await runWithOverrides(command.run);
-        expect(result, equals(ExitCode.usage.code));
-        verify(() => logger.err('Patch 1 is already live')).called(1);
-      });
+      test(
+        'tells user patch is already in prod, exits with usage code',
+        () async {
+          final result = await runWithOverrides(command.run);
+          expect(result, equals(ExitCode.usage.code));
+          verify(() => logger.err('Patch 1 is already live')).called(1);
+        },
+      );
     });
 
     group('when app has no stable channel', () {
@@ -182,8 +181,9 @@ void main() {
             channel: stableChannel,
           ),
         );
-        verify(() => logger.success('Patch 1 is now live for release 1.0.0!'))
-            .called(1);
+        verify(
+          () => logger.success('Patch 1 is now live for release 1.0.0!'),
+        ).called(1);
       });
     });
   });

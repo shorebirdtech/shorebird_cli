@@ -52,25 +52,23 @@ void main() {
     late AndroidReleaser androidReleaser;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          artifactBuilderRef.overrideWith(() => artifactBuilder),
-          codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
-          codeSignerRef.overrideWith(() => codeSigner),
-          doctorRef.overrideWith(() => doctor),
-          engineConfigRef.overrideWith(() => const EngineConfig.empty()),
-          loggerRef.overrideWith(() => logger),
-          osInterfaceRef.overrideWith(() => operatingSystemInterface),
-          platformRef.overrideWith(() => platform),
-          processRef.overrideWith(() => shorebirdProcess),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-          shorebirdAndroidArtifactsRef
-              .overrideWith(() => shorebirdAndroidArtifacts),
-        },
-      );
+      return runScoped(body, values: {
+        artifactBuilderRef.overrideWith(() => artifactBuilder),
+        codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+        codeSignerRef.overrideWith(() => codeSigner),
+        doctorRef.overrideWith(() => doctor),
+        engineConfigRef.overrideWith(() => const EngineConfig.empty()),
+        loggerRef.overrideWith(() => logger),
+        osInterfaceRef.overrideWith(() => operatingSystemInterface),
+        platformRef.overrideWith(() => platform),
+        processRef.overrideWith(() => shorebirdProcess),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+        shorebirdAndroidArtifactsRef.overrideWith(
+          () => shorebirdAndroidArtifacts,
+        ),
+      });
     }
 
     setUpAll(() {
@@ -97,8 +95,9 @@ void main() {
       shorebirdValidator = MockShorebirdValidator();
       shorebirdAndroidArtifacts = MockShorebirdAndroidArtifacts();
 
-      when(() => argResults['target-platform'])
-          .thenReturn(Arch.values.map((a) => a.targetPlatformCliArg).toList());
+      when(
+        () => argResults['target-platform'],
+      ).thenReturn(Arch.values.map((a) => a.targetPlatformCliArg).toList());
       when(() => argResults.rest).thenReturn([]);
       when(() => argResults.wasParsed(any())).thenReturn(false);
 
@@ -123,8 +122,9 @@ void main() {
 
     group('assertPreconditions', () {
       setUp(() {
-        when(() => doctor.androidCommandValidators)
-            .thenReturn([flutterValidator]);
+        when(
+          () => doctor.androidCommandValidators,
+        ).thenReturn([flutterValidator]);
         when(flutterValidator.validate).thenAnswer((_) async => []);
       });
 
@@ -133,11 +133,13 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
-              supportedOperatingSystems:
-                  any(named: 'supportedOperatingSystems'),
+              supportedOperatingSystems: any(
+                named: 'supportedOperatingSystems',
+              ),
             ),
           ).thenAnswer((_) async {});
         });
@@ -156,8 +158,9 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
             ),
           ).thenThrow(exception);
@@ -168,8 +171,9 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
             ),
           ).thenThrow(exception);
@@ -248,8 +252,9 @@ To change the version of this release, change your app's version in your pubspec
               'public-key.pem',
             ),
           )..writeAsStringSync('public key');
-          when(() => argResults[CommonArguments.publicKeyArg.name])
-              .thenReturn(publicKeyFile.path);
+          when(
+            () => argResults[CommonArguments.publicKeyArg.name],
+          ).thenReturn(publicKeyFile.path);
         });
 
         test('returns normally', () async {
@@ -263,8 +268,9 @@ To change the version of this release, change your app's version in your pubspec
       group('when a public key is provided but does not exist', () {
         setUp(() {
           when(() => argResults['artifact']).thenReturn('apk');
-          when(() => argResults[CommonArguments.publicKeyArg.name])
-              .thenReturn('non-existing-key.pem');
+          when(
+            () => argResults[CommonArguments.publicKeyArg.name],
+          ).thenReturn('non-existing-key.pem');
         });
 
         test('logs and exits with usage err', () async {
@@ -273,8 +279,9 @@ To change the version of this release, change your app's version in your pubspec
             exitsWithCode(ExitCode.usage),
           );
 
-          verify(() => logger.err('No file found at non-existing-key.pem'))
-              .called(1);
+          verify(
+            () => logger.err('No file found at non-existing-key.pem'),
+          ).called(1);
         });
       });
     });
@@ -301,9 +308,7 @@ To change the version of this release, change your app's version in your pubspec
             targetPlatforms: any(named: 'targetPlatforms'),
             args: any(named: 'args'),
           ),
-        ).thenAnswer(
-          (_) async => File(''),
-        );
+        ).thenAnswer((_) async => File(''));
         when(
           () => shorebirdFlutter.getVersionAndRevision(),
         ).thenAnswer((_) async => flutterVersionAndRevision);
@@ -370,9 +375,10 @@ To change the version of this release, change your app's version in your pubspec
           });
 
           test('returns the path to the aab', () async {
-            final result = await runWithOverrides(
-              () => androidReleaser.buildReleaseArtifacts(),
-            );
+            final result =
+                await runWithOverrides(
+                  () => androidReleaser.buildReleaseArtifacts(),
+                );
             expect(result, aabFile);
             verify(
               () => artifactBuilder.buildAppBundle(
@@ -384,9 +390,10 @@ To change the version of this release, change your app's version in your pubspec
         });
 
         test('returns the path to the aab', () async {
-          final result = await runWithOverrides(
-            () => androidReleaser.buildReleaseArtifacts(),
-          );
+          final result =
+              await runWithOverrides(
+                () => androidReleaser.buildReleaseArtifacts(),
+              );
           expect(result, aabFile);
           verify(
             () => artifactBuilder.buildAppBundle(
@@ -397,9 +404,7 @@ To change the version of this release, change your app's version in your pubspec
         });
 
         test('does not built apk by default', () async {
-          await runWithOverrides(
-            () => androidReleaser.buildReleaseArtifacts(),
-          );
+          await runWithOverrides(() => androidReleaser.buildReleaseArtifacts());
           verifyNever(
             () => artifactBuilder.buildApk(
               flavor: any(named: 'flavor'),
@@ -455,8 +460,9 @@ To change the version of this release, change your app's version in your pubspec
               'patch-signing-public-key.pem',
             ),
           )..createSync(recursive: true);
-          when(() => argResults[CommonArguments.publicKeyArg.name])
-              .thenReturn(patchSigningPublicKeyFile.path);
+          when(
+            () => argResults[CommonArguments.publicKeyArg.name],
+          ).thenReturn(patchSigningPublicKeyFile.path);
 
           when(
             () => artifactBuilder.buildAppBundle(
@@ -477,8 +483,9 @@ To change the version of this release, change your app's version in your pubspec
             ),
           ).thenAnswer((_) async => File(''));
 
-          when(() => codeSigner.base64PublicKey(any()))
-              .thenReturn(base64PublicKey);
+          when(
+            () => codeSigner.base64PublicKey(any()),
+          ).thenReturn(base64PublicKey);
         });
 
         test(
@@ -548,11 +555,12 @@ To change the version of this release, change your app's version in your pubspec
       });
 
       test('returns value from artifactManager', () async {
-        final result = await runWithOverrides(
-          () => androidReleaser.getReleaseVersion(
-            releaseArtifactRoot: Directory(''),
-          ),
-        );
+        final result =
+            await runWithOverrides(
+              () => androidReleaser.getReleaseVersion(
+                releaseArtifactRoot: Directory(''),
+              ),
+            );
         expect(result, releaseVersion);
         verify(
           () =>
@@ -625,26 +633,28 @@ To change the version of this release, change your app's version in your pubspec
         ).thenReturn(aabFile);
       });
 
-      test('calls codePushClientWrapper.createAndroidReleaseArtifacts',
-          () async {
-        await runWithOverrides(
-          () => androidReleaser.uploadReleaseArtifacts(
-            appId: appId,
-            release: release,
-          ),
-        );
-        verify(
-          () => codePushClientWrapper.createAndroidReleaseArtifacts(
-            appId: appId,
-            releaseId: release.id,
-            projectRoot: projectRoot.path,
-            aabPath: aabFile.path,
-            platform: ReleasePlatform.android,
-            architectures: Arch.values,
-            flavor: androidReleaser.flavor,
-          ),
-        ).called(1);
-      });
+      test(
+        'calls codePushClientWrapper.createAndroidReleaseArtifacts',
+        () async {
+          await runWithOverrides(
+            () => androidReleaser.uploadReleaseArtifacts(
+              appId: appId,
+              release: release,
+            ),
+          );
+          verify(
+            () => codePushClientWrapper.createAndroidReleaseArtifacts(
+              appId: appId,
+              releaseId: release.id,
+              projectRoot: projectRoot.path,
+              aabPath: aabFile.path,
+              platform: ReleasePlatform.android,
+              architectures: Arch.values,
+              flavor: androidReleaser.flavor,
+            ),
+          ).called(1);
+        },
+      );
     });
 
     group('releaseMetadata', () {

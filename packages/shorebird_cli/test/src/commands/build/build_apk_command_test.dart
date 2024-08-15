@@ -27,15 +27,12 @@ void main() {
     late BuildApkCommand command;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          artifactBuilderRef.overrideWith(() => artifactBuilder),
-          doctorRef.overrideWith(() => doctor),
-          loggerRef.overrideWith(() => logger),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-        },
-      );
+      return runScoped(body, values: {
+        artifactBuilderRef.overrideWith(() => artifactBuilder),
+        doctorRef.overrideWith(() => doctor),
+        loggerRef.overrideWith(() => logger),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+      });
     }
 
     setUpAll(() {
@@ -116,9 +113,7 @@ void main() {
       final exitCode = await runWithOverrides(command.run);
 
       expect(exitCode, equals(ExitCode.software.code));
-      verify(
-        () => artifactBuilder.buildApk(args: []),
-      ).called(1);
+      verify(() => artifactBuilder.buildApk(args: [])).called(1);
     });
 
     group('when platform was specified via arg results rest', () {
@@ -131,9 +126,7 @@ void main() {
 
         expect(exitCode, equals(ExitCode.success.code));
 
-        verify(
-          () => artifactBuilder.buildApk(args: ['--verbose']),
-        ).called(1);
+        verify(() => artifactBuilder.buildApk(args: ['--verbose'])).called(1);
         verify(
           () => logger.info(
             '''
@@ -149,9 +142,7 @@ ${lightCyan.wrap(p.join('build', 'app', 'outputs', 'apk', 'release', 'app-releas
 
       expect(exitCode, equals(ExitCode.success.code));
 
-      verify(
-        () => artifactBuilder.buildApk(args: []),
-      ).called(1);
+      verify(() => artifactBuilder.buildApk(args: [])).called(1);
       verify(
         () => logger.info(
           '''
@@ -161,8 +152,7 @@ ${lightCyan.wrap(p.join('build', 'app', 'outputs', 'apk', 'release', 'app-releas
       ).called(1);
     });
 
-    test(
-        'exits with code 0 when building apk succeeds '
+    test('exits with code 0 when building apk succeeds '
         'with flavor and target', () async {
       const flavor = 'development';
       final target = p.join('lib', 'main_development.dart');
@@ -173,11 +163,8 @@ ${lightCyan.wrap(p.join('build', 'app', 'outputs', 'apk', 'release', 'app-releas
       expect(exitCode, equals(ExitCode.success.code));
 
       verify(
-        () => artifactBuilder.buildApk(
-          flavor: flavor,
-          target: target,
-          args: [],
-        ),
+        () =>
+            artifactBuilder.buildApk(flavor: flavor, target: target, args: []),
       ).called(1);
       verify(
         () => logger.info(

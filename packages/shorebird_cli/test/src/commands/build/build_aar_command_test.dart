@@ -26,15 +26,12 @@ void main() {
     late BuildAarCommand command;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          artifactBuilderRef.overrideWith(() => artifactBuilder),
-          loggerRef.overrideWith(() => logger),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-        },
-      );
+      return runScoped(body, values: {
+        artifactBuilderRef.overrideWith(() => artifactBuilder),
+        loggerRef.overrideWith(() => logger),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+      });
     }
 
     setUp(() {
@@ -129,29 +126,15 @@ void main() {
         expect(result, equals(ExitCode.success.code));
 
         verify(
-          () => artifactBuilder.buildAar(
-            buildNumber: buildNumber,
-            args: ['--verbose'],
-          ),
+          () => artifactBuilder.buildAar(buildNumber: buildNumber, args: [
+            '--verbose',
+          ]),
         ).called(1);
         verify(
           () => logger.info(
             '''
 📦 Generated an aar at:
-${lightCyan.wrap(
-              p.join(
-                'build',
-                'host',
-                'outputs',
-                'repo',
-                'com',
-                'example',
-                'my_flutter_module',
-                'flutter_release',
-                buildNumber,
-                'flutter_release-$buildNumber.aar',
-              ),
-            )}''',
+${lightCyan.wrap(p.join('build', 'host', 'outputs', 'repo', 'com', 'example', 'my_flutter_module', 'flutter_release', buildNumber, 'flutter_release-$buildNumber.aar'))}''',
           ),
         ).called(1);
       });
@@ -169,20 +152,7 @@ ${lightCyan.wrap(
         () => logger.info(
           '''
 📦 Generated an aar at:
-${lightCyan.wrap(
-            p.join(
-              'build',
-              'host',
-              'outputs',
-              'repo',
-              'com',
-              'example',
-              'my_flutter_module',
-              'flutter_release',
-              buildNumber,
-              'flutter_release-$buildNumber.aar',
-            ),
-          )}''',
+${lightCyan.wrap(p.join('build', 'host', 'outputs', 'repo', 'com', 'example', 'my_flutter_module', 'flutter_release', buildNumber, 'flutter_release-$buildNumber.aar'))}''',
         ),
       ).called(1);
     });

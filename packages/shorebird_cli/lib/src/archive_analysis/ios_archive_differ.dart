@@ -50,14 +50,16 @@ class IosArchiveDiffer extends ArchiveDiffer {
     var oldPathHashes = await fileHashes(File(oldArchivePath));
     var newPathHashes = await fileHashes(File(newArchivePath));
 
-    oldPathHashes = await _updateHashes(
-      archivePath: oldArchivePath,
-      pathHashes: oldPathHashes,
-    );
-    newPathHashes = await _updateHashes(
-      archivePath: newArchivePath,
-      pathHashes: newPathHashes,
-    );
+    oldPathHashes =
+        await _updateHashes(
+          archivePath: oldArchivePath,
+          pathHashes: oldPathHashes,
+        );
+    newPathHashes =
+        await _updateHashes(
+          archivePath: newArchivePath,
+          pathHashes: newPathHashes,
+        );
 
     return FileSetDiff.fromPathHashes(
       oldPathHashes: oldPathHashes,
@@ -93,8 +95,9 @@ class IosArchiveDiffer extends ArchiveDiffer {
         .where((file) => file.isFile)
         .where(
           (file) =>
-              _binaryFilePatterns
-                  .any((pattern) => pattern.hasMatch(file.name)) ||
+              _binaryFilePatterns.any(
+                (pattern) => pattern.hasMatch(file.name),
+              ) ||
               appRegex.hasMatch(file.name),
         )
         .toList();

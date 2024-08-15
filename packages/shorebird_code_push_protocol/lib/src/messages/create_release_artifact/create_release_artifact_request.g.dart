@@ -9,44 +9,53 @@ part of 'create_release_artifact_request.dart';
 // **************************************************************************
 
 CreateReleaseArtifactRequest _$CreateReleaseArtifactRequestFromJson(
-        Map<String, dynamic> json) =>
-    $checkedCreate(
-      'CreateReleaseArtifactRequest',
-      json,
-      ($checkedConvert) {
-        final val = CreateReleaseArtifactRequest(
-          arch: $checkedConvert('arch', (v) => v as String),
-          platform: $checkedConvert(
-              'platform', (v) => $enumDecode(_$ReleasePlatformEnumMap, v)),
-          hash: $checkedConvert('hash', (v) => v as String),
-          size: $checkedConvert(
-              'size', (v) => CreateReleaseArtifactRequest._parseStringToInt(v)),
-          canSideload: $checkedConvert('can_sideload',
-              (v) => CreateReleaseArtifactRequest._parseStringToBool(v)),
-          filename: $checkedConvert('filename', (v) => v as String),
-          podfileLockHash:
-              $checkedConvert('podfile_lock_hash', (v) => v as String?),
-        );
-        return val;
-      },
-      fieldKeyMap: const {
-        'canSideload': 'can_sideload',
-        'podfileLockHash': 'podfile_lock_hash'
-      },
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  'CreateReleaseArtifactRequest',
+  json,
+  ($checkedConvert) {
+    final val = CreateReleaseArtifactRequest(
+      arch: $checkedConvert('arch', (v) => v as String),
+      platform: $checkedConvert(
+        'platform',
+        (v) => $enumDecode(_$ReleasePlatformEnumMap, v),
+      ),
+      hash: $checkedConvert('hash', (v) => v as String),
+      size: $checkedConvert(
+        'size',
+        (v) => CreateReleaseArtifactRequest._parseStringToInt(v),
+      ),
+      canSideload: $checkedConvert(
+        'can_sideload',
+        (v) => CreateReleaseArtifactRequest._parseStringToBool(v),
+      ),
+      filename: $checkedConvert('filename', (v) => v as String),
+      podfileLockHash: $checkedConvert(
+        'podfile_lock_hash',
+        (v) => v as String?,
+      ),
     );
+    return val;
+  },
+  fieldKeyMap: const {
+    'canSideload': 'can_sideload',
+    'podfileLockHash': 'podfile_lock_hash',
+  },
+);
 
 Map<String, dynamic> _$CreateReleaseArtifactRequestToJson(
-        CreateReleaseArtifactRequest instance) =>
-    <String, dynamic>{
-      'arch': instance.arch,
-      'platform': _$ReleasePlatformEnumMap[instance.platform]!,
-      'hash': instance.hash,
-      'filename': instance.filename,
-      'can_sideload':
-          CreateReleaseArtifactRequest._parseBoolToString(instance.canSideload),
-      'size': CreateReleaseArtifactRequest._parseIntToString(instance.size),
-      'podfile_lock_hash': instance.podfileLockHash,
-    };
+  CreateReleaseArtifactRequest instance,
+) => <String, dynamic>{
+  'arch': instance.arch,
+  'platform': _$ReleasePlatformEnumMap[instance.platform]!,
+  'hash': instance.hash,
+  'filename': instance.filename,
+  'can_sideload': CreateReleaseArtifactRequest._parseBoolToString(
+    instance.canSideload,
+  ),
+  'size': CreateReleaseArtifactRequest._parseIntToString(instance.size),
+  'podfile_lock_hash': instance.podfileLockHash,
+};
 
 const _$ReleasePlatformEnumMap = {
   ReleasePlatform.android: 'android',

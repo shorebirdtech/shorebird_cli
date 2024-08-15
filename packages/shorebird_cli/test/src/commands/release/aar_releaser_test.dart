@@ -48,23 +48,21 @@ void main() {
     late AarReleaser aarReleaser;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          artifactBuilderRef.overrideWith(() => artifactBuilder),
-          codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
-          engineConfigRef.overrideWith(() => const EngineConfig.empty()),
-          loggerRef.overrideWith(() => logger),
-          osInterfaceRef.overrideWith(() => operatingSystemInterface),
-          platformRef.overrideWith(() => platform),
-          processRef.overrideWith(() => shorebirdProcess),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-          shorebirdAndroidArtifactsRef
-              .overrideWith(() => shorebirdAndroidArtifacts),
-        },
-      );
+      return runScoped(body, values: {
+        artifactBuilderRef.overrideWith(() => artifactBuilder),
+        codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+        engineConfigRef.overrideWith(() => const EngineConfig.empty()),
+        loggerRef.overrideWith(() => logger),
+        osInterfaceRef.overrideWith(() => operatingSystemInterface),
+        platformRef.overrideWith(() => platform),
+        processRef.overrideWith(() => shorebirdProcess),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+        shorebirdAndroidArtifactsRef.overrideWith(
+          () => shorebirdAndroidArtifacts,
+        ),
+      });
     }
 
     setUpAll(() {
@@ -88,8 +86,9 @@ void main() {
       shorebirdAndroidArtifacts = MockShorebirdAndroidArtifacts();
 
       when(() => argResults['build-number']).thenReturn(buildNumber);
-      when(() => argResults['target-platform'])
-          .thenReturn(Arch.values.map((a) => a.targetPlatformCliArg).toList());
+      when(
+        () => argResults['target-platform'],
+      ).thenReturn(Arch.values.map((a) => a.targetPlatformCliArg).toList());
       when(() => argResults.rest).thenReturn([]);
       when(() => argResults.wasParsed(any())).thenReturn(false);
 
@@ -125,11 +124,13 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
-              supportedOperatingSystems:
-                  any(named: 'supportedOperatingSystems'),
+              supportedOperatingSystems: any(
+                named: 'supportedOperatingSystems',
+              ),
             ),
           ).thenAnswer((_) async {});
         });
@@ -165,8 +166,9 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
             ),
           ).thenThrow(exception);
@@ -177,8 +179,9 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
             ),
           ).thenThrow(exception);
@@ -262,9 +265,7 @@ void main() {
             targetPlatforms: any(named: 'targetPlatforms'),
             args: any(named: 'args'),
           ),
-        ).thenAnswer(
-          (_) async => File(''),
-        );
+        ).thenAnswer((_) async => File(''));
         when(
           () => shorebirdFlutter.getVersionAndRevision(),
         ).thenAnswer((_) async => flutterVersionAndRevision);
@@ -279,9 +280,10 @@ void main() {
           });
 
           test('produces aar in release directory', () async {
-            final aar = await runWithOverrides(
-              () => aarReleaser.buildReleaseArtifacts(),
-            );
+            final aar =
+                await runWithOverrides(
+                  () => aarReleaser.buildReleaseArtifacts(),
+                );
 
             expect(aar.path, p.join(projectRoot.path, 'release'));
             verify(
@@ -295,9 +297,8 @@ void main() {
         });
 
         test('produces aar in release directory', () async {
-          final aar = await runWithOverrides(
-            () => aarReleaser.buildReleaseArtifacts(),
-          );
+          final aar =
+              await runWithOverrides(() => aarReleaser.buildReleaseArtifacts());
 
           expect(aar.path, p.join(projectRoot.path, 'release'));
           verify(
@@ -340,11 +341,12 @@ void main() {
       });
 
       test('returns value from argResults', () async {
-        final result = await runWithOverrides(
-          () => aarReleaser.getReleaseVersion(
-            releaseArtifactRoot: Directory(''),
-          ),
-        );
+        final result =
+            await runWithOverrides(
+              () => aarReleaser.getReleaseVersion(
+                releaseArtifactRoot: Directory(''),
+              ),
+            );
         expect(result, releaseVersion);
       });
     });
@@ -462,7 +464,8 @@ void main() {
       test('returns expected instructions', () {
         expect(
           runWithOverrides(() => aarReleaser.postReleaseInstructions),
-          equals('''
+          equals(
+            '''
 
 Your next steps:
 
@@ -494,7 +497,8 @@ dependencies {
   releaseImplementation '${shorebirdEnv.androidPackageName}:flutter_release:$buildNumber'
   // ...
 }''')}
-'''),
+''',
+          ),
         );
       });
     });

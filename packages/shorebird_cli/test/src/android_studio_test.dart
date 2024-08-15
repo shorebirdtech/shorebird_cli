@@ -16,12 +16,9 @@ void main() {
     late AndroidStudio androidStudio;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          platformRef.overrideWith(() => platform),
-        },
-      );
+      return runScoped(() => body(), values: {
+        platformRef.overrideWith(() => platform),
+      });
     }
 
     Directory setUpAppTempDir() {
@@ -54,9 +51,8 @@ void main() {
 
           Directory setUpLocalAppData() {
             final tempDir = setUpAppTempDir();
-            final googleDir = Directory(
-              p.join(tempDir.path, 'Google'),
-            )..createSync(recursive: true);
+            final googleDir = Directory(p.join(tempDir.path, 'Google'))
+              ..createSync(recursive: true);
 
             for (final version in androidStudioVersions) {
               final androidStudioDir = Directory(
@@ -75,9 +71,7 @@ void main() {
                 // Test the case where an Android Studio directory doesn't have
                 // a .home file.
 
-                File(
-                  p.join(androidStudioDir.path, '.home'),
-                )
+                File(p.join(androidStudioDir.path, '.home'))
                   ..createSync(recursive: true)
                   ..writeAsStringSync(installPath);
               }
@@ -88,9 +82,9 @@ void main() {
 
           test('returns correct path', () async {
             final appDataDir = setUpLocalAppData();
-            when(() => platform.environment).thenReturn(
-              {'LOCALAPPDATA': appDataDir.path},
-            );
+            when(
+              () => platform.environment,
+            ).thenReturn({'LOCALAPPDATA': appDataDir.path});
 
             await expectLater(
               runWithOverrides(() => androidStudio.path),
@@ -151,9 +145,9 @@ void main() {
           when(() => platform.isLinux).thenReturn(true);
 
           userHomeDir = Directory.systemTemp.createTempSync();
-          when(() => platform.environment).thenReturn({
-            'HOME': userHomeDir.path,
-          });
+          when(
+            () => platform.environment,
+          ).thenReturn({'HOME': userHomeDir.path});
         });
 
         group('when installed at ~', () {

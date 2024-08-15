@@ -36,12 +36,14 @@ class AarReleaser extends Releaser {
   String get buildNumber => argResults['build-number'] as String;
 
   /// The architectures to build the aar for.
-  Set<Arch> get architectures => (argResults['target-platform'] as List<String>)
-      .map(
-        (platform) => AndroidArch.availableAndroidArchs
-            .firstWhere((arch) => arch.targetPlatformCliArg == platform),
-      )
-      .toSet();
+  Set<Arch> get architectures =>
+      (argResults['target-platform'] as List<String>)
+          .map(
+            (platform) => AndroidArch.availableAndroidArchs.firstWhere(
+              (arch) => arch.targetPlatformCliArg == platform,
+            ),
+          )
+          .toSet();
 
   @override
   ReleaseType get releaseType => ReleaseType.aar;
@@ -77,8 +79,9 @@ class AarReleaser extends Releaser {
   @override
   Future<FileSystemEntity> buildReleaseArtifacts() async {
     final flutterVersionString = await shorebirdFlutter.getVersionAndRevision();
-    final buildAppBundleProgress =
-        logger.progress('Building aar with Flutter $flutterVersionString');
+    final buildAppBundleProgress = logger.progress(
+      'Building aar with Flutter $flutterVersionString',
+    );
 
     try {
       await artifactBuilder.buildAar(
@@ -103,10 +106,7 @@ class AarReleaser extends Releaser {
     final targetLibraryDirectory = Directory(
       p.join(shorebirdEnv.getShorebirdProjectRoot()!.path, 'release'),
     );
-    await copyPath(
-      sourceLibraryDirectory.path,
-      targetLibraryDirectory.path,
-    );
+    await copyPath(sourceLibraryDirectory.path, targetLibraryDirectory.path);
 
     return targetLibraryDirectory;
   }
@@ -124,11 +124,12 @@ class AarReleaser extends Releaser {
     required String appId,
   }) async {
     final extractAarProgress = logger.progress('Creating artifacts');
-    final extractedAarDir = await shorebirdAndroidArtifacts.extractAar(
-      packageName: shorebirdEnv.androidPackageName!,
-      buildNumber: buildNumber,
-      unzipFn: extractFileToDisk,
-    );
+    final extractedAarDir =
+        await shorebirdAndroidArtifacts.extractAar(
+          packageName: shorebirdEnv.androidPackageName!,
+          buildNumber: buildNumber,
+          unzipFn: extractFileToDisk,
+        );
     extractAarProgress.complete();
 
     await codePushClientWrapper.createAndroidArchiveReleaseArtifacts(

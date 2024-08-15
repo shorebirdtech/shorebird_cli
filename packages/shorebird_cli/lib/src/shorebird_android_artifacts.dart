@@ -101,10 +101,11 @@ class ShorebirdAndroidArtifacts {
     }
 
     final allFiles = directory.listSync();
-    final artifactCandidates = allFiles.whereType<File>().where((file) {
-      final fileName = p.basename(file.path);
-      return fileName.artifactId == artifactId;
-    }).toList();
+    final artifactCandidates =
+        allFiles.whereType<File>().where((file) {
+          final fileName = p.basename(file.path);
+          return fileName.artifactId == artifactId;
+        }).toList();
 
     if (artifactCandidates.isEmpty) {
       throw ArtifactNotFoundException(
@@ -124,10 +125,7 @@ class ShorebirdAndroidArtifacts {
   }
 
   /// Find the app bundle in the provided [project] [Directory].
-  File findAab({
-    required Directory project,
-    required String? flavor,
-  }) {
+  File findAab({required Directory project, required String? flavor}) {
     final buildDir = p.join(
       project.path,
       'build',
@@ -147,10 +145,7 @@ class ShorebirdAndroidArtifacts {
   }
 
   /// Find the apk in the provided [project] [Directory].
-  File findApk({
-    required Directory project,
-    required String? flavor,
-  }) {
+  File findApk({required Directory project, required String? flavor}) {
     final buildDir = p.join(
       project.path,
       'build',
@@ -170,37 +165,26 @@ class ShorebirdAndroidArtifacts {
 
   static String get aarLibraryPath {
     final projectRoot = shorebirdEnv.getShorebirdProjectRoot()!;
-    return p.joinAll([
-      projectRoot.path,
-      'build',
-      'host',
-      'outputs',
-      'repo',
-    ]);
+    return p.joinAll([projectRoot.path, 'build', 'host', 'outputs', 'repo']);
   }
 
   static String aarArtifactDirectory({
     required String packageName,
     required String buildNumber,
-  }) =>
-      p.joinAll([
-        aarLibraryPath,
-        ...packageName.split('.'),
-        'flutter_release',
-        buildNumber,
-      ]);
+  }) => p.joinAll([
+    aarLibraryPath,
+    ...packageName.split('.'),
+    'flutter_release',
+    buildNumber,
+  ]);
 
   static String aarArtifactPath({
     required String packageName,
     required String buildNumber,
-  }) =>
-      p.join(
-        aarArtifactDirectory(
-          packageName: packageName,
-          buildNumber: buildNumber,
-        ),
-        'flutter_release-$buildNumber.aar',
-      );
+  }) => p.join(
+    aarArtifactDirectory(packageName: packageName, buildNumber: buildNumber),
+    'flutter_release-$buildNumber.aar',
+  );
 
   /// Extract the release version from an appbundle.
   Future<String> extractReleaseVersionFromAppBundle(
@@ -208,10 +192,11 @@ class ShorebirdAndroidArtifacts {
   ) async {
     await cache.updateAll();
 
-    final [versionName, versionCode] = await Future.wait([
-      bundletool.getVersionName(appBundlePath),
-      bundletool.getVersionCode(appBundlePath),
-    ]);
+    final [versionName, versionCode] =
+        await Future.wait([
+          bundletool.getVersionName(appBundlePath),
+          bundletool.getVersionCode(appBundlePath),
+        ]);
 
     return '$versionName+$versionCode';
   }

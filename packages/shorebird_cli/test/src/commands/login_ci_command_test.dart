@@ -22,13 +22,10 @@ void main() {
     late LoginCiCommand command;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          authRef.overrideWith(() => auth),
-          loggerRef.overrideWith(() => logger),
-        },
-      );
+      return runScoped(body, values: {
+        authRef.overrideWith(() => auth),
+        loggerRef.overrideWith(() => logger),
+      });
     }
 
     setUpAll(() {
@@ -52,8 +49,9 @@ void main() {
         ),
       ).thenReturn(AuthProvider.google);
 
-      command =
-          runWithOverrides(() => LoginCiCommand()..testArgResults = results);
+      command = runWithOverrides(
+        () => LoginCiCommand()..testArgResults = results,
+      );
     });
 
     group('provider', () {
@@ -69,10 +67,7 @@ void main() {
           await runWithOverrides(() => command.run());
 
           verify(
-            () => auth.loginCI(
-              provider,
-              prompt: any(named: 'prompt'),
-            ),
+            () => auth.loginCI(provider, prompt: any(named: 'prompt')),
           ).called(1);
         });
       });
@@ -95,18 +90,17 @@ void main() {
           await runWithOverrides(() => command.run());
 
           verify(
-            () => auth.loginCI(
-              provider,
-              prompt: any(named: 'prompt'),
-            ),
+            () => auth.loginCI(provider, prompt: any(named: 'prompt')),
           ).called(1);
-          final captured = verify(
-            () => logger.chooseOne<AuthProvider>(
-              any(),
-              choices: any(named: 'choices'),
-              display: captureAny(named: 'display'),
-            ),
-          ).captured.single as String Function(AuthProvider);
+          final captured =
+              verify(
+                    () => logger.chooseOne<AuthProvider>(
+                      any(),
+                      choices: any(named: 'choices'),
+                      display: captureAny(named: 'display'),
+                    ),
+                  ).captured.single
+                  as String Function(AuthProvider);
           expect(captured(AuthProvider.google), contains('Google'));
         });
       });
@@ -114,10 +108,7 @@ void main() {
 
     test('exits with code 70 if no user is found', () async {
       when(
-        () => auth.loginCI(
-          any(),
-          prompt: any(named: 'prompt'),
-        ),
+        () => auth.loginCI(any(), prompt: any(named: 'prompt')),
       ).thenThrow(UserNotFoundException(email: email));
 
       final result = await runWithOverrides(command.run);
@@ -134,21 +125,13 @@ void main() {
     test('exits with code 70 when error occurs', () async {
       final error = Exception('oops something went wrong!');
       when(
-        () => auth.loginCI(
-          any(),
-          prompt: any(named: 'prompt'),
-        ),
+        () => auth.loginCI(any(), prompt: any(named: 'prompt')),
       ).thenThrow(error);
 
       final result = await runWithOverrides(command.run);
       expect(result, equals(ExitCode.software.code));
 
-      verify(
-        () => auth.loginCI(
-          any(),
-          prompt: any(named: 'prompt'),
-        ),
-      ).called(1);
+      verify(() => auth.loginCI(any(), prompt: any(named: 'prompt'))).called(1);
       verify(() => logger.err(error.toString())).called(1);
     });
 
@@ -159,22 +142,14 @@ void main() {
         authProvider: AuthProvider.google,
       );
       when(
-        () => auth.loginCI(
-          any(),
-          prompt: any(named: 'prompt'),
-        ),
+        () => auth.loginCI(any(), prompt: any(named: 'prompt')),
       ).thenAnswer((_) async => token);
       when(() => auth.email).thenReturn(email);
 
       final result = await runWithOverrides(command.run);
       expect(result, equals(ExitCode.success.code));
 
-      verify(
-        () => auth.loginCI(
-          any(),
-          prompt: any(named: 'prompt'),
-        ),
-      ).called(1);
+      verify(() => auth.loginCI(any(), prompt: any(named: 'prompt'))).called(1);
       verify(
         () => logger.info(
           any(that: contains('${lightCyan.wrap(token.toBase64())}')),

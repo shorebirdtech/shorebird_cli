@@ -43,10 +43,7 @@ class Adb {
   }
 
   /// Starts the app with the given [package] name.
-  Future<void> startApp({
-    required String package,
-    String? deviceId,
-  }) async {
+  Future<void> startApp({required String package, String? deviceId}) async {
     final args = [
       if (deviceId != null) ...['-s', deviceId],
       'shell',
@@ -61,10 +58,7 @@ class Adb {
   }
 
   /// Runs `adb logcat`.
-  Future<Process> logcat({
-    String? filter,
-    String? deviceId,
-  }) async {
+  Future<Process> logcat({String? filter, String? deviceId}) async {
     final args = [
       if (deviceId != null) ...['-s', deviceId],
       'logcat',

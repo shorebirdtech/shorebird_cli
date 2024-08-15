@@ -37,19 +37,16 @@ void main() {
     late DoctorCommand command;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          androidStudioRef.overrideWith(() => androidStudio),
-          androidSdkRef.overrideWith(() => androidSdk),
-          doctorRef.overrideWith(() => doctor),
-          gradlewRef.overrideWith(() => gradlew),
-          javaRef.overrideWith(() => java),
-          loggerRef.overrideWith(() => logger),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
-        },
-      );
+      return runScoped(body, values: {
+        androidStudioRef.overrideWith(() => androidStudio),
+        androidSdkRef.overrideWith(() => androidSdk),
+        doctorRef.overrideWith(() => doctor),
+        gradlewRef.overrideWith(() => gradlew),
+        javaRef.overrideWith(() => java),
+        loggerRef.overrideWith(() => logger),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
+      });
     }
 
     setUp(() {
@@ -88,8 +85,7 @@ void main() {
         ..testArgResults = argResults;
     });
 
-    test(
-        'prints shorebird version, flutter revision, '
+    test('prints shorebird version, flutter revision, '
         'and engine revision', () async {
       await runWithOverrides(command.run);
 
@@ -103,8 +99,7 @@ Engine • revision $shorebirdEngineRevision
       ).called(1);
     });
 
-    test(
-        'prints shorebird version, flutter revision, '
+    test('prints shorebird version, flutter revision, '
         'flutter version, and engine revision', () async {
       const flutterVersion = '1.2.3';
       when(
@@ -173,12 +168,8 @@ OpenJDK 64-Bit Server VM (build 17.0.9+0-17.0.9b1087.7-11185874, mixed mode)'''
 
         final notDetectedText = red.wrap('not detected');
         expect(
-          msg.replaceAll(
-            Platform.lineTerminator,
-            '\n',
-          ),
-          equals(
-            '''
+          msg.replaceAll(Platform.lineTerminator, '\n'),
+          equals('''
 Shorebird $packageVersion • git@github.com:shorebirdtech/shorebird.git
 Flutter • revision ${shorebirdEnv.flutterRevision}
 Engine • revision $shorebirdEngineRevision
@@ -194,8 +185,7 @@ Android Toolchain
                   OpenJDK Runtime Environment (build 17.0.9+0-17.0.9b1087.7-11185874)
                   OpenJDK 64-Bit Server VM (build 17.0.9+0-17.0.9b1087.7-11185874, mixed mode)
   • Gradle: $notDetectedText
-''',
-          ),
+'''),
         );
       });
 
@@ -226,12 +216,8 @@ OpenJDK 64-Bit Server VM (build 17.0.9+0-17.0.9b1087.7-11185874, mixed mode)'''
               verify(() => logger.info(captureAny())).captured.first as String;
 
           expect(
-            msg.replaceAll(
-              Platform.lineTerminator,
-              '\n',
-            ),
-            equals(
-              '''
+            msg.replaceAll(Platform.lineTerminator, '\n'),
+            equals('''
 Shorebird $packageVersion • git@github.com:shorebirdtech/shorebird.git
 Flutter • revision ${shorebirdEnv.flutterRevision}
 Engine • revision $shorebirdEngineRevision
@@ -247,21 +233,22 @@ Android Toolchain
                   OpenJDK Runtime Environment (build 17.0.9+0-17.0.9b1087.7-11185874)
                   OpenJDK 64-Bit Server VM (build 17.0.9+0-17.0.9b1087.7-11185874, mixed mode)
   • Gradle: 7.6.3
-''',
-            ),
+'''),
           );
         });
       });
     });
 
-    test('runs validators without applying fixes if no fix flag exists',
-        () async {
-      when(() => argResults['fix']).thenReturn(null);
-      final result = await runWithOverrides(command.run);
+    test(
+      'runs validators without applying fixes if no fix flag exists',
+      () async {
+        when(() => argResults['fix']).thenReturn(null);
+        final result = await runWithOverrides(command.run);
 
-      expect(result, equals(ExitCode.success.code));
-      verify(() => doctor.runValidators([validator])).called(1);
-    });
+        expect(result, equals(ExitCode.success.code));
+        verify(() => doctor.runValidators([validator])).called(1);
+      },
+    );
 
     test('runs validators and applies fixes fix flag is true', () async {
       when(() => argResults['fix']).thenReturn(true);

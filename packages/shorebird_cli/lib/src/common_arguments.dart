@@ -26,15 +26,13 @@ class ArgumentDescriber {
 /// commands and layers.
 class CommonArguments {
   /// The Flutter --build-name argument.
-  static const buildNameArg = ArgumentDescriber(
-    name: 'build-name',
-    description: '''
+  static const buildNameArg = ArgumentDescriber(name: 'build-name', description:
+      '''
 An identifier used as an internal version number.
 Each build must have a unique identifier to differentiate it from previous builds.
 It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.
 On Android it is used as "versionCode".
-On Xcode builds it is used as "CFBundleVersion".''',
-  );
+On Xcode builds it is used as "CFBundleVersion".''');
 
   /// The Flutter --build-number argument.
   static const buildNumberArg = ArgumentDescriber(

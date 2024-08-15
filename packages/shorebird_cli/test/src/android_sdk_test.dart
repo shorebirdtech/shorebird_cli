@@ -19,29 +19,22 @@ void main() {
     late AndroidSdk androidSdk;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          osInterfaceRef.overrideWith(() => osInterface),
-          platformRef.overrideWith(() => platform),
-        },
-      );
+      return runScoped(() => body(), values: {
+        osInterfaceRef.overrideWith(() => osInterface),
+        platformRef.overrideWith(() => platform),
+      });
     }
 
     String linuxAndroidHome() => p.join(homeDirectory.path, 'Android', 'Sdk');
     String macAndroidHome() =>
         p.join(homeDirectory.path, 'Library', 'Android', 'sdk');
-    String windowsAndroidHome() => p.join(
-          homeDirectory.path,
-          'AppData',
-          'Local',
-          'Android',
-          'Sdk',
-        );
+    String windowsAndroidHome() =>
+        p.join(homeDirectory.path, 'AppData', 'Local', 'Android', 'Sdk');
 
     void populateAndroidSdk({required String androidHomePath}) {
-      Directory(p.join(androidHomePath, 'platform-tools'))
-          .createSync(recursive: true);
+      Directory(
+        p.join(androidHomePath, 'platform-tools'),
+      ).createSync(recursive: true);
     }
 
     File createAapt({
@@ -85,9 +78,9 @@ void main() {
     group('path', () {
       group('when ANDROID_HOME is set', () {
         setUp(() {
-          when(() => platform.environment).thenReturn({
-            kAndroidHome: homeDirectory.path,
-          });
+          when(
+            () => platform.environment,
+          ).thenReturn({kAndroidHome: homeDirectory.path});
           populateAndroidSdk(androidHomePath: homeDirectory.path);
         });
 
@@ -98,9 +91,9 @@ void main() {
 
       group('when ANDROID_SDK_ROOT is set', () {
         setUp(() {
-          when(() => platform.environment).thenReturn({
-            kAndroidSdkRoot: homeDirectory.path,
-          });
+          when(
+            () => platform.environment,
+          ).thenReturn({kAndroidSdkRoot: homeDirectory.path});
           populateAndroidSdk(androidHomePath: homeDirectory.path);
         });
 
@@ -188,8 +181,9 @@ void main() {
 
         group('when aapt is not in a valid Android SDK', () {
           setUp(() {
-            when(() => osInterface.which('aapt'))
-                .thenReturn(homeDirectory.path);
+            when(
+              () => osInterface.which('aapt'),
+            ).thenReturn(homeDirectory.path);
           });
 
           test('returns null', () {
@@ -232,14 +226,14 @@ void main() {
           when(() => platform.isMacOS).thenReturn(true);
 
           // Add ANDROID_SDK_ROOT to path, but do not populate it.
-          when(() => platform.environment).thenReturn({
-            kAndroidSdkRoot: homeDirectory.path,
-          });
+          when(
+            () => platform.environment,
+          ).thenReturn({kAndroidSdkRoot: homeDirectory.path});
 
           // Create a valid Android SDK in the user's home directory.
-          when(() => platform.environment).thenReturn(
-            {'HOME': homeDirectory.path},
-          );
+          when(
+            () => platform.environment,
+          ).thenReturn({'HOME': homeDirectory.path});
           populateAndroidSdk(androidHomePath: macAndroidHome());
 
           // Add adb to the path. This should not be returned, as the sdk in the
@@ -272,20 +266,22 @@ void main() {
       });
 
       test('returns correct value on Linux', () async {
-        when(() => platform.environment).thenReturn({
-          kAndroidHome: homeDirectory.path,
-        });
+        when(
+          () => platform.environment,
+        ).thenReturn({kAndroidHome: homeDirectory.path});
         when(() => platform.isLinux).thenReturn(true);
         populateAndroidSdk(androidHomePath: homeDirectory.path);
-        final adb =
-            createAdb(androidHomePath: homeDirectory.path, isWindows: false);
+        final adb = createAdb(
+          androidHomePath: homeDirectory.path,
+          isWindows: false,
+        );
         expect(runWithOverrides(() => androidSdk.adbPath), adb.path);
       });
 
       test('returns correct value on MacOS', () async {
-        when(() => platform.environment).thenReturn({
-          kAndroidHome: homeDirectory.path,
-        });
+        when(
+          () => platform.environment,
+        ).thenReturn({kAndroidHome: homeDirectory.path});
         when(() => platform.isMacOS).thenReturn(true);
         final adb = File(p.join(homeDirectory.path, 'platform-tools', 'adb'))
           ..createSync(recursive: true);
@@ -293,9 +289,9 @@ void main() {
       });
 
       test('returns correct value on Windows', () async {
-        when(() => platform.environment).thenReturn({
-          kAndroidHome: homeDirectory.path,
-        });
+        when(
+          () => platform.environment,
+        ).thenReturn({kAndroidHome: homeDirectory.path});
         when(() => platform.isWindows).thenReturn(true);
         final adb = File(
           p.join(homeDirectory.path, 'platform-tools', 'adb.exe'),

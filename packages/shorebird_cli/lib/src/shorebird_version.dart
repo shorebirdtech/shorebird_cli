@@ -51,11 +51,9 @@ class ShorebirdVersion {
   /// branch with cherry picks, there may not be a direct fast-forward route
   /// to the next release.
   Future<void> attemptReset({required String revision}) async {
-    return git.reset(
-      revision: revision,
-      directory: _workingDirectory,
-      args: ['--hard'],
-    );
+    return git.reset(revision: revision, directory: _workingDirectory, args: [
+      '--hard',
+    ]);
   }
 
   /// Whether the current version of shorebird is tracking the stable branch. If

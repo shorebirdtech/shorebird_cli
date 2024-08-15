@@ -32,16 +32,13 @@ void main() {
     late ShorebirdCliCommandRunner commandRunner;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          loggerRef.overrideWith(() => logger),
-          platformRef.overrideWith(() => platform),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
-          shorebirdVersionRef.overrideWith(() => shorebirdVersion),
-        },
-      );
+      return runScoped(body, values: {
+        loggerRef.overrideWith(() => logger),
+        platformRef.overrideWith(() => platform),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
+        shorebirdVersionRef.overrideWith(() => shorebirdVersion),
+      });
     }
 
     setUp(() {
@@ -52,9 +49,9 @@ void main() {
       shorebirdVersion = MockShorebirdVersion();
       when(() => logger.level).thenReturn(Level.info);
       final logFile = MockFile();
-      when(() => shorebirdEnv.logsDirectory).thenReturn(
-        Directory.systemTemp.createTempSync(),
-      );
+      when(
+        () => shorebirdEnv.logsDirectory,
+      ).thenReturn(Directory.systemTemp.createTempSync());
       when(() => logFile.absolute).thenReturn(logFile);
       when(() => logFile.path).thenReturn('test.log');
       when(
@@ -73,17 +70,15 @@ void main() {
     group('handles ProcessExit', () {
       test('does nothing when exit code is 0', () async {
         commandRunner.addCommand(_TestCommand(ExitCode.success));
-        final result = await runWithOverrides(
-          () => commandRunner.run(['test']),
-        );
+        final result =
+            await runWithOverrides(() => commandRunner.run(['test']));
         expect(result, equals(ExitCode.success.code));
       });
 
       test('exits with the correct code', () async {
         commandRunner.addCommand(_TestCommand(ExitCode.unavailable));
-        final result = await runWithOverrides(
-          () => commandRunner.run(['test']),
-        );
+        final result =
+            await runWithOverrides(() => commandRunner.run(['test']));
         expect(result, equals(ExitCode.unavailable.code));
         verify(
           () => logger.info(
@@ -104,30 +99,26 @@ void main() {
           throw exception;
         }
       });
-      final result = await runWithOverrides(
-        () => commandRunner.run(['--version']),
-      );
+      final result =
+          await runWithOverrides(() => commandRunner.run(['--version']));
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err(exception.message)).called(1);
       verify(() => logger.info(commandRunner.usage)).called(1);
     });
 
     test('handles UsageException', () async {
-      final result = await runWithOverrides(
-        // fly_to_the_moon is not a valid command.
-        () => commandRunner.run(['fly_to_the_moon']),
-      );
+      final result =
+          await runWithOverrides(
+            // fly_to_the_moon is not a valid command.
+            () => commandRunner.run(['fly_to_the_moon']),
+          );
       expect(result, equals(ExitCode.usage.code));
       verify(
         () => logger.err('Could not find a command named "fly_to_the_moon".'),
       ).called(1);
       verify(
         () => logger.info(
-          any(
-            that: contains(
-              'Usage: shorebird <command> [arguments]',
-            ),
-          ),
+          any(that: contains('Usage: shorebird <command> [arguments]')),
         ),
       ).called(1);
     });
@@ -144,20 +135,17 @@ void main() {
           throw exception;
         }
       });
-      final result = await runWithOverrides(
-        () => commandRunner.run(['--version']),
-      );
+      final result =
+          await runWithOverrides(() => commandRunner.run(['--version']));
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err(exception.message)).called(1);
       verify(
-        () => logger.err(
-          '''
+        () => logger.err('''
 To proxy an option to the flutter command, use the -- --<option> syntax.
 
 Example:
 
-${lightCyan.wrap('shorebird release android -- --no-pub lib/main.dart')}''',
-        ),
+${lightCyan.wrap('shorebird release android -- --no-pub lib/main.dart')}'''),
       ).called(1);
       verify(() => logger.info('exception usage')).called(1);
     });
@@ -175,38 +163,32 @@ ${lightCyan.wrap('shorebird release android -- --no-pub lib/main.dart')}''',
           throw exception;
         }
       });
-      final result = await runWithOverrides(
-        () => commandRunner.run(['--version']),
-      );
+      final result =
+          await runWithOverrides(() => commandRunner.run(['--version']));
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err(exception.message)).called(1);
       verify(
-        () => logger.err(
-          '''
+        () => logger.err('''
 To proxy an option to the flutter command, use the '--' --<option> syntax.
 
 Example:
 
-${lightCyan.wrap("shorebird release android '--' --no-pub lib/main.dart")}''',
-        ),
+${lightCyan.wrap("shorebird release android '--' --no-pub lib/main.dart")}'''),
       ).called(1);
       verify(() => logger.info('exception usage')).called(1);
     });
 
     group('--version', () {
       test('outputs current version info', () async {
-        final result = await runWithOverrides(
-          () => commandRunner.run(['--version']),
-        );
+        final result =
+            await runWithOverrides(() => commandRunner.run(['--version']));
         expect(result, equals(ExitCode.success.code));
 
         verify(
-          () => logger.info(
-            '''
+          () => logger.info('''
 Shorebird $packageVersion • git@github.com:shorebirdtech/shorebird.git
 Flutter $flutterVersion • revision $flutterRevision
-Engine • revision $shorebirdEngineRevision''',
-          ),
+Engine • revision $shorebirdEngineRevision'''),
         ).called(1);
 
         // Making sure the only thing that was logged was the version info.
@@ -217,9 +199,8 @@ Engine • revision $shorebirdEngineRevision''',
 
     group('--verbose', () {
       test('enables verbose logging', () async {
-        final result = await runWithOverrides(
-          () => commandRunner.run(['--verbose']),
-        );
+        final result =
+            await runWithOverrides(() => commandRunner.run(['--verbose']));
         expect(result, equals(ExitCode.success.code));
       });
     });
@@ -227,25 +208,24 @@ Engine • revision $shorebirdEngineRevision''',
     group('local engine', () {
       group('when all local engine args are provided', () {
         test('creates engine config with arguments', () async {
-          final result = await runWithOverrides(
-            () => commandRunner.run([
-              '--local-engine',
-              'foo',
-              '--local-engine-src-path',
-              'bar',
-              '--local-engine-host',
-              'baz',
-            ]),
-          );
+          final result =
+              await runWithOverrides(
+                () => commandRunner.run([
+                  '--local-engine',
+                  'foo',
+                  '--local-engine-src-path',
+                  'bar',
+                  '--local-engine-host',
+                  'baz',
+                ]),
+              );
           expect(result, equals(ExitCode.success.code));
         });
       });
 
       group('when no local engine args are provided', () {
         test('uses empty engine config', () async {
-          final result = await runWithOverrides(
-            () => commandRunner.run([]),
-          );
+          final result = await runWithOverrides(() => commandRunner.run([]));
           expect(result, equals(ExitCode.success.code));
         });
       });
@@ -308,9 +288,8 @@ Engine • revision $shorebirdEngineRevision''',
 
     group('completion', () {
       test('fast tracks completion', () async {
-        final result = await runWithOverrides(
-          () => commandRunner.run(['completion']),
-        );
+        final result =
+            await runWithOverrides(() => commandRunner.run(['completion']));
         expect(result, equals(ExitCode.success.code));
       });
     });
@@ -319,15 +298,16 @@ Engine • revision $shorebirdEngineRevision''',
       group('when running upgrade command', () {
         setUp(() {
           when(() => logger.progress(any())).thenReturn(MockProgress());
-          when(shorebirdVersion.fetchCurrentGitHash)
-              .thenAnswer((_) async => 'current');
-          when(shorebirdVersion.fetchLatestGitHash)
-              .thenAnswer((_) async => 'current');
+          when(
+            shorebirdVersion.fetchCurrentGitHash,
+          ).thenAnswer((_) async => 'current');
+          when(
+            shorebirdVersion.fetchLatestGitHash,
+          ).thenAnswer((_) async => 'current');
         });
         test('does not check for update', () async {
-          final result = await runWithOverrides(
-            () => commandRunner.run(['upgrade']),
-          );
+          final result =
+              await runWithOverrides(() => commandRunner.run(['upgrade']));
           expect(result, equals(ExitCode.success.code));
           verifyNever(() => shorebirdVersion.isTrackingStable());
           verifyNever(() => shorebirdVersion.isLatest());
@@ -339,24 +319,24 @@ Engine • revision $shorebirdEngineRevision''',
           when(shorebirdVersion.isTrackingStable).thenAnswer((_) async => true);
         });
 
-        test('gracefully handles case when latest version cannot be determined',
-            () async {
-          when(shorebirdVersion.isLatest).thenThrow('error');
-          final result = await runWithOverrides(
-            () => commandRunner.run(['--version']),
-          );
-          expect(result, equals(ExitCode.success.code));
-          verify(
-            () => logger.detail('Unable to check for updates.\nerror'),
-          ).called(1);
-        });
+        test(
+          'gracefully handles case when latest version cannot be determined',
+          () async {
+            when(shorebirdVersion.isLatest).thenThrow('error');
+            final result =
+                await runWithOverrides(() => commandRunner.run(['--version']));
+            expect(result, equals(ExitCode.success.code));
+            verify(
+              () => logger.detail('Unable to check for updates.\nerror'),
+            ).called(1);
+          },
+        );
 
         group('when update is available', () {
           test('logs update message', () async {
             when(shorebirdVersion.isLatest).thenAnswer((_) async => false);
-            final result = await runWithOverrides(
-              () => commandRunner.run(['--version']),
-            );
+            final result =
+                await runWithOverrides(() => commandRunner.run(['--version']));
             verify(
               () => logger.info('A new version of shorebird is available!'),
             ).called(1);
@@ -376,9 +356,8 @@ Engine • revision $shorebirdEngineRevision''',
           });
 
           test('does not log update message', () async {
-            final result = await runWithOverrides(
-              () => commandRunner.run(['--version']),
-            );
+            final result =
+                await runWithOverrides(() => commandRunner.run(['--version']));
             expect(result, equals(ExitCode.success.code));
             verifyNever(
               () => logger.info('A new version of shorebird is available!'),
@@ -387,30 +366,31 @@ Engine • revision $shorebirdEngineRevision''',
         });
 
         test(
-            'gracefully handles case when flutter version cannot be determined',
-            () async {
-          when(shorebirdFlutter.getVersionString).thenThrow('error');
-          final result = await runWithOverrides(
-            () => commandRunner.run(['--version']),
-          );
-          expect(result, equals(ExitCode.success.code));
-          verify(
-            () => logger.detail('Unable to determine Flutter version.\nerror'),
-          ).called(1);
-        });
+          'gracefully handles case when flutter version cannot be determined',
+          () async {
+            when(shorebirdFlutter.getVersionString).thenThrow('error');
+            final result =
+                await runWithOverrides(() => commandRunner.run(['--version']));
+            expect(result, equals(ExitCode.success.code));
+            verify(
+              () =>
+                  logger.detail('Unable to determine Flutter version.\nerror'),
+            ).called(1);
+          },
+        );
       });
 
       group('when not tracking the stable branch', () {
         setUp(() {
-          when(shorebirdVersion.isTrackingStable)
-              .thenAnswer((_) async => false);
+          when(
+            shorebirdVersion.isTrackingStable,
+          ).thenAnswer((_) async => false);
           when(shorebirdVersion.isLatest).thenAnswer((_) async => false);
         });
 
         test('does not check for updates or print update message', () async {
-          final result = await runWithOverrides(
-            () => commandRunner.run(['--version']),
-          );
+          final result =
+              await runWithOverrides(() => commandRunner.run(['--version']));
           expect(result, equals(ExitCode.success.code));
 
           verifyNever(shorebirdVersion.isLatest);

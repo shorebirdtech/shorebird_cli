@@ -44,14 +44,16 @@ class PromoteCommand extends ShorebirdCommand {
     final flavor = results.findOption('flavor', argParser: argParser);
     final appId = shorebirdEnv.getShorebirdYaml()!.getAppId(flavor: flavor);
 
-    final release = await codePushClientWrapper.getRelease(
-      appId: appId,
-      releaseVersion: releaseVersion,
-    );
-    final patches = await codePushClientWrapper.getReleasePatches(
-      appId: appId,
-      releaseId: release.id,
-    );
+    final release =
+        await codePushClientWrapper.getRelease(
+          appId: appId,
+          releaseVersion: releaseVersion,
+        );
+    final patches =
+        await codePushClientWrapper.getReleasePatches(
+          appId: appId,
+          releaseId: release.id,
+        );
     final patchToPromote = patches.firstWhereOrNull(
       (patch) => patch.number == patchNumber,
     );
@@ -70,10 +72,11 @@ class PromoteCommand extends ShorebirdCommand {
       return ExitCode.usage.code;
     }
 
-    final channel = await codePushClientWrapper.maybeGetChannel(
-      appId: appId,
-      name: DeploymentTrack.production.channel,
-    );
+    final channel =
+        await codePushClientWrapper.maybeGetChannel(
+          appId: appId,
+          name: DeploymentTrack.production.channel,
+        );
     if (channel == null) {
       // This is a symptom that something bigger is wrong. Apps should always
       // have a production channel.

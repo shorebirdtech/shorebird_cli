@@ -27,11 +27,11 @@ void main() {
         expect(extractedContents, hasLength(2));
 
         final extractedFileA = extractedContents.whereType<File>().firstWhere(
-              (entity) => p.basename(entity.path) == 'a.txt',
-            );
+          (entity) => p.basename(entity.path) == 'a.txt',
+        );
         final extractedFileB = extractedContents.whereType<File>().firstWhere(
-              (entity) => p.basename(entity.path) == 'b.txt',
-            );
+          (entity) => p.basename(entity.path) == 'b.txt',
+        );
         expect(extractedFileA.existsSync(), isTrue);
         expect(extractedFileB.existsSync(), isTrue);
         expect(extractedFileA.readAsStringSync(), equals('a'));

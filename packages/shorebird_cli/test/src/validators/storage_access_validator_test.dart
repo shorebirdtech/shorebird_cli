@@ -15,12 +15,9 @@ void main() {
     late StorageAccessValidator validator;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          httpClientRef.overrideWith(() => httpClient),
-        },
-      );
+      return runScoped(() => body(), values: {
+        httpClientRef.overrideWith(() => httpClient),
+      });
     }
 
     setUpAll(() {
@@ -31,9 +28,9 @@ void main() {
       httpClient = MockHttpClient();
       validator = StorageAccessValidator();
 
-      when(() => httpClient.get(any())).thenAnswer(
-        (_) async => http.Response('', HttpStatus.ok),
-      );
+      when(
+        () => httpClient.get(any()),
+      ).thenAnswer((_) async => http.Response('', HttpStatus.ok));
     });
 
     group('description', () {
@@ -45,9 +42,9 @@ void main() {
     group('validate', () {
       group('when storage url is accessible', () {
         setUp(() {
-          when(() => httpClient.get(any())).thenAnswer(
-            (_) async => http.Response('hello', HttpStatus.ok),
-          );
+          when(
+            () => httpClient.get(any()),
+          ).thenAnswer((_) async => http.Response('hello', HttpStatus.ok));
         });
 
         test('returns empty list of validation issues', () async {
@@ -67,14 +64,12 @@ void main() {
           final results = await runWithOverrides(validator.validate);
           expect(
             results,
-            equals(
-              [
-                const ValidationIssue(
-                  severity: ValidationIssueSeverity.error,
-                  message: 'Unable to access storage.googleapis.com',
-                ),
-              ],
-            ),
+            equals([
+              const ValidationIssue(
+                severity: ValidationIssueSeverity.error,
+                message: 'Unable to access storage.googleapis.com',
+              ),
+            ]),
           );
         });
       });

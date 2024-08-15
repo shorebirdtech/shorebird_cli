@@ -8,19 +8,16 @@ part of 'patch.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Patch _$PatchFromJson(Map<String, dynamic> json) => $checkedCreate(
-      'Patch',
-      json,
-      ($checkedConvert) {
-        final val = Patch(
-          id: $checkedConvert('id', (v) => v as int),
-          number: $checkedConvert('number', (v) => v as int),
-        );
-        return val;
-      },
-    );
+Patch _$PatchFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('Patch', json, ($checkedConvert) {
+      final val = Patch(
+        id: $checkedConvert('id', (v) => v as int),
+        number: $checkedConvert('number', (v) => v as int),
+      );
+      return val;
+    });
 
 Map<String, dynamic> _$PatchToJson(Patch instance) => <String, dynamic>{
-      'id': instance.id,
-      'number': instance.number,
-    };
+  'id': instance.id,
+  'number': instance.number,
+};

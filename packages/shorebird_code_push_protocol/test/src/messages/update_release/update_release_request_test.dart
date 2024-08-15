@@ -7,18 +7,19 @@ void main() {
       final request = UpdateReleaseRequest(
         platform: ReleasePlatform.android,
         status: ReleaseStatus.active,
-        metadata: const UpdateReleaseMetadata(
-          releasePlatform: ReleasePlatform.ios,
-          flutterVersionOverride: null,
-          generatedApks: null,
-          environment: BuildEnvironmentMetadata(
-            flutterRevision: '853d13d954df3b6e9c2f07b72062f33c52a9a64b',
-            operatingSystem: 'macos',
-            operatingSystemVersion: '11.1',
-            shorebirdVersion: '1.2.3',
-            xcodeVersion: '15.3',
-          ),
-        ).toJson(),
+        metadata:
+            const UpdateReleaseMetadata(
+              releasePlatform: ReleasePlatform.ios,
+              flutterVersionOverride: null,
+              generatedApks: null,
+              environment: BuildEnvironmentMetadata(
+                flutterRevision: '853d13d954df3b6e9c2f07b72062f33c52a9a64b',
+                operatingSystem: 'macos',
+                operatingSystemVersion: '11.1',
+                shorebirdVersion: '1.2.3',
+                xcodeVersion: '15.3',
+              ),
+            ).toJson(),
       );
       expect(
         UpdateReleaseRequest.fromJson(request.toJson()).toJson(),

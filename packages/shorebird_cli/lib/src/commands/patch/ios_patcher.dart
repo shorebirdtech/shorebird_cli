@@ -91,13 +91,13 @@ class IosPatcher extends Patcher {
     // patch and the release.
     final diffStatus =
         await patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
-      localArchive: patchArchive,
-      releaseArchive: releaseArchive,
-      archiveDiffer: const IosArchiveDiffer(),
-      allowAssetChanges: allowAssetDiffs,
-      allowNativeChanges: allowNativeDiffs,
-      confirmNativeChanges: false,
-    );
+          localArchive: patchArchive,
+          releaseArchive: releaseArchive,
+          archiveDiffer: const IosArchiveDiffer(),
+          allowAssetChanges: allowAssetDiffs,
+          allowNativeChanges: allowNativeDiffs,
+          confirmNativeChanges: false,
+        );
 
     if (!diffStatus.hasNativeChanges) {
       return diffStatus;
@@ -105,9 +105,10 @@ class IosPatcher extends Patcher {
 
     final String? podfileLockHash;
     if (shorebirdEnv.podfileLockFile.existsSync()) {
-      podfileLockHash = sha256
-          .convert(shorebirdEnv.podfileLockFile.readAsBytesSync())
-          .toString();
+      podfileLockHash =
+          sha256
+              .convert(shorebirdEnv.podfileLockFile.readAsBytesSync())
+              .toString();
     } else {
       podfileLockHash = null;
     }
@@ -146,18 +147,17 @@ This may indicate that the patch contains native changes, which cannot be applie
 
     try {
       final shouldCodesign = argResults['codesign'] == true;
-      final (flutterVersionAndRevision, flutterVersion) = await (
-        shorebirdFlutter.getVersionAndRevision(),
-        shorebirdFlutter.getVersion(),
-      ).wait;
+      final (flutterVersionAndRevision, flutterVersion) =
+          await (
+            shorebirdFlutter.getVersionAndRevision(),
+            shorebirdFlutter.getVersion(),
+          ).wait;
 
       if ((flutterVersion ?? minimumSupportedIosFlutterVersion) <
           minimumSupportedIosFlutterVersion) {
-        logger.err(
-          '''
+        logger.err('''
 iOS patches are not supported with Flutter versions older than $minimumSupportedIosFlutterVersion.
-For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
-        );
+For more information see: ${supportedFlutterVersionsUrl.toLink()}''');
         throw ProcessExit(ExitCode.software.code);
       }
 
@@ -168,15 +168,17 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
       try {
         // If buildIpa is called with a different codesign value than the
         // release was, we will erroneously report native diffs.
-        ipaBuildResult = await artifactBuilder.buildIpa(
-          codesign: shouldCodesign,
-          exportOptionsPlist: exportOptionsPlist,
-          flavor: flavor,
-          target: target,
-          args: argResults.forwardedArgs +
-              buildNameAndNumberArgsFromReleaseVersion(releaseVersion),
-          base64PublicKey: argResults.encodedPublicKey,
-        );
+        ipaBuildResult =
+            await artifactBuilder.buildIpa(
+              codesign: shouldCodesign,
+              exportOptionsPlist: exportOptionsPlist,
+              flavor: flavor,
+              target: target,
+              args:
+                  argResults.forwardedArgs +
+                  buildNameAndNumberArgsFromReleaseVersion(releaseVersion),
+              base64PublicKey: argResults.encodedPublicKey,
+            );
       } on ProcessException catch (error) {
         buildProgress.fail('Failed to build: ${error.message}');
         rethrow;
@@ -237,20 +239,16 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
       throw ProcessExit(ExitCode.software.code);
     }
     final releaseArtifactFile = File(
-      p.join(
-        appDirectory.path,
-        'Frameworks',
-        'App.framework',
-        'App',
-      ),
+      p.join(appDirectory.path, 'Frameworks', 'App.framework', 'App'),
     );
 
     final useLinker = AotTools.usesLinker(shorebirdEnv.flutterRevision);
     if (useLinker) {
-      final (:exitCode, :linkPercentage) = await _runLinker(
-        releaseArtifact: releaseArtifactFile,
-        kernelFile: File(_appDillCopyPath),
-      );
+      final (:exitCode, :linkPercentage) =
+          await _runLinker(
+            releaseArtifact: releaseArtifactFile,
+            kernelFile: File(_appDillCopyPath),
+          );
       if (exitCode != ExitCode.success.code) throw ProcessExit(exitCode);
       if (linkPercentage != null &&
           linkPercentage < Patcher.minLinkPercentage) {
@@ -272,10 +270,11 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
       try {
         // If the aot_tools executable supports the dump_blobs command, we
         // can generate a stable diff base and use that to create a patch.
-        patchBaseFile = await aotTools.generatePatchDiffBase(
-          analyzeSnapshotPath: analyzeSnapshotPath,
-          releaseSnapshot: releaseArtifactFile,
-        );
+        patchBaseFile =
+            await aotTools.generatePatchDiffBase(
+              analyzeSnapshotPath: analyzeSnapshotPath,
+              releaseSnapshot: releaseArtifactFile,
+            );
         patchBaseProgress.complete();
       } catch (error) {
         patchBaseProgress.fail('$error');
@@ -295,12 +294,10 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
     final patchFileSize = patchFile.statSync().size;
     final privateKeyFile = argResults.file(CommonArguments.privateKeyArg.name);
     final hash = sha256.convert(patchBuildFile.readAsBytesSync()).toString();
-    final hashSignature = privateKeyFile != null
-        ? codeSigner.sign(
-            message: hash,
-            privateKeyPemFile: privateKeyFile,
-          )
-        : null;
+    final hashSignature =
+        privateKeyFile != null
+            ? codeSigner.sign(message: hash, privateKeyPemFile: privateKeyFile)
+            : null;
 
     return {
       Arch.arm64: PatchArtifactBundle(
@@ -385,9 +382,10 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
 
     final linkProgress = logger.progress('Linking AOT files');
     double? linkPercentage;
-    final dumpDebugInfoDir = await aotTools.isLinkDebugInfoSupported()
-        ? Directory.systemTemp.createTempSync()
-        : null;
+    final dumpDebugInfoDir =
+        await aotTools.isLinkDebugInfoSupported()
+            ? Directory.systemTemp.createTempSync()
+            : null;
 
     Future<void> dumpDebugInfo() async {
       if (dumpDebugInfoDir == null) return;
@@ -398,16 +396,17 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
     }
 
     try {
-      linkPercentage = await aotTools.link(
-        base: releaseArtifact.path,
-        patch: patch.path,
-        analyzeSnapshot: analyzeSnapshot.path,
-        genSnapshot: genSnapshot,
-        outputPath: _vmcodeOutputPath,
-        workingDirectory: buildDirectory.path,
-        kernel: kernelFile.path,
-        dumpDebugInfoPath: dumpDebugInfoDir?.path,
-      );
+      linkPercentage =
+          await aotTools.link(
+            base: releaseArtifact.path,
+            patch: patch.path,
+            analyzeSnapshot: analyzeSnapshot.path,
+            genSnapshot: genSnapshot,
+            outputPath: _vmcodeOutputPath,
+            workingDirectory: buildDirectory.path,
+            kernel: kernelFile.path,
+            dumpDebugInfoPath: dumpDebugInfoDir?.path,
+          );
     } catch (error) {
       linkProgress.fail('Failed to link AOT files: $error');
       return (exitCode: ExitCode.software.code, linkPercentage: null);

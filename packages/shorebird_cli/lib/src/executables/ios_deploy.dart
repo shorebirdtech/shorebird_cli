@@ -19,11 +19,7 @@ final iosDeployRef = create(IOSDeploy.new);
 IOSDeploy get iosDeploy => read(iosDeployRef);
 
 /// lldb debugger state.
-enum _DebuggerState {
-  detached,
-  launching,
-  attached,
-}
+enum _DebuggerState { detached, launching, attached }
 
 /// Wrapper around the `ios-deploy` command cached by the Flutter tool.
 /// https://github.com/ios-control/ios-deploy
@@ -34,23 +30,24 @@ class IOSDeploy {
 
   @visibleForTesting
   static File get iosDeployExecutable => File(
-        p.join(
-          shorebirdEnv.flutterDirectory.path,
-          'bin',
-          'cache',
-          'artifacts',
-          'ios-deploy',
-          'ios-deploy',
-        ),
-      );
+    p.join(
+      shorebirdEnv.flutterDirectory.path,
+      'bin',
+      'cache',
+      'artifacts',
+      'ios-deploy',
+      'ios-deploy',
+    ),
+  );
 
   static bool get _isInstalled => iosDeployExecutable.existsSync();
 
   // (lldb)    platform select remote-'ios' --sysroot
   // This regex is to get the configurable lldb prompt.
   // By default this prompt will be "lldb".
-  static final _lldbPlatformSelect =
-      RegExp(r"\s*platform select remote-'ios' --sysroot");
+  static final _lldbPlatformSelect = RegExp(
+    r"\s*platform select remote-'ios' --sysroot",
+  );
 
   // (lldb)     run
   static final _lldbProcessExit = RegExp(r'Process \d* exited with status =');
@@ -163,16 +160,14 @@ Or run on an iOS simulator without code signing
     });
 
     try {
-      launchProcess = await process.start(
-        iosDeployExecutable.path,
-        [
-          '--debug',
-          if (deviceId != null) ...['--id', deviceId],
-          '-r', // uninstall the app before reinstalling and clear app data
-          '--bundle',
-          bundlePath,
-        ],
-      );
+      launchProcess =
+          await process.start(iosDeployExecutable.path, [
+            '--debug',
+            if (deviceId != null) ...['--id', deviceId],
+            '-r', // uninstall the app before reinstalling and clear app data
+            '--bundle',
+            bundlePath,
+          ]);
 
       void detach() {
         if (debuggerState.isNotAttached) return;
@@ -285,11 +280,13 @@ Or run on an iOS simulator without code signing
         logger.detail(line);
       }
 
-      final stdoutSubscription =
-          launchProcess.stdout.asLines().listen(onStdout);
+      final stdoutSubscription = launchProcess.stdout.asLines().listen(
+        onStdout,
+      );
 
-      final stderrSubscription =
-          launchProcess.stderr.asLines().listen(onStderr);
+      final stderrSubscription = launchProcess.stderr.asLines().listen(
+        onStderr,
+      );
 
       final status = await launchProcess.exitCode;
       logger.detail('[ios-deploy] exited with code: $exitCode');
@@ -334,7 +331,7 @@ Or run on an iOS simulator without code signing
 String detectFailures(String line, Logger logger) {
   final isMissingProvisioningProfile =
       line.contains(IOSDeploy.noProvisioningProfileErrorOne) ||
-          line.contains(IOSDeploy.noProvisioningProfileErrorTwo);
+      line.contains(IOSDeploy.noProvisioningProfileErrorTwo);
 
   // No provisioning profile.
   if (isMissingProvisioningProfile) {
@@ -342,7 +339,8 @@ String detectFailures(String line, Logger logger) {
     return line;
   }
 
-  final isDeviceLocked = line.contains(IOSDeploy.deviceLockedError) ||
+  final isDeviceLocked =
+      line.contains(IOSDeploy.deviceLockedError) ||
       line.contains(IOSDeploy.deviceLockedErrorMessage);
 
   if (isDeviceLocked) {
@@ -369,7 +367,8 @@ extension on _DebuggerState {
 
 extension on Stream<List<int>> {
   Stream<String> asLines() {
-    return transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter());
+    return transform<String>(
+      utf8.decoder,
+    ).transform<String>(const LineSplitter());
   }
 }

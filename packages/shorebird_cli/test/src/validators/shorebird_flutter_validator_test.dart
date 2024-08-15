@@ -24,14 +24,11 @@ void main() {
     late Platform platform;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          platformRef.overrideWith(() => platform),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
-        },
-      );
+      return runScoped(() => body(), values: {
+        platformRef.overrideWith(() => platform),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
+      });
     }
 
     Directory flutterDirectory(Directory root) =>
@@ -63,9 +60,7 @@ void main() {
 
       validator = ShorebirdFlutterValidator();
       when(
-        () => shorebirdFlutter.isUnmodified(
-          revision: any(named: 'revision'),
-        ),
+        () => shorebirdFlutter.isUnmodified(revision: any(named: 'revision')),
       ).thenAnswer((_) async => true);
     });
 
@@ -95,9 +90,7 @@ void main() {
 
     test('warns when Flutter has local modifications', () async {
       when(
-        () => shorebirdFlutter.isUnmodified(
-          revision: any(named: 'revision'),
-        ),
+        () => shorebirdFlutter.isUnmodified(revision: any(named: 'revision')),
       ).thenAnswer((_) async => false);
 
       final results = await runWithOverrides(validator.validate);
@@ -107,20 +100,15 @@ void main() {
       expect(results.first.message, contains('has local modifications'));
     });
 
-    test(
-      'does not warn if system flutter does not exist',
-      () async {
-        when(
-          () => shorebirdFlutter.getSystemVersion(),
-        ).thenThrow(const ProcessException('flutter', ['--version'], '', 127));
+    test('does not warn if system flutter does not exist', () async {
+      when(
+        () => shorebirdFlutter.getSystemVersion(),
+      ).thenThrow(const ProcessException('flutter', ['--version'], '', 127));
 
-        final results = await runWithOverrides(
-          () => validator.validate(),
-        );
+      final results = await runWithOverrides(() => validator.validate());
 
-        expect(results, isEmpty);
-      },
-    );
+      expect(results, isEmpty);
+    });
 
     test(
       'does not warn if flutter version and shorebird flutter version have same'
@@ -130,65 +118,54 @@ void main() {
           () => shorebirdFlutter.getSystemVersion(),
         ).thenAnswer((_) async => '3.7.10');
 
-        final results = await runWithOverrides(
-          () => validator.validate(),
-        );
+        final results = await runWithOverrides(() => validator.validate());
 
         expect(results, isEmpty);
       },
     );
 
-    test(
-      'warns when path flutter version has different major or minor version '
-      'than shorebird flutter',
-      () async {
-        when(
-          () => shorebirdFlutter.getSystemVersion(),
-        ).thenAnswer((_) async => '3.8.9');
+    test('warns when path flutter version has different major or minor version '
+        'than shorebird flutter', () async {
+      when(
+        () => shorebirdFlutter.getSystemVersion(),
+      ).thenAnswer((_) async => '3.8.9');
 
-        final results = await runWithOverrides(validator.validate);
+      final results = await runWithOverrides(validator.validate);
 
-        expect(results, hasLength(1));
-        expect(results.first.severity, ValidationIssueSeverity.warning);
-        expect(
-          results.first.message,
-          contains(
-            'The version of Flutter that Shorebird includes and the Flutter on '
-            'your path are different',
-          ),
-        );
-      },
-    );
+      expect(results, hasLength(1));
+      expect(results.first.severity, ValidationIssueSeverity.warning);
+      expect(
+        results.first.message,
+        contains(
+          'The version of Flutter that Shorebird includes and the Flutter on '
+          'your path are different',
+        ),
+      );
+    });
 
-    test(
-      'warns if FLUTTER_STORAGE_BASE_URL has a non-empty value',
-      () async {
-        when(() => platform.environment).thenReturn(
-          {'FLUTTER_STORAGE_BASE_URL': 'https://storage.flutter-io.cn'},
-        );
+    test('warns if FLUTTER_STORAGE_BASE_URL has a non-empty value', () async {
+      when(() => platform.environment).thenReturn({
+        'FLUTTER_STORAGE_BASE_URL': 'https://storage.flutter-io.cn',
+      });
 
-        final results = await runWithOverrides(validator.validate);
+      final results = await runWithOverrides(validator.validate);
 
-        expect(results, hasLength(1));
-        expect(results.first.severity, ValidationIssueSeverity.warning);
-        expect(
-          results.first.message,
-          contains(
-            'Shorebird does not respect the FLUTTER_STORAGE_BASE_URL '
-            'environment variable',
-          ),
-        );
-      },
-    );
+      expect(results, hasLength(1));
+      expect(results.first.severity, ValidationIssueSeverity.warning);
+      expect(
+        results.first.message,
+        contains(
+          'Shorebird does not respect the FLUTTER_STORAGE_BASE_URL '
+          'environment variable',
+        ),
+      );
+    });
 
     test('throws exception if path flutter version lookup fails', () async {
       when(() => shorebirdFlutter.getSystemVersion()).thenThrow(
-        const ProcessException(
-          'flutter',
-          ['--version'],
-          'OH NO THERE IS NO FLUTTER VERSION HERE',
-          1,
-        ),
+        const ProcessException('flutter', [
+          '--version',
+        ], 'OH NO THERE IS NO FLUTTER VERSION HERE', 1),
       );
 
       final results = await runWithOverrides(validator.validate);
@@ -204,30 +181,27 @@ void main() {
       );
     });
 
-    test('throws exception if shorebird flutter version lookup fails',
-        () async {
-      when(
-        () => shorebirdFlutter.getVersionString(),
-      ).thenThrow(
-        const ProcessException(
-          'flutter',
-          ['--version'],
-          'OH NO THERE IS NO FLUTTER VERSION HERE',
-          1,
-        ),
-      );
+    test(
+      'throws exception if shorebird flutter version lookup fails',
+      () async {
+        when(() => shorebirdFlutter.getVersionString()).thenThrow(
+          const ProcessException('flutter', [
+            '--version',
+          ], 'OH NO THERE IS NO FLUTTER VERSION HERE', 1),
+        );
 
-      final results = await runWithOverrides(validator.validate);
+        final results = await runWithOverrides(validator.validate);
 
-      expect(results, hasLength(1));
-      expect(
-        results[0],
-        isA<ValidationIssue>().having(
-          (exception) => exception.message,
-          'message',
-          contains('Failed to determine Shorebird Flutter version'),
-        ),
-      );
-    });
+        expect(results, hasLength(1));
+        expect(
+          results[0],
+          isA<ValidationIssue>().having(
+            (exception) => exception.message,
+            'message',
+            contains('Failed to determine Shorebird Flutter version'),
+          ),
+        );
+      },
+    );
   });
 }

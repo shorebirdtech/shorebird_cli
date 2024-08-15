@@ -11,10 +11,7 @@ void main() {
         displayName: 'Test User',
         jwtIssuer: 'https://accounts.google.com',
       );
-      expect(
-        User.fromJson(user.toJson()).toJson(),
-        equals(user.toJson()),
-      );
+      expect(User.fromJson(user.toJson()).toJson(), equals(user.toJson()));
     });
   });
 }

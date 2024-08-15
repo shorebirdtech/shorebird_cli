@@ -25,11 +25,8 @@ class BuildIpaCommand extends ShorebirdCommand {
         'flavor',
         help: 'The product flavor to use when building the app.',
       )
-      ..addFlag(
-        'codesign',
-        help:
-            '''Codesign the application bundle (only available on device builds).''',
-      );
+      ..addFlag('codesign', help:
+          '''Codesign the application bundle (only available on device builds).''');
   }
 
   @override
@@ -56,8 +53,10 @@ class BuildIpaCommand extends ShorebirdCommand {
     final codesign = results['codesign'] as bool;
 
     if (!codesign) {
-      logger.warn('''
-Codesigning is disabled. You must manually codesign before deploying to devices.''');
+      logger.warn(
+        '''
+Codesigning is disabled. You must manually codesign before deploying to devices.''',
+      );
     }
 
     final buildProgress = logger.progress('Building ipa');

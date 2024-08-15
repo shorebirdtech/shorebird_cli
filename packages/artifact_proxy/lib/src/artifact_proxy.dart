@@ -40,10 +40,9 @@ Handler artifactProxyHandler({required ArtifactManifestClient client}) {
   return (Request request) async {
     final path = request.url.path;
     if (path.isEmpty) {
-      return Response.ok(
-        _explainerHtml,
-        headers: {'content-type': 'text/html'},
-      );
+      return Response.ok(_explainerHtml, headers: {
+        'content-type': 'text/html',
+      });
     }
 
     RegExpMatch? engineArtifactMatch;
@@ -113,9 +112,10 @@ String getFlutterArtifactLocation({
   required String artifactPath,
   String? engine,
 }) {
-  final adjustedPath = engine != null
-      ? artifactPath.replaceAll(r'$engine', engine)
-      : artifactPath;
+  final adjustedPath =
+      engine != null
+          ? artifactPath.replaceAll(r'$engine', engine)
+          : artifactPath;
 
   return 'https://storage.googleapis.com/$adjustedPath';
 }

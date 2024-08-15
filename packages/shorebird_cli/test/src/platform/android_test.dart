@@ -17,12 +17,9 @@ void main() {
     });
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          engineConfigRef.overrideWith(() => engineConfig),
-        },
-      );
+      return runScoped(body, values: {
+        engineConfigRef.overrideWith(() => engineConfig),
+      });
     }
 
     group('availableAndroidArchs', () {
@@ -41,8 +38,9 @@ void main() {
 
       group('when a local engine is being used', () {
         setUp(() {
-          when(() => engineConfig.localEngine)
-              .thenReturn('android_release_arm64');
+          when(
+            () => engineConfig.localEngine,
+          ).thenReturn('android_release_arm64');
         });
 
         test('returns archs matching local engine arch', () async {

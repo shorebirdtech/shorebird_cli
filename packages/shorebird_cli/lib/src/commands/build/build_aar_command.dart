@@ -22,9 +22,9 @@ class BuildAarCommand extends ShorebirdCommand {
     // and [BuildAabCommand] have, but target cannot currently be configured in
     // `flutter build aar` and is always assumed to be lib/main.dart.
     argParser
-        // `flutter build aar` defaults to a build number of 1.0, so we do the
-        // same.
-        .addOption(
+    // `flutter build aar` defaults to a build number of 1.0, so we do the
+    // same.
+    .addOption(
       'build-number',
       help: 'The build number of the aar',
       defaultsTo: '1.0',

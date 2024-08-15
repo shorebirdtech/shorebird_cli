@@ -21,12 +21,9 @@ void main() {
     late FlavorValidator validator;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(body, values: {
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUp(() {
@@ -43,8 +40,9 @@ void main() {
     group('validate', () {
       group('when project does not have flavors', () {
         setUp(() {
-          when(() => shorebirdEnv.getShorebirdYaml())
-              .thenReturn(shorebirdYamlWithoutFlavors);
+          when(
+            () => shorebirdEnv.getShorebirdYaml(),
+          ).thenReturn(shorebirdYamlWithoutFlavors);
         });
 
         group('when flavor arg is provided', () {
@@ -78,8 +76,9 @@ void main() {
 
       group('when project has flavors', () {
         setUp(() {
-          when(() => shorebirdEnv.getShorebirdYaml())
-              .thenReturn(shorebirdYamlWithFlavors);
+          when(
+            () => shorebirdEnv.getShorebirdYaml(),
+          ).thenReturn(shorebirdYamlWithFlavors);
         });
 
         group('when flavor arg is provided', () {
@@ -104,10 +103,8 @@ void main() {
               expect(
                 issues,
                 equals([
-                  ValidationIssue.error(
-                    message:
-                        '''This project does not have a flavor named "flavorC". Available flavors: (flavorA, flavorB)''',
-                  ),
+                  ValidationIssue.error(message:
+                      '''This project does not have a flavor named "flavorC". Available flavors: (flavorA, flavorB)'''),
                 ]),
               );
             });
@@ -124,10 +121,8 @@ void main() {
             expect(
               issues,
               equals([
-                ValidationIssue.error(
-                  message:
-                      '''The project has flavors (flavorA, flavorB), but no --flavor argument was provided''',
-                ),
+                ValidationIssue.error(message:
+                    '''The project has flavors (flavorA, flavorB), but no --flavor argument was provided'''),
               ]),
             );
           });

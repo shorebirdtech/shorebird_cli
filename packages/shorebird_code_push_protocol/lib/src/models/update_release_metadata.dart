@@ -32,13 +32,12 @@ class UpdateReleaseMetadata extends Equatable {
     String? flutterVersionOverride = '1.2.3',
     bool? generatedApks = false,
     BuildEnvironmentMetadata? environment,
-  }) =>
-      UpdateReleaseMetadata(
-        releasePlatform: releasePlatform,
-        flutterVersionOverride: flutterVersionOverride,
-        generatedApks: generatedApks,
-        environment: environment ?? BuildEnvironmentMetadata.forTest(),
-      );
+  }) => UpdateReleaseMetadata(
+    releasePlatform: releasePlatform,
+    flutterVersionOverride: flutterVersionOverride,
+    generatedApks: generatedApks,
+    environment: environment ?? BuildEnvironmentMetadata.forTest(),
+  );
   // coverage:ignore-end
 
   /// Converts a Map<String, dynamic> to a [UpdateReleaseMetadata].
@@ -72,9 +71,9 @@ class UpdateReleaseMetadata extends Equatable {
 
   @override
   List<Object?> get props => [
-        releasePlatform,
-        flutterVersionOverride,
-        generatedApks,
-        environment,
-      ];
+    releasePlatform,
+    flutterVersionOverride,
+    generatedApks,
+    environment,
+  ];
 }

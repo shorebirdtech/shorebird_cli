@@ -93,7 +93,8 @@ class AotTools {
       String,
       List<String>, {
       String? workingDirectory,
-    })? runCommand,
+    })?
+    runCommand,
     String? workingDirectory,
   }) async {
     final runFn = runCommand ?? process.run;
@@ -109,19 +110,15 @@ class AotTools {
     // distributed as an executable.
     final extension = p.extension(artifactPath);
     if (extension != '.dill' && extension != '.dart') {
-      return runFn(
-        artifactPath,
-        command,
-        workingDirectory: workingDirectory,
-      );
+      return runFn(artifactPath, command, workingDirectory: workingDirectory);
     }
 
     // local engine versions use .dart and we distribute aot-tools as a .dill
-    return runFn(
-      shorebirdEnv.dartBinaryFile.path,
-      ['run', artifactPath, ...command],
-      workingDirectory: workingDirectory,
-    );
+    return runFn(shorebirdEnv.dartBinaryFile.path, [
+      'run',
+      artifactPath,
+      ...command,
+    ], workingDirectory: workingDirectory);
   }
 
   /// Similar to [_exec], but logs the sub process stdout and stderr
@@ -130,43 +127,37 @@ class AotTools {
     List<String> command, {
     String? workingDirectory,
   }) {
-    return _exec(
-      command,
-      runCommand: (
-        String exe,
-        List<String> args, {
-        String? workingDirectory,
-      }) async {
-        final spawnedProcess = await process.start(
-          exe,
-          args,
-          workingDirectory: workingDirectory,
-        );
+    return _exec(command, runCommand: (
+      String exe,
+      List<String> args, {
+      String? workingDirectory,
+    }) async {
+      final spawnedProcess =
+          await process.start(exe, args, workingDirectory: workingDirectory);
 
-        final stdout = StringBuffer();
-        final stderr = StringBuffer();
+      final stdout = StringBuffer();
+      final stderr = StringBuffer();
 
-        final stdoutSub = spawnedProcess.stdout.map(utf8.decode).listen((data) {
-          logger.detail(data);
-          stdout.write(data);
-        });
+      final stdoutSub = spawnedProcess.stdout.map(utf8.decode).listen((data) {
+        logger.detail(data);
+        stdout.write(data);
+      });
 
-        final stderrSub =
-            spawnedProcess.stderr.map(utf8.decode).listen(stderr.write);
+      final stderrSub = spawnedProcess.stderr
+          .map(utf8.decode)
+          .listen(stderr.write);
 
-        final exitCode = await spawnedProcess.exitCode;
+      final exitCode = await spawnedProcess.exitCode;
 
-        await stdoutSub.cancel();
-        await stderrSub.cancel();
+      await stdoutSub.cancel();
+      await stderrSub.cancel();
 
-        return ShorebirdProcessResult(
-          exitCode: exitCode,
-          stdout: stdout.toString(),
-          stderr: stderr.toString(),
-        );
-      },
-      workingDirectory: workingDirectory,
-    );
+      return ShorebirdProcessResult(
+        exitCode: exitCode,
+        stdout: stdout.toString(),
+        stderr: stderr.toString(),
+      );
+    }, workingDirectory: workingDirectory);
   }
 
   Future<bool> _linkerUsesGenSnapshot() async {
@@ -209,24 +200,22 @@ class AotTools {
     const linkJson = 'link.jsonl';
     final outputDir = p.dirname(outputPath);
     final linkerUsesGenSnapshot = await _linkerUsesGenSnapshot();
-    final result = await _execWithLiveLogs(
-      [
-        'link',
-        '--base=$base',
-        '--patch=$patch',
-        '--analyze-snapshot=$analyzeSnapshot',
-        '--output=$outputPath',
-        '--verbose',
-        if (linkerUsesGenSnapshot) ...[
-          '--gen-snapshot=$genSnapshot',
-          '--kernel=$kernel',
-          '--reporter=json',
-          '--redirect-to=${p.join(outputDir, linkJson)}',
-        ],
-        if (dumpDebugInfoPath != null) '--dump-debug-info=$dumpDebugInfoPath',
-      ],
-      workingDirectory: workingDirectory,
-    );
+    final result =
+        await _execWithLiveLogs([
+          'link',
+          '--base=$base',
+          '--patch=$patch',
+          '--analyze-snapshot=$analyzeSnapshot',
+          '--output=$outputPath',
+          '--verbose',
+          if (linkerUsesGenSnapshot) ...[
+            '--gen-snapshot=$genSnapshot',
+            '--kernel=$kernel',
+            '--reporter=json',
+            '--redirect-to=${p.join(outputDir, linkJson)}',
+          ],
+          if (dumpDebugInfoPath != null) '--dump-debug-info=$dumpDebugInfoPath',
+        ], workingDirectory: workingDirectory);
 
     if (result.exitCode != 0) {
       throw Exception('Failed to link: ${result.stderr}');
@@ -239,11 +228,12 @@ class AotTools {
 
   double? _extractLinkPercentage(File file) {
     if (!file.existsSync()) return null;
-    final status = const LineSplitter()
-        .convert(file.readAsStringSync())
-        .map(json.decode)
-        .cast<Map<String, dynamic>>()
-        .toList();
+    final status =
+        const LineSplitter()
+            .convert(file.readAsStringSync())
+            .map(json.decode)
+            .cast<Map<String, dynamic>>()
+            .toList();
 
     final linkSuccess = status.firstWhereOrNull(
       (line) => line['type'] == 'link_success',
@@ -272,14 +262,13 @@ class AotTools {
   }) async {
     final tmpDir = Directory.systemTemp.createTempSync();
     final outFile = File(p.join(tmpDir.path, 'diff_base'));
-    final result = await _exec(
-      [
-        'dump_blobs',
-        '--analyze-snapshot=$analyzeSnapshotPath',
-        '--output=${outFile.path}',
-        '--snapshot=${releaseSnapshot.path}',
-      ],
-    );
+    final result =
+        await _exec([
+          'dump_blobs',
+          '--analyze-snapshot=$analyzeSnapshotPath',
+          '--output=${outFile.path}',
+          '--snapshot=${releaseSnapshot.path}',
+        ]);
 
     if (result.exitCode != ExitCode.success.code) {
       throw Exception('Failed to generate patch diff base: ${result.stderr}');

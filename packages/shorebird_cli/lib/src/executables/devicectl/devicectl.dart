@@ -22,10 +22,7 @@ typedef BundleId = String;
 /// {@endtemplate}
 class DevicectlException implements Exception {
   /// {@macro devicectl_exception}
-  DevicectlException({
-    required this.message,
-    this.underlyingException,
-  });
+  DevicectlException({required this.message, this.underlyingException});
 
   /// A message describing this exception.
   final String message;
@@ -49,17 +46,13 @@ Devicectl get devicectl => read(devicectlRef);
 /// A wrapper around the `devicectl` command.
 class Devicectl {
   static const executableName = 'xcrun';
-  static const baseArgs = [
-    'devicectl',
-  ];
+  static const baseArgs = ['devicectl'];
 
   /// Whether the `devicectl` command is available.
   Future<bool> _isAvailable() async {
     try {
-      final result = await process.run(executableName, [
-        ...baseArgs,
-        '--version',
-      ]);
+      final result =
+          await process.run(executableName, [...baseArgs, '--version']);
       return result.exitCode == ExitCode.success.code;
     } catch (_) {
       return false;
@@ -115,10 +108,10 @@ class Devicectl {
     final String bundleId;
     try {
       final maybeBundleId =
-          JsonPath(r'$.result.installedApplications[0].bundleID')
-              .read(jsonResult)
-              .firstOrNull
-              ?.value as String?;
+          JsonPath(
+                r'$.result.installedApplications[0].bundleID',
+              ).read(jsonResult).firstOrNull?.value
+              as String?;
       if (maybeBundleId == null) {
         throw Exception(
           'Unable to find installed app bundleID in devicectl output',
@@ -182,10 +175,11 @@ class Devicectl {
 
     final String bundleId;
     try {
-      bundleId = await installApp(
-        deviceId: device.udid,
-        runnerApp: runnerAppDirectory,
-      );
+      bundleId =
+          await installApp(
+            deviceId: device.udid,
+            runnerApp: runnerAppDirectory,
+          );
     } catch (error) {
       installProgress.fail('Failed to install app: $error');
       return ExitCode.software.code;
@@ -249,11 +243,12 @@ class Devicectl {
     final tempDir = Directory.systemTemp.createTempSync();
     final jsonOutputFile = File(p.join(tempDir.path, 'devicectl.out.json'));
 
-    final result = await process.run(executableName, [
-      ...args,
-      '--json-output',
-      jsonOutputFile.path,
-    ]);
+    final result =
+        await process.run(executableName, [
+          ...args,
+          '--json-output',
+          jsonOutputFile.path,
+        ]);
 
     // The `devicectl` command will still write json output if it fails, so in
     // the event of a non-zero exit code, only throw a ProcessException if we

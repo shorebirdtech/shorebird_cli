@@ -27,16 +27,13 @@ void main() {
     late AotTools aotTools;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          cacheRef.overrideWith(() => cache),
-          processRef.overrideWith(() => process),
-          shorebirdArtifactsRef.overrideWith(() => shorebirdArtifacts),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          loggerRef.overrideWith(() => logger),
-        },
-      );
+      return runScoped(body, values: {
+        cacheRef.overrideWith(() => cache),
+        processRef.overrideWith(() => process),
+        shorebirdArtifactsRef.overrideWith(() => shorebirdArtifacts),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        loggerRef.overrideWith(() => logger),
+      });
     }
 
     setUp(() {
@@ -92,18 +89,18 @@ void main() {
             any(),
             workingDirectory: any(named: 'workingDirectory'),
           ),
-        ).thenAnswer(
-          (_) async {
-            final mockProcess = MockProcess();
-            when(() => mockProcess.exitCode).thenAnswer((_) async => 1);
-            when(() => mockProcess.stdout)
-                .thenAnswer((_) => const Stream.empty());
-            when(() => mockProcess.stderr)
-                .thenAnswer((_) => Stream.value(utf8.encode('error')));
+        ).thenAnswer((_) async {
+          final mockProcess = MockProcess();
+          when(() => mockProcess.exitCode).thenAnswer((_) async => 1);
+          when(
+            () => mockProcess.stdout,
+          ).thenAnswer((_) => const Stream.empty());
+          when(
+            () => mockProcess.stderr,
+          ).thenAnswer((_) => Stream.value(utf8.encode('error')));
 
-            return mockProcess;
-          },
-        );
+          return mockProcess;
+        });
         await expectLater(
           () => runWithOverrides(
             () => aotTools.link(
@@ -156,18 +153,18 @@ void main() {
               any(),
               workingDirectory: any(named: 'workingDirectory'),
             ),
-          ).thenAnswer(
-            (_) async {
-              final mockProcess = MockProcess();
-              when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
-              when(() => mockProcess.stdout)
-                  .thenAnswer((_) => const Stream.empty());
-              when(() => mockProcess.stderr)
-                  .thenAnswer((_) => const Stream.empty());
+          ).thenAnswer((_) async {
+            final mockProcess = MockProcess();
+            when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
+            when(
+              () => mockProcess.stdout,
+            ).thenAnswer((_) => const Stream.empty());
+            when(
+              () => mockProcess.stderr,
+            ).thenAnswer((_) => const Stream.empty());
 
-              return mockProcess;
-            },
-          );
+            return mockProcess;
+          });
           await expectLater(
             runWithOverrides(
               () => aotTools.link(
@@ -183,18 +180,14 @@ void main() {
             completes,
           );
           verify(
-            () => process.start(
-              aotToolsPath,
-              [
-                'link',
-                '--base=$base',
-                '--patch=$patch',
-                '--analyze-snapshot=$analyzeSnapshot',
-                '--output=$outputPath',
-                '--verbose',
-              ],
-              workingDirectory: any(named: 'workingDirectory'),
-            ),
+            () => process.start(aotToolsPath, [
+              'link',
+              '--base=$base',
+              '--patch=$patch',
+              '--analyze-snapshot=$analyzeSnapshot',
+              '--output=$outputPath',
+              '--verbose',
+            ], workingDirectory: any(named: 'workingDirectory')),
           ).called(1);
         });
 
@@ -218,18 +211,18 @@ void main() {
               any(),
               workingDirectory: any(named: 'workingDirectory'),
             ),
-          ).thenAnswer(
-            (_) async {
-              final mockProcess = MockProcess();
-              when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
-              when(() => mockProcess.stdout)
-                  .thenAnswer((_) => Stream.value(utf8.encode('stdout')));
-              when(() => mockProcess.stderr)
-                  .thenAnswer((_) => const Stream.empty());
+          ).thenAnswer((_) async {
+            final mockProcess = MockProcess();
+            when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
+            when(
+              () => mockProcess.stdout,
+            ).thenAnswer((_) => Stream.value(utf8.encode('stdout')));
+            when(
+              () => mockProcess.stderr,
+            ).thenAnswer((_) => const Stream.empty());
 
-              return mockProcess;
-            },
-          );
+            return mockProcess;
+          });
 
           await runWithOverrides(
             () => aotTools.link(
@@ -247,85 +240,78 @@ void main() {
         });
       });
 
-      group(
-        'when --dump-debug-info is provided',
-        () {
-          const aotToolsPath = 'aot_tools';
+      group('when --dump-debug-info is provided', () {
+        const aotToolsPath = 'aot_tools';
 
-          setUp(() {
+        setUp(() {
+          when(
+            () => shorebirdArtifacts.getArtifactPath(
+              artifact: ShorebirdArtifact.aotTools,
+            ),
+          ).thenReturn(aotToolsPath);
+        });
+
+        test('forwards the option to aot_tools', () async {
+          const debugPath = 'my_debug_path';
+          when(
+            () => process.run(
+              aotToolsPath,
+              any(),
+              workingDirectory: any(named: 'workingDirectory'),
+            ),
+          ).thenAnswer(
+            (_) async => const ShorebirdProcessResult(
+              exitCode: 0,
+              stdout: '',
+              stderr: '',
+            ),
+          );
+          when(
+            () => process.start(
+              aotToolsPath,
+              any(),
+              workingDirectory: any(named: 'workingDirectory'),
+            ),
+          ).thenAnswer((_) async {
+            final mockProcess = MockProcess();
+            when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
             when(
-              () => shorebirdArtifacts.getArtifactPath(
-                artifact: ShorebirdArtifact.aotTools,
-              ),
-            ).thenReturn(aotToolsPath);
+              () => mockProcess.stdout,
+            ).thenAnswer((_) => const Stream.empty());
+            when(
+              () => mockProcess.stderr,
+            ).thenAnswer((_) => const Stream.empty());
+
+            return mockProcess;
           });
-
-          test('forwards the option to aot_tools', () async {
-            const debugPath = 'my_debug_path';
-            when(
-              () => process.run(
-                aotToolsPath,
-                any(),
-                workingDirectory: any(named: 'workingDirectory'),
+          await expectLater(
+            runWithOverrides(
+              () => aotTools.link(
+                base: base,
+                patch: patch,
+                analyzeSnapshot: analyzeSnapshot,
+                genSnapshot: genSnapshot,
+                kernel: kernel,
+                workingDirectory: workingDirectory.path,
+                outputPath: outputPath,
+                dumpDebugInfoPath: debugPath,
               ),
-            ).thenAnswer(
-              (_) async => const ShorebirdProcessResult(
-                exitCode: 0,
-                stdout: '',
-                stderr: '',
-              ),
-            );
-            when(
-              () => process.start(
-                aotToolsPath,
-                any(),
-                workingDirectory: any(named: 'workingDirectory'),
-              ),
-            ).thenAnswer(
-              (_) async {
-                final mockProcess = MockProcess();
-                when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
-                when(() => mockProcess.stdout)
-                    .thenAnswer((_) => const Stream.empty());
-                when(() => mockProcess.stderr)
-                    .thenAnswer((_) => const Stream.empty());
-
-                return mockProcess;
-              },
-            );
-            await expectLater(
-              runWithOverrides(
-                () => aotTools.link(
-                  base: base,
-                  patch: patch,
-                  analyzeSnapshot: analyzeSnapshot,
-                  genSnapshot: genSnapshot,
-                  kernel: kernel,
-                  workingDirectory: workingDirectory.path,
-                  outputPath: outputPath,
-                  dumpDebugInfoPath: debugPath,
-                ),
-              ),
-              completes,
-            );
-            verify(
-              () => process.start(
-                aotToolsPath,
-                [
-                  'link',
-                  '--base=$base',
-                  '--patch=$patch',
-                  '--analyze-snapshot=$analyzeSnapshot',
-                  '--output=$outputPath',
-                  '--verbose',
-                  '--dump-debug-info=$debugPath',
-                ],
-                workingDirectory: any(named: 'workingDirectory'),
-              ),
-            ).called(1);
-          });
-        },
-      );
+            ),
+            completes,
+          );
+          verify(
+            () => process.start(aotToolsPath, [
+              'link',
+              '--base=$base',
+              '--patch=$patch',
+              '--analyze-snapshot=$analyzeSnapshot',
+              '--output=$outputPath',
+              '--verbose',
+              '--dump-debug-info=$debugPath',
+            ], workingDirectory: any(named: 'workingDirectory')),
+          ).called(1);
+        });
+      });
 
       group('when aot-tools is a kernel file', () {
         const aotToolsPath = 'aot_tools.dill';
@@ -358,17 +344,17 @@ void main() {
               any(),
               workingDirectory: any(named: 'workingDirectory'),
             ),
-          ).thenAnswer(
-            (_) async {
-              final mockProcess = MockProcess();
-              when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
-              when(() => mockProcess.stdout)
-                  .thenAnswer((_) => const Stream.empty());
-              when(() => mockProcess.stderr)
-                  .thenAnswer((_) => const Stream.empty());
-              return mockProcess;
-            },
-          );
+          ).thenAnswer((_) async {
+            final mockProcess = MockProcess();
+            when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
+            when(
+              () => mockProcess.stdout,
+            ).thenAnswer((_) => const Stream.empty());
+            when(
+              () => mockProcess.stderr,
+            ).thenAnswer((_) => const Stream.empty());
+            return mockProcess;
+          });
           await expectLater(
             runWithOverrides(
               () => aotTools.link(
@@ -384,20 +370,16 @@ void main() {
             completes,
           );
           verify(
-            () => process.start(
-              dartBinaryFile.path,
-              [
-                'run',
-                aotToolsPath,
-                'link',
-                '--base=$base',
-                '--patch=$patch',
-                '--analyze-snapshot=$analyzeSnapshot',
-                '--output=$outputPath',
-                '--verbose',
-              ],
-              workingDirectory: any(named: 'workingDirectory'),
-            ),
+            () => process.start(dartBinaryFile.path, [
+              'run',
+              aotToolsPath,
+              'link',
+              '--base=$base',
+              '--patch=$patch',
+              '--analyze-snapshot=$analyzeSnapshot',
+              '--output=$outputPath',
+              '--verbose',
+            ], workingDirectory: any(named: 'workingDirectory')),
           ).called(1);
         });
       });
@@ -433,18 +415,18 @@ void main() {
               any(),
               workingDirectory: any(named: 'workingDirectory'),
             ),
-          ).thenAnswer(
-            (_) async {
-              final mockProcess = MockProcess();
-              when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
-              when(() => mockProcess.stdout)
-                  .thenAnswer((_) => const Stream.empty());
-              when(() => mockProcess.stderr)
-                  .thenAnswer((_) => const Stream.empty());
+          ).thenAnswer((_) async {
+            final mockProcess = MockProcess();
+            when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
+            when(
+              () => mockProcess.stdout,
+            ).thenAnswer((_) => const Stream.empty());
+            when(
+              () => mockProcess.stderr,
+            ).thenAnswer((_) => const Stream.empty());
 
-              return mockProcess;
-            },
-          );
+            return mockProcess;
+          });
           await expectLater(
             runWithOverrides(
               () => aotTools.link(
@@ -460,20 +442,16 @@ void main() {
             completes,
           );
           verify(
-            () => process.start(
-              dartBinaryFile.path,
-              [
-                'run',
-                aotToolsPath,
-                'link',
-                '--base=$base',
-                '--patch=$patch',
-                '--analyze-snapshot=$analyzeSnapshot',
-                '--output=$outputPath',
-                '--verbose',
-              ],
-              workingDirectory: any(named: 'workingDirectory'),
-            ),
+            () => process.start(dartBinaryFile.path, [
+              'run',
+              aotToolsPath,
+              'link',
+              '--base=$base',
+              '--patch=$patch',
+              '--analyze-snapshot=$analyzeSnapshot',
+              '--output=$outputPath',
+              '--verbose',
+            ], workingDirectory: any(named: 'workingDirectory')),
           ).called(1);
         });
       });
@@ -491,11 +469,9 @@ void main() {
 
         test('passes gen_snapshot to aot_tools', () async {
           when(
-            () => process.run(
-              aotToolsPath,
-              ['--version'],
-              workingDirectory: any(named: 'workingDirectory'),
-            ),
+            () => process.run(aotToolsPath, [
+              '--version',
+            ], workingDirectory: any(named: 'workingDirectory')),
           ).thenAnswer(
             (_) async => const ShorebirdProcessResult(
               exitCode: 0,
@@ -509,18 +485,18 @@ void main() {
               any(that: contains('--gen-snapshot=$genSnapshot')),
               workingDirectory: any(named: 'workingDirectory'),
             ),
-          ).thenAnswer(
-            (_) async {
-              final mockProcess = MockProcess();
-              when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
-              when(() => mockProcess.stdout)
-                  .thenAnswer((_) => const Stream.empty());
-              when(() => mockProcess.stderr)
-                  .thenAnswer((_) => const Stream.empty());
+          ).thenAnswer((_) async {
+            final mockProcess = MockProcess();
+            when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
+            when(
+              () => mockProcess.stdout,
+            ).thenAnswer((_) => const Stream.empty());
+            when(
+              () => mockProcess.stderr,
+            ).thenAnswer((_) => const Stream.empty());
 
-              return mockProcess;
-            },
-          );
+            return mockProcess;
+          });
           await expectLater(
             runWithOverrides(
               () => aotTools.link(
@@ -537,33 +513,27 @@ void main() {
           );
 
           verify(
-            () => process.start(
-              aotToolsPath,
-              [
-                'link',
-                '--base=$base',
-                '--patch=$patch',
-                '--analyze-snapshot=$analyzeSnapshot',
-                '--output=$outputPath',
-                '--verbose',
-                '--gen-snapshot=$genSnapshot',
-                '--kernel=$kernel',
-                '--reporter=json',
-                '--redirect-to=$linkJsonPath',
-              ],
-              workingDirectory: any(named: 'workingDirectory'),
-            ),
+            () => process.start(aotToolsPath, [
+              'link',
+              '--base=$base',
+              '--patch=$patch',
+              '--analyze-snapshot=$analyzeSnapshot',
+              '--output=$outputPath',
+              '--verbose',
+              '--gen-snapshot=$genSnapshot',
+              '--kernel=$kernel',
+              '--reporter=json',
+              '--redirect-to=$linkJsonPath',
+            ], workingDirectory: any(named: 'workingDirectory')),
           ).called(1);
         });
 
         test('returns link percentage', () async {
           workingDirectory = Directory.systemTemp.createTempSync();
           when(
-            () => process.run(
-              aotToolsPath,
-              ['--version'],
-              workingDirectory: any(named: 'workingDirectory'),
-            ),
+            () => process.run(aotToolsPath, [
+              '--version',
+            ], workingDirectory: any(named: 'workingDirectory')),
           ).thenAnswer((_) async {
             return const ShorebirdProcessResult(
               exitCode: 0,
@@ -577,25 +547,24 @@ void main() {
               any(that: contains('--gen-snapshot=$genSnapshot')),
               workingDirectory: any(named: 'workingDirectory'),
             ),
-          ).thenAnswer(
-            (_) async {
-              File(p.join(workingDirectory.path, 'link.jsonl'))
-                  .writeAsStringSync(
-                '''
+          ).thenAnswer((_) async {
+            File(p.join(workingDirectory.path, 'link.jsonl')).writeAsStringSync(
+              '''
 {"type":"link_success","base_codes_length":3036,"patch_codes_length":3036,"base_code_size":861816,"patch_code_size":861816,"linked_code_size":860460,"link_percentage":99.8426578295135}
 {"type":"link_debug","message":"wrote vmcode file to out.vmcode"}''',
-              );
+            );
 
-              final mockProcess = MockProcess();
-              when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
-              when(() => mockProcess.stdout)
-                  .thenAnswer((_) => const Stream.empty());
-              when(() => mockProcess.stderr)
-                  .thenAnswer((_) => const Stream.empty());
+            final mockProcess = MockProcess();
+            when(() => mockProcess.exitCode).thenAnswer((_) async => 0);
+            when(
+              () => mockProcess.stdout,
+            ).thenAnswer((_) => const Stream.empty());
+            when(
+              () => mockProcess.stderr,
+            ).thenAnswer((_) => const Stream.empty());
 
-              return mockProcess;
-            },
-          );
+            return mockProcess;
+          });
           await expectLater(
             runWithOverrides(
               () => aotTools.link(
@@ -612,22 +581,18 @@ void main() {
           );
 
           verify(
-            () => process.start(
-              aotToolsPath,
-              [
-                'link',
-                '--base=$base',
-                '--patch=$patch',
-                '--analyze-snapshot=$analyzeSnapshot',
-                '--output=$outputPath',
-                '--verbose',
-                '--gen-snapshot=$genSnapshot',
-                '--kernel=$kernel',
-                '--reporter=json',
-                '--redirect-to=$linkJsonPath',
-              ],
-              workingDirectory: any(named: 'workingDirectory'),
-            ),
+            () => process.start(aotToolsPath, [
+              'link',
+              '--base=$base',
+              '--patch=$patch',
+              '--analyze-snapshot=$analyzeSnapshot',
+              '--output=$outputPath',
+              '--verbose',
+              '--gen-snapshot=$genSnapshot',
+              '--kernel=$kernel',
+              '--reporter=json',
+              '--redirect-to=$linkJsonPath',
+            ], workingDirectory: any(named: 'workingDirectory')),
           ).called(1);
         });
       });
@@ -756,9 +721,10 @@ Run "aot_tools help <command>" for more information about a command.
         });
 
         test('returns false', () async {
-          final result = await runWithOverrides(
-            () => aotTools.isGeneratePatchDiffBaseSupported(),
-          );
+          final result =
+              await runWithOverrides(
+                () => aotTools.isGeneratePatchDiffBaseSupported(),
+              );
           expect(result, isFalse);
         });
       });
@@ -784,9 +750,10 @@ Run "aot_tools help <command>" for more information about a command.
         });
 
         test('returns true', () async {
-          final result = await runWithOverrides(
-            () => aotTools.isGeneratePatchDiffBaseSupported(),
-          );
+          final result =
+              await runWithOverrides(
+                () => aotTools.isGeneratePatchDiffBaseSupported(),
+              );
           expect(result, isTrue);
         });
       });
@@ -905,12 +872,13 @@ Run "aot_tools help <command>" for more information about a command.
         });
 
         test('returns path to file', () async {
-          final result = await runWithOverrides(
-            () => aotTools.generatePatchDiffBase(
-              releaseSnapshot: File('release_snapshot'),
-              analyzeSnapshotPath: 'analyze_snapshot',
-            ),
-          );
+          final result =
+              await runWithOverrides(
+                () => aotTools.generatePatchDiffBase(
+                  releaseSnapshot: File('release_snapshot'),
+                  analyzeSnapshotPath: 'analyze_snapshot',
+                ),
+              );
 
           expect(result.existsSync(), isTrue);
         });

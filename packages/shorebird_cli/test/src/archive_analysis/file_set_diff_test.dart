@@ -5,14 +5,8 @@ void main() {
   group(FileSetDiff, () {
     group('fromPathHashes', () {
       test('detects added, changed, and removed files', () {
-        final oldPathHashes = {
-          'a': 'asdf',
-          'b': 'qwer',
-        };
-        final newPathHashes = {
-          'a': 'qwer',
-          'c': 'zxcv',
-        };
+        final oldPathHashes = {'a': 'asdf', 'b': 'qwer'};
+        final newPathHashes = {'a': 'qwer', 'c': 'zxcv'};
 
         final fileSetDiff = FileSetDiff.fromPathHashes(
           oldPathHashes: oldPathHashes,
@@ -31,32 +25,25 @@ void main() {
           changedPaths: {'c'},
           removedPaths: {'d'},
         );
-        expect(
-          fileSetDiff.prettyString,
-          '''
+        expect(fileSetDiff.prettyString, '''
     Added files:
         a
         b
     Changed files:
         c
     Removed files:
-        d''',
-        );
+        d''');
       });
 
       test('does not include empty path sets', () {
-        final fileSetDiff = FileSetDiff(
-          addedPaths: {'a', 'b'},
-          changedPaths: {},
-          removedPaths: {},
-        );
-        expect(
-          fileSetDiff.prettyString,
-          '''
+        final fileSetDiff = FileSetDiff(addedPaths: {
+          'a',
+          'b',
+        }, changedPaths: {}, removedPaths: {});
+        expect(fileSetDiff.prettyString, '''
     Added files:
         a
-        b''',
-        );
+        b''');
       });
     });
 
@@ -67,11 +54,9 @@ void main() {
     });
 
     test('isEmpty is false if any path sets are not empty', () {
-      final fileSetDiff = FileSetDiff(
-        addedPaths: {'a'},
-        changedPaths: {},
-        removedPaths: {},
-      );
+      final fileSetDiff = FileSetDiff(addedPaths: {
+        'a',
+      }, changedPaths: {}, removedPaths: {});
       expect(fileSetDiff.isEmpty, isFalse);
       expect(fileSetDiff.isNotEmpty, isTrue);
     });

@@ -26,19 +26,15 @@ class FlavorValidator extends Validator {
     final projectFlavors = shorebirdEnv.getShorebirdYaml()!.flavors;
     if (projectFlavors == null && flavorArg != null) {
       return [
-        ValidationIssue.error(
-          message:
-              '''The project does not have any flavors defined, but the --flavor argument was provided''',
-        ),
+        ValidationIssue.error(message:
+            '''The project does not have any flavors defined, but the --flavor argument was provided'''),
       ];
     }
 
     if (projectFlavors != null && flavorArg == null) {
       return [
-        ValidationIssue.error(
-          message:
-              '''The project has flavors ${projectFlavors.keys}, but no --flavor argument was provided''',
-        ),
+        ValidationIssue.error(message:
+            '''The project has flavors ${projectFlavors.keys}, but no --flavor argument was provided'''),
       ];
     }
 
@@ -46,10 +42,8 @@ class FlavorValidator extends Validator {
         flavorArg != null &&
         !projectFlavors.containsKey(flavorArg)) {
       return [
-        ValidationIssue.error(
-          message:
-              '''This project does not have a flavor named "$flavorArg". Available flavors: ${projectFlavors.keys}''',
-        ),
+        ValidationIssue.error(message:
+            '''This project does not have a flavor named "$flavorArg". Available flavors: ${projectFlavors.keys}'''),
       ];
     }
 

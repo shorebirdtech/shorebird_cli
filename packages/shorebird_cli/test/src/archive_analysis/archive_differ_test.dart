@@ -14,11 +14,9 @@ void main() {
 
     group('containsPotentiallyBreakingAssetDiffs', () {
       test('returns true if any assets were added', () {
-        archiveDiffer.changedFileSetDiff = FileSetDiff(
-          addedPaths: {assetFilePath},
-          removedPaths: {},
-          changedPaths: {},
-        );
+        archiveDiffer.changedFileSetDiff = FileSetDiff(addedPaths: {
+          assetFilePath,
+        }, removedPaths: {}, changedPaths: {});
         expect(
           archiveDiffer.containsPotentiallyBreakingAssetDiffs(
             archiveDiffer.changedFileSetDiff,
@@ -65,8 +63,7 @@ class TestArchiveDiffer extends ArchiveDiffer {
   Future<FileSetDiff> changedFiles(
     String oldArchivePath,
     String newArchivePath,
-  ) async =>
-      changedFileSetDiff;
+  ) async => changedFileSetDiff;
 
   @override
   bool containsPotentiallyBreakingNativeDiffs(FileSetDiff fileSetDiff) => false;

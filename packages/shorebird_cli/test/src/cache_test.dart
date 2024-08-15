@@ -36,19 +36,16 @@ void main() {
     late ShorebirdProcess shorebirdProcess;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          artifactManagerRef.overrideWith(() => artifactManager),
-          cacheRef.overrideWith(() => cache),
-          checksumCheckerRef.overrideWith(() => checksumChecker),
-          httpClientRef.overrideWith(() => httpClient),
-          loggerRef.overrideWith(() => logger),
-          platformRef.overrideWith(() => platform),
-          processRef.overrideWith(() => shorebirdProcess),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(() => body(), values: {
+        artifactManagerRef.overrideWith(() => artifactManager),
+        cacheRef.overrideWith(() => cache),
+        checksumCheckerRef.overrideWith(() => checksumChecker),
+        httpClientRef.overrideWith(() => httpClient),
+        loggerRef.overrideWith(() => logger),
+        platformRef.overrideWith(() => platform),
+        processRef.overrideWith(() => shorebirdProcess),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     void setMockPlatform(String name) {
@@ -87,8 +84,9 @@ void main() {
           outputDirectory: any(named: 'outputDirectory'),
         ),
       ).thenAnswer((invocation) async {
-        (invocation.namedArguments[#outputDirectory] as Directory)
-            .createSync(recursive: true);
+        (invocation.namedArguments[#outputDirectory] as Directory).createSync(
+          recursive: true,
+        );
       });
       when(
         () => shorebirdEnv.shorebirdEngineRevision,
@@ -97,12 +95,12 @@ void main() {
 
       when(() => platform.environment).thenReturn({});
       setMockPlatform(Platform.macOS);
-      when(() => shorebirdProcess.start(any(), any())).thenAnswer(
-        (_) async => chmodProcess,
-      );
-      when(() => chmodProcess.exitCode).thenAnswer(
-        (_) async => ExitCode.success.code,
-      );
+      when(
+        () => shorebirdProcess.start(any(), any()),
+      ).thenAnswer((_) async => chmodProcess);
+      when(
+        () => chmodProcess.exitCode,
+      ).thenAnswer((_) async => ExitCode.success.code);
       when(() => httpClient.send(any())).thenAnswer(
         (_) async => http.StreamedResponse(
           Stream.value(ZipEncoder().encode(Archive())!),
@@ -131,14 +129,7 @@ void main() {
           () => cache.getArtifactDirectory('test'),
         );
         expect(
-          directory.path.endsWith(
-            p.join(
-              'bin',
-              'cache',
-              'artifacts',
-              'test',
-            ),
-          ),
+          directory.path.endsWith(p.join('bin', 'cache', 'artifacts', 'test')),
           isTrue,
         );
       });
@@ -150,14 +141,7 @@ void main() {
           () => cache.getPreviewDirectory('test'),
         );
         expect(
-          directory.path.endsWith(
-            p.join(
-              'bin',
-              'cache',
-              'previews',
-              'test',
-            ),
-          ),
+          directory.path.endsWith(p.join('bin', 'cache', 'previews', 'test')),
           isTrue,
         );
       });
@@ -207,13 +191,12 @@ void main() {
 
             await expectLater(
               runWithOverrides(cache.updateAll),
-              throwsA(
-                isA<CacheUpdateFailure>(),
-              ),
+              throwsA(isA<CacheUpdateFailure>()),
             );
 
-            verify(() => logger.detail('Failed to update patch, retrying...'))
-                .called(2);
+            verify(
+              () => logger.detail('Failed to update patch, retrying...'),
+            ).called(2);
           });
         });
 
@@ -238,28 +221,23 @@ void main() {
         });
 
         test('skips optional artifacts if a 404 is returned', () async {
-          when(() => httpClient.send(any())).thenAnswer(
-            (invocation) async {
-              final request =
-                  invocation.positionalArguments.first as http.BaseRequest;
-              final fileName = p.basename(request.url.path);
-              if (fileName.startsWith('aot-tools')) {
-                return http.StreamedResponse(
-                  const Stream.empty(),
-                  HttpStatus.notFound,
-                  reasonPhrase: 'Not Found',
-                );
-              }
+          when(() => httpClient.send(any())).thenAnswer((invocation) async {
+            final request =
+                invocation.positionalArguments.first as http.BaseRequest;
+            final fileName = p.basename(request.url.path);
+            if (fileName.startsWith('aot-tools')) {
               return http.StreamedResponse(
-                Stream.value(ZipEncoder().encode(Archive())!),
-                HttpStatus.ok,
+                const Stream.empty(),
+                HttpStatus.notFound,
+                reasonPhrase: 'Not Found',
               );
-            },
-          );
-          await expectLater(
-            runWithOverrides(cache.updateAll),
-            completes,
-          );
+            }
+            return http.StreamedResponse(
+              Stream.value(ZipEncoder().encode(Archive())!),
+              HttpStatus.ok,
+            );
+          });
+          await expectLater(runWithOverrides(cache.updateAll), completes);
           verify(
             () => logger.detail(
               '''[cache] optional artifact: "aot-tools.dill" was not found, skipping...''',
@@ -278,8 +256,9 @@ void main() {
 
         group('when checksum validation fails', () {
           setUp(() {
-            when(() => checksumChecker.checkFile(any(), any()))
-                .thenReturn(false);
+            when(
+              () => checksumChecker.checkFile(any(), any()),
+            ).thenReturn(false);
           });
           test('fails with the correct message', () async {
             await expectLater(
@@ -302,20 +281,20 @@ void main() {
 
           await expectLater(runWithOverrides(cache.updateAll), completes);
 
-          final requests = verify(() => httpClient.send(captureAny()))
-              .captured
-              .cast<http.BaseRequest>()
-              .map((r) => r.url)
-              .toList();
+          final requests =
+              verify(
+                () => httpClient.send(captureAny()),
+              ).captured.cast<http.BaseRequest>().map((r) => r.url).toList();
 
           String perEngine(String name) =>
               '${cache.storageBaseUrl}/${cache.storageBucket}/shorebird/$shorebirdEngineRevision/$name';
 
-          final expected = [
-            perEngine('patch-darwin-x64.zip'),
-            'https://github.com/google/bundletool/releases/download/1.15.6/bundletool-all-1.15.6.jar',
-            perEngine('aot-tools.dill'),
-          ].map(Uri.parse).toList();
+          final expected =
+              [
+                perEngine('patch-darwin-x64.zip'),
+                'https://github.com/google/bundletool/releases/download/1.15.6/bundletool-all-1.15.6.jar',
+                perEngine('aot-tools.dill'),
+              ].map(Uri.parse).toList();
 
           expect(requests, equals(expected));
         });
@@ -325,20 +304,20 @@ void main() {
 
           await expectLater(runWithOverrides(cache.updateAll), completes);
 
-          final requests = verify(() => httpClient.send(captureAny()))
-              .captured
-              .cast<http.BaseRequest>()
-              .map((r) => r.url)
-              .toList();
+          final requests =
+              verify(
+                () => httpClient.send(captureAny()),
+              ).captured.cast<http.BaseRequest>().map((r) => r.url).toList();
 
           String perEngine(String name) =>
               '${cache.storageBaseUrl}/${cache.storageBucket}/shorebird/$shorebirdEngineRevision/$name';
 
-          final expected = [
-            perEngine('patch-windows-x64.zip'),
-            'https://github.com/google/bundletool/releases/download/1.15.6/bundletool-all-1.15.6.jar',
-            perEngine('aot-tools.dill'),
-          ].map(Uri.parse).toList();
+          final expected =
+              [
+                perEngine('patch-windows-x64.zip'),
+                'https://github.com/google/bundletool/releases/download/1.15.6/bundletool-all-1.15.6.jar',
+                perEngine('aot-tools.dill'),
+              ].map(Uri.parse).toList();
 
           expect(requests, equals(expected));
         });
@@ -348,20 +327,20 @@ void main() {
 
           await expectLater(runWithOverrides(cache.updateAll), completes);
 
-          final requests = verify(() => httpClient.send(captureAny()))
-              .captured
-              .cast<http.BaseRequest>()
-              .map((r) => r.url)
-              .toList();
+          final requests =
+              verify(
+                () => httpClient.send(captureAny()),
+              ).captured.cast<http.BaseRequest>().map((r) => r.url).toList();
 
           String perEngine(String name) =>
               '${cache.storageBaseUrl}/${cache.storageBucket}/shorebird/$shorebirdEngineRevision/$name';
 
-          final expected = [
-            perEngine('patch-linux-x64.zip'),
-            'https://github.com/google/bundletool/releases/download/1.15.6/bundletool-all-1.15.6.jar',
-            perEngine('aot-tools.dill'),
-          ].map(Uri.parse).toList();
+          final expected =
+              [
+                perEngine('patch-linux-x64.zip'),
+                'https://github.com/google/bundletool/releases/download/1.15.6/bundletool-all-1.15.6.jar',
+                perEngine('aot-tools.dill'),
+              ].map(Uri.parse).toList();
 
           expect(requests, equals(expected));
         });
@@ -378,14 +357,11 @@ void main() {
     late _TestCachedArtifact cachedArtifact;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          checksumCheckerRef.overrideWith(() => checksumChecker),
-          httpClientRef.overrideWith(() => httpClient),
-          loggerRef.overrideWith(() => logger),
-        },
-      );
+      return runScoped(() => body(), values: {
+        checksumCheckerRef.overrideWith(() => checksumChecker),
+        httpClientRef.overrideWith(() => httpClient),
+        loggerRef.overrideWith(() => logger),
+      });
     }
 
     setUpAll(() {
@@ -401,10 +377,8 @@ void main() {
       platform = MockPlatform();
 
       when(() => httpClient.send(any())).thenAnswer(
-        (_) async => http.StreamedResponse(
-          const Stream.empty(),
-          HttpStatus.notFound,
-        ),
+        (_) async =>
+            http.StreamedResponse(const Stream.empty(), HttpStatus.notFound),
       );
       cachedArtifact = _TestCachedArtifact(cache: cache, platform: platform);
     });
@@ -449,8 +423,9 @@ void main() {
 
             group('when the checksum matches', () {
               setUp(() {
-                when(() => checksumChecker.checkFile(any(), any()))
-                    .thenReturn(true);
+                when(
+                  () => checksumChecker.checkFile(any(), any()),
+                ).thenReturn(true);
               });
 
               test('returns true', () async {
@@ -460,15 +435,13 @@ void main() {
 
             group('when the checksum does not match', () {
               setUp(() {
-                when(() => checksumChecker.checkFile(any(), any()))
-                    .thenReturn(false);
+                when(
+                  () => checksumChecker.checkFile(any(), any()),
+                ).thenReturn(false);
               });
 
               test('returns false', () async {
-                expect(
-                  await runWithOverrides(cachedArtifact.isValid),
-                  isFalse,
-                );
+                expect(await runWithOverrides(cachedArtifact.isValid), isFalse);
               });
             });
           });
@@ -483,20 +456,22 @@ void main() {
           cachedArtifact.stampFile.createSync(recursive: true);
         });
 
-        test('deletes existing artifact and stamp file before updating',
-            () async {
-          expect(cachedArtifact.file.existsSync(), isTrue);
-          expect(cachedArtifact.stampFile.existsSync(), isTrue);
+        test(
+          'deletes existing artifact and stamp file before updating',
+          () async {
+            expect(cachedArtifact.file.existsSync(), isTrue);
+            expect(cachedArtifact.stampFile.existsSync(), isTrue);
 
-          // This will fail due to the mock http client returning a 404.
-          await expectLater(
-            () => runWithOverrides(cachedArtifact.update),
-            throwsException,
-          );
+            // This will fail due to the mock http client returning a 404.
+            await expectLater(
+              () => runWithOverrides(cachedArtifact.update),
+              throwsException,
+            );
 
-          expect(cachedArtifact.file.existsSync(), isFalse);
-          expect(cachedArtifact.stampFile.existsSync(), isFalse);
-        });
+            expect(cachedArtifact.file.existsSync(), isFalse);
+            expect(cachedArtifact.stampFile.existsSync(), isFalse);
+          },
+        );
       });
     });
   });

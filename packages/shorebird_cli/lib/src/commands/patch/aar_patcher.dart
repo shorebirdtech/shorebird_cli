@@ -67,20 +67,20 @@ class AarPatcher extends Patcher {
     required ReleaseArtifact releaseArtifact,
     required File releaseArchive,
     required File patchArchive,
-  }) =>
-      patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
-        localArchive: patchArchive,
-        releaseArchive: releaseArchive,
-        archiveDiffer: const AndroidArchiveDiffer(),
-        allowAssetChanges: allowAssetDiffs,
-        allowNativeChanges: allowNativeDiffs,
-      );
+  }) => patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
+    localArchive: patchArchive,
+    releaseArchive: releaseArchive,
+    archiveDiffer: const AndroidArchiveDiffer(),
+    allowAssetChanges: allowAssetDiffs,
+    allowNativeChanges: allowNativeDiffs,
+  );
 
   @override
   Future<File> buildPatchArtifact({String? releaseVersion}) async {
     final flutterVersionString = await shorebirdFlutter.getVersionAndRevision();
-    final buildProgress =
-        logger.progress('Building patch with Flutter $flutterVersionString');
+    final buildProgress = logger.progress(
+      'Building patch with Flutter $flutterVersionString',
+    );
 
     try {
       await artifactBuilder.buildAar(
@@ -107,12 +107,13 @@ class AarPatcher extends Patcher {
     required int releaseId,
     required File releaseArtifact,
   }) async {
-    final releaseArtifacts = await codePushClientWrapper.getReleaseArtifacts(
-      appId: appId,
-      releaseId: releaseId,
-      architectures: AndroidArch.availableAndroidArchs,
-      platform: releaseType.releasePlatform,
-    );
+    final releaseArtifacts =
+        await codePushClientWrapper.getReleaseArtifacts(
+          appId: appId,
+          releaseId: releaseId,
+          architectures: AndroidArch.availableAndroidArchs,
+          platform: releaseType.releasePlatform,
+        );
 
     final releaseArtifactPaths = <Arch, String>{};
     final downloadReleaseArtifactProgress = logger.progress(
@@ -121,9 +122,10 @@ class AarPatcher extends Patcher {
 
     for (final releaseArtifact in releaseArtifacts.entries) {
       try {
-        final releaseArtifactFile = await artifactManager.downloadFile(
-          Uri.parse(releaseArtifact.value.url),
-        );
+        final releaseArtifactFile =
+            await artifactManager.downloadFile(
+              Uri.parse(releaseArtifact.value.url),
+            );
         releaseArtifactPaths[releaseArtifact.key] = releaseArtifactFile.path;
       } catch (error) {
         downloadReleaseArtifactProgress.fail('$error');
@@ -133,11 +135,12 @@ class AarPatcher extends Patcher {
 
     downloadReleaseArtifactProgress.complete();
 
-    final extractedAarDirectory = await shorebirdAndroidArtifacts.extractAar(
-      packageName: shorebirdEnv.androidPackageName!,
-      buildNumber: buildNumber,
-      unzipFn: extractFileToDisk,
-    );
+    final extractedAarDirectory =
+        await shorebirdAndroidArtifacts.extractAar(
+          packageName: shorebirdEnv.androidPackageName!,
+          buildNumber: buildNumber,
+          unzipFn: extractFileToDisk,
+        );
     final patchArtifactBundles = <Arch, PatchArtifactBundle>{};
 
     final createDiffProgress = logger.progress('Creating artifacts');
@@ -153,10 +156,11 @@ class AarPatcher extends Patcher {
       final patchArtifact = File(artifactPath);
       final hash = sha256.convert(await patchArtifact.readAsBytes()).toString();
       try {
-        final diffPath = await artifactManager.createDiff(
-          releaseArtifactPath: releaseArtifactPath.value,
-          patchArtifactPath: artifactPath,
-        );
+        final diffPath =
+            await artifactManager.createDiff(
+              releaseArtifactPath: releaseArtifactPath.value,
+              patchArtifactPath: artifactPath,
+            );
         patchArtifactBundles[arch] = PatchArtifactBundle(
           arch: arch.arch,
           path: diffPath,

@@ -35,12 +35,9 @@ To add iOS, run "flutter create . --platforms ios"''';
 /// {@endtemplate}
 enum ExportMethod {
   appStore('app-store', 'Upload to the App Store'),
-  adHoc(
-    'ad-hoc',
-    '''
+  adHoc('ad-hoc', '''
 Test on designated devices that do not need to be registered with the Apple developer account.
-    Requires a distribution certificate.''',
-  ),
+    Requires a distribution certificate.'''),
   development(
     'development',
     '''Test only on development devices registered with the Apple developer account.''',
@@ -87,8 +84,9 @@ class Ios {
   File exportOptionsPlistFromArgs(ArgResults results) {
     final exportPlistArg =
         results[CommonArguments.exportOptionsPlistArg.name] as String?;
-    final exportMethodArgExists =
-        results.options.contains(CommonArguments.exportMethodArg.name);
+    final exportMethodArgExists = results.options.contains(
+      CommonArguments.exportMethodArg.name,
+    );
     if (exportPlistArg != null &&
         exportMethodArgExists &&
         results.wasParsed(CommonArguments.exportMethodArg.name)) {
@@ -146,11 +144,7 @@ class Ios {
     }
 
     final xcschemesDir = Directory(
-      p.join(
-        xcodeProjDirectory.path,
-        'xcshareddata',
-        'xcschemes',
-      ),
+      p.join(xcodeProjDirectory.path, 'xcshareddata', 'xcschemes'),
     );
     if (!xcschemesDir.existsSync()) {
       throw Exception('Unable to detect iOS schemes in $xcschemesDir');
@@ -190,9 +184,7 @@ class Ios {
   /// number as the release they are patching.
   /// See
   /// https://developer.apple.com/forums/thread/690647?answerId=689925022#689925022
-  File createExportOptionsPlist({
-    ExportMethod? exportMethod,
-  }) {
+  File createExportOptionsPlist({ExportMethod? exportMethod}) {
     exportMethod ??= ExportMethod.appStore;
     final plistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -211,9 +203,10 @@ class Ios {
 </plist>
 ''';
     final tempDir = Directory.systemTemp.createTempSync();
-    final exportPlistFile = File(p.join(tempDir.path, 'ExportOptions.plist'))
-      ..createSync(recursive: true)
-      ..writeAsStringSync(plistContents);
+    final exportPlistFile =
+        File(p.join(tempDir.path, 'ExportOptions.plist'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(plistContents);
     return exportPlistFile;
   }
 

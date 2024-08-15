@@ -21,13 +21,10 @@ void main() {
     late ShorebirdCachedArtifacts artifacts;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          cacheRef.overrideWith(() => cache),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(() => body(), values: {
+        cacheRef.overrideWith(() => cache),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUp(() {
@@ -44,8 +41,9 @@ void main() {
         () => cache.getArtifactDirectory(any()),
       ).thenReturn(artifactDirectory);
       when(() => shorebirdEnv.flutterDirectory).thenReturn(flutterDirectory);
-      when(() => shorebirdEnv.shorebirdEngineRevision)
-          .thenReturn(engineRevision);
+      when(
+        () => shorebirdEnv.shorebirdEngineRevision,
+      ).thenReturn(engineRevision);
     });
 
     group('getArtifactPath', () {
@@ -155,12 +153,9 @@ void main() {
     late ShorebirdLocalEngineArtifacts artifacts;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          engineConfigRef.overrideWith(() => engineConfig),
-        },
-      );
+      return runScoped(() => body(), values: {
+        engineConfigRef.overrideWith(() => engineConfig),
+      });
     }
 
     setUp(() {
@@ -172,18 +167,15 @@ void main() {
       when(
         () => engineConfig.localEngineSrcPath,
       ).thenReturn(localEngineSrcPath);
-      when(
-        () => engineConfig.localEngine,
-      ).thenReturn(localEngine);
+      when(() => engineConfig.localEngine).thenReturn(localEngine);
     });
 
     group('getArtifactPath', () {
       test('returns correct path for aot tools', () {
         expect(
           runWithOverrides(
-            () => artifacts.getArtifactPath(
-              artifact: ShorebirdArtifact.aotTools,
-            ),
+            () =>
+                artifacts.getArtifactPath(artifact: ShorebirdArtifact.aotTools),
           ),
           equals(
             p.join(

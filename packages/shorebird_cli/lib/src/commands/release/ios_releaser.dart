@@ -85,11 +85,9 @@ To change the version of this release, change your app's version in your pubspec
     if (flutterVersionArg != null) {
       if (Version.parse(flutterVersionArg) <
           minimumSupportedIosFlutterVersion) {
-        logger.err(
-          '''
+        logger.err('''
 iOS releases are not supported with Flutter versions older than $minimumSupportedIosFlutterVersion.
-For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
-        );
+For more information see: ${supportedFlutterVersionsUrl.toLink()}''');
         throw ProcessExit(ExitCode.usage.code);
       }
     }
@@ -116,8 +114,9 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
     }
 
     final flutterVersionString = await shorebirdFlutter.getVersionAndRevision();
-    final buildProgress =
-        logger.progress('Building ipa with Flutter $flutterVersionString');
+    final buildProgress = logger.progress(
+      'Building ipa with Flutter $flutterVersionString',
+    );
 
     try {
       await artifactBuilder.buildIpa(
@@ -180,9 +179,10 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
     final xcarchiveDirectory = artifactManager.getXcarchiveDirectory()!;
     final String? podfileLockHash;
     if (shorebirdEnv.podfileLockFile.existsSync()) {
-      podfileLockHash = sha256
-          .convert(shorebirdEnv.podfileLockFile.readAsBytesSync())
-          .toString();
+      podfileLockHash =
+          sha256
+              .convert(shorebirdEnv.podfileLockFile.readAsBytesSync())
+              .toString();
     } else {
       podfileLockHash = null;
     }
@@ -190,9 +190,10 @@ For more information see: ${supportedFlutterVersionsUrl.toLink()}''',
       appId: appId,
       releaseId: release.id,
       xcarchivePath: xcarchiveDirectory.path,
-      runnerPath: artifactManager
-          .getIosAppDirectory(xcarchiveDirectory: xcarchiveDirectory)!
-          .path,
+      runnerPath:
+          artifactManager
+              .getIosAppDirectory(xcarchiveDirectory: xcarchiveDirectory)!
+              .path,
       isCodesigned: codesign,
       podfileLockHash: podfileLockHash,
     );

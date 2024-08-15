@@ -17,13 +17,10 @@ void main() {
     late LogoutCommand command;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          authRef.overrideWith(() => auth),
-          loggerRef.overrideWith(() => logger),
-        },
-      );
+      return runScoped(body, values: {
+        authRef.overrideWith(() => auth),
+        loggerRef.overrideWith(() => logger),
+      });
     }
 
     setUp(() {
@@ -42,9 +39,7 @@ void main() {
       final result = await runWithOverrides(command.run);
       expect(result, equals(ExitCode.success.code));
 
-      verify(
-        () => logger.info('You are already logged out.'),
-      ).called(1);
+      verify(() => logger.info('You are already logged out.')).called(1);
     });
 
     test('exits with code 0 when logged out successfully', () async {

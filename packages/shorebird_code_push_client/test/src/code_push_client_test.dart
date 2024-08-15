@@ -73,10 +73,8 @@ void main() {
 
     test('throws CodePushUpgradeRequiredException on 426 response', () async {
       when(() => httpClient.send(any())).thenAnswer(
-        (_) async => http.StreamedResponse(
-          Stream.empty(),
-          HttpStatus.upgradeRequired,
-        ),
+        (_) async =>
+            http.StreamedResponse(Stream.empty(), HttpStatus.upgradeRequired),
       );
 
       expect(
@@ -87,10 +85,8 @@ void main() {
 
     test('throws CodePushForbiddenException on 403 response', () async {
       when(() => httpClient.send(any())).thenAnswer(
-        (_) async => http.StreamedResponse(
-          Stream.empty(),
-          HttpStatus.forbidden,
-        ),
+        (_) async =>
+            http.StreamedResponse(Stream.empty(), HttpStatus.forbidden),
       );
 
       expect(
@@ -108,9 +104,9 @@ void main() {
 
       test('makes the correct request', () async {
         codePushClient.getCurrentUser().ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('GET'));
         expect(request.url, equals(v1('users/me')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -118,10 +114,8 @@ void main() {
 
       test('returns null if reponse is a 404', () async {
         when(() => httpClient.send(any())).thenAnswer(
-          (_) async => http.StreamedResponse(
-            const Stream.empty(),
-            HttpStatus.notFound,
-          ),
+          (_) async =>
+              http.StreamedResponse(const Stream.empty(), HttpStatus.notFound),
         );
         expect(await codePushClient.getCurrentUser(), isNull);
       });
@@ -185,9 +179,9 @@ void main() {
           );
         } catch (_) {}
 
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.MultipartRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.MultipartRequest;
         expect(request.method, equals('POST'));
         expect(
           request.url,
@@ -224,9 +218,9 @@ void main() {
             );
           } catch (_) {}
 
-          final request = verify(() => httpClient.send(captureAny()))
-              .captured
-              .single as http.MultipartRequest;
+          final request =
+              verify(() => httpClient.send(captureAny())).captured.single
+                  as http.MultipartRequest;
           expect(request.method, equals('POST'));
           expect(
             request.url,
@@ -332,9 +326,9 @@ void main() {
           ),
           http.StreamedResponse(Stream.empty(), HttpStatus.badRequest),
         ];
-        when(() => httpClient.send(any())).thenAnswer(
-          (_) async => responses.removeAt(0),
-        );
+        when(
+          () => httpClient.send(any()),
+        ).thenAnswer((_) async => responses.removeAt(0));
 
         final tempDir = Directory.systemTemp.createTempSync();
         final fixture = File(path.join(tempDir.path, 'release.txt'))
@@ -357,9 +351,9 @@ void main() {
             ),
           ),
         );
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .last as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.last
+                as http.BaseRequest;
         expect(request.url, equals(Uri.parse(uploadUrl)));
         expect(
           (request as http.MultipartRequest).files.single.length,
@@ -391,9 +385,9 @@ void main() {
           ),
           http.StreamedResponse(Stream.empty(), HttpStatus.noContent),
         ];
-        when(() => httpClient.send(any())).thenAnswer(
-          (_) async => responses.removeAt(0),
-        );
+        when(
+          () => httpClient.send(any()),
+        ).thenAnswer((_) async => responses.removeAt(0));
 
         final tempDir = Directory.systemTemp.createTempSync();
         final fixture = File(path.join(tempDir.path, 'release.txt'))
@@ -411,9 +405,9 @@ void main() {
           completes,
         );
 
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .first as http.MultipartRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.first
+                as http.MultipartRequest;
 
         expect(
           request.url,
@@ -435,9 +429,10 @@ void main() {
 
       test('makes the correct request', () async {
         final tempDir = Directory.systemTemp.createTempSync();
-        final fixture = File(path.join(tempDir.path, 'release.txt'))
-          ..createSync()
-          ..writeAsStringSync('hello');
+        final fixture =
+            File(path.join(tempDir.path, 'release.txt'))
+              ..createSync()
+              ..writeAsStringSync('hello');
         final expectedRequest = CreateReleaseArtifactRequest(
           arch: arch,
           platform: platform,
@@ -461,9 +456,9 @@ void main() {
           );
         } catch (_) {}
 
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.MultipartRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.MultipartRequest;
         expect(request.method, equals('POST'));
         expect(
           request.url,
@@ -513,62 +508,64 @@ void main() {
       });
 
       test(
-          'throws a CodePushNotFoundException if the http response code is 404',
-          () {
-        when(() => httpClient.send(any())).thenAnswer((_) async {
-          return http.StreamedResponse(
-            Stream.value(utf8.encode(json.encode(errorResponse.toJson()))),
-            HttpStatus.notFound,
+        'throws a CodePushNotFoundException if the http response code is 404',
+        () {
+          when(() => httpClient.send(any())).thenAnswer((_) async {
+            return http.StreamedResponse(
+              Stream.value(utf8.encode(json.encode(errorResponse.toJson()))),
+              HttpStatus.notFound,
+            );
+          });
+
+          final tempDir = Directory.systemTemp.createTempSync();
+          final fixture = File(path.join(tempDir.path, 'release.txt'))
+            ..createSync();
+
+          expect(
+            codePushClient.createReleaseArtifact(
+              appId: appId,
+              artifactPath: fixture.path,
+              releaseId: releaseId,
+              arch: arch,
+              platform: platform,
+              hash: hash,
+              canSideload: canSideload,
+              podfileLockHash: null,
+            ),
+            throwsA(isA<CodePushNotFoundException>()),
           );
-        });
-
-        final tempDir = Directory.systemTemp.createTempSync();
-        final fixture = File(path.join(tempDir.path, 'release.txt'))
-          ..createSync();
-
-        expect(
-          codePushClient.createReleaseArtifact(
-            appId: appId,
-            artifactPath: fixture.path,
-            releaseId: releaseId,
-            arch: arch,
-            platform: platform,
-            hash: hash,
-            canSideload: canSideload,
-            podfileLockHash: null,
-          ),
-          throwsA(isA<CodePushNotFoundException>()),
-        );
-      });
+        },
+      );
 
       test(
-          'throws a CodePushConflictException if the http response code is 409',
-          () {
-        when(() => httpClient.send(any())).thenAnswer((_) async {
-          return http.StreamedResponse(
-            Stream.value(utf8.encode(json.encode(errorResponse.toJson()))),
-            HttpStatus.conflict,
+        'throws a CodePushConflictException if the http response code is 409',
+        () {
+          when(() => httpClient.send(any())).thenAnswer((_) async {
+            return http.StreamedResponse(
+              Stream.value(utf8.encode(json.encode(errorResponse.toJson()))),
+              HttpStatus.conflict,
+            );
+          });
+
+          final tempDir = Directory.systemTemp.createTempSync();
+          final fixture = File(path.join(tempDir.path, 'release.txt'))
+            ..createSync();
+
+          expect(
+            codePushClient.createReleaseArtifact(
+              appId: appId,
+              artifactPath: fixture.path,
+              releaseId: releaseId,
+              arch: arch,
+              platform: platform,
+              hash: hash,
+              canSideload: canSideload,
+              podfileLockHash: null,
+            ),
+            throwsA(isA<CodePushConflictException>()),
           );
-        });
-
-        final tempDir = Directory.systemTemp.createTempSync();
-        final fixture = File(path.join(tempDir.path, 'release.txt'))
-          ..createSync();
-
-        expect(
-          codePushClient.createReleaseArtifact(
-            appId: appId,
-            artifactPath: fixture.path,
-            releaseId: releaseId,
-            arch: arch,
-            platform: platform,
-            hash: hash,
-            canSideload: canSideload,
-            podfileLockHash: null,
-          ),
-          throwsA(isA<CodePushConflictException>()),
-        );
-      });
+        },
+      );
 
       test('throws an exception if the http request fails', () async {
         when(() => httpClient.send(any())).thenAnswer((_) async {
@@ -627,9 +624,9 @@ void main() {
           ),
           http.StreamedResponse(Stream.empty(), HttpStatus.badRequest),
         ];
-        when(() => httpClient.send(any())).thenAnswer(
-          (_) async => responses.removeAt(0),
-        );
+        when(
+          () => httpClient.send(any()),
+        ).thenAnswer((_) async => responses.removeAt(0));
 
         final tempDir = Directory.systemTemp.createTempSync();
         final fixture = File(path.join(tempDir.path, 'release.txt'))
@@ -654,9 +651,9 @@ void main() {
             ),
           ),
         );
-        final request = verify(
-          () => httpClient.send(captureAny()),
-        ).captured.last as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.last
+                as http.BaseRequest;
         expect(request.url, equals(Uri.parse(uploadUrl)));
         expect(
           (request as http.MultipartRequest).files.single.length,
@@ -688,9 +685,9 @@ void main() {
           ),
           http.StreamedResponse(Stream.empty(), HttpStatus.noContent),
         ];
-        when(() => httpClient.send(any())).thenAnswer(
-          (_) async => responses.removeAt(0),
-        );
+        when(
+          () => httpClient.send(any()),
+        ).thenAnswer((_) async => responses.removeAt(0));
 
         final tempDir = Directory.systemTemp.createTempSync();
         final fixture = File(path.join(tempDir.path, 'release.txt'))
@@ -710,9 +707,9 @@ void main() {
           completes,
         );
 
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .first as http.MultipartRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.first
+                as http.MultipartRequest;
 
         expect(
           request.url,
@@ -726,9 +723,9 @@ void main() {
     group('createApp', () {
       test('makes the correct request', () async {
         codePushClient.createApp(displayName: displayName).ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('POST'));
         expect(request.url, equals(v1('apps')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -797,9 +794,9 @@ void main() {
           ),
         );
 
-        final request = verify(
-          () => httpClient.send(captureAny()),
-        ).captured.single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
 
         expect(
           request.url,
@@ -813,9 +810,9 @@ void main() {
 
       test('makes the correct request', () async {
         codePushClient.createChannel(appId: appId, channel: channel).ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('POST'));
         expect(request.url, equals(v1('apps/$appId/channels')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -888,9 +885,9 @@ void main() {
           ),
         );
 
-        final request = verify(
-          () => httpClient.send(captureAny()),
-        ).captured.single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
 
         expect(
           request.url,
@@ -912,9 +909,9 @@ void main() {
               metadata: CreatePatchMetadata.forTest().toJson(),
             )
             .ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('POST'));
         expect(request.url, equals(v1('apps/$appId/patches')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -974,9 +971,7 @@ void main() {
         when(() => httpClient.send(any())).thenAnswer(
           (_) async => http.StreamedResponse(
             Stream.value(
-              utf8.encode(
-                json.encode(Patch(id: patchId, number: patchNumber)),
-              ),
+              utf8.encode(json.encode(Patch(id: patchId, number: patchNumber))),
             ),
             HttpStatus.ok,
           ),
@@ -997,9 +992,9 @@ void main() {
           ),
         );
 
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
 
         expect(
           request.url,
@@ -1021,9 +1016,9 @@ void main() {
               displayName: displayName,
             )
             .ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('POST'));
         expect(request.url, equals(v1('apps/$appId/releases')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1134,22 +1129,23 @@ void main() {
                   )
                   .having((r) => r.displayName, 'displayName', displayName)
                   .having(
-                (r) => r.platformStatuses,
-                'platformStatuses',
-                <ReleasePlatform, ReleaseStatus>{},
-              ),
+                    (r) => r.platformStatuses,
+                    'platformStatuses',
+                    <ReleasePlatform, ReleaseStatus>{},
+                  ),
             ),
           ),
         );
 
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
 
         expect(
           request.url,
-          codePushClient.hostedUri
-              .replace(path: '/api/v1/apps/$appId/releases'),
+          codePushClient.hostedUri.replace(
+            path: '/api/v1/apps/$appId/releases',
+          ),
         );
       });
     });
@@ -1168,9 +1164,9 @@ void main() {
               status: ReleaseStatus.active,
             )
             .ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('PATCH'));
         expect(request.url, equals(v1('apps/$appId/releases/$releaseId')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1203,10 +1199,8 @@ void main() {
 
       test('completes when the server responds with a 204', () async {
         when(() => httpClient.send(any())).thenAnswer(
-          (_) async => http.StreamedResponse(
-            const Stream.empty(),
-            HttpStatus.noContent,
-          ),
+          (_) async =>
+              http.StreamedResponse(const Stream.empty(), HttpStatus.noContent),
         );
 
         expect(
@@ -1233,9 +1227,9 @@ void main() {
 
       test('makes the correct request', () async {
         codePushClient.createUser(name: userName).ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('POST'));
         expect(request.url, equals(v1('users')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1278,9 +1272,9 @@ void main() {
     group('deleteApp', () {
       test('makes the correct request', () async {
         codePushClient.deleteApp(appId: appId).ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('DELETE'));
         expect(request.url, equals(v1('apps/$appId')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1328,23 +1322,19 @@ void main() {
 
       test('completes when request succeeds', () async {
         when(() => httpClient.send(any())).thenAnswer(
-          (_) async => http.StreamedResponse(
-            const Stream.empty(),
-            HttpStatus.noContent,
-          ),
+          (_) async =>
+              http.StreamedResponse(const Stream.empty(), HttpStatus.noContent),
         );
 
         await codePushClient.deleteApp(appId: appId);
 
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
 
         expect(
           request.url,
-          codePushClient.hostedUri.replace(
-            path: '/api/v1/apps/$appId',
-          ),
+          codePushClient.hostedUri.replace(path: '/api/v1/apps/$appId'),
         );
       });
     });
@@ -1352,9 +1342,9 @@ void main() {
     group('getApps', () {
       test('makes the correct request', () async {
         codePushClient.getApps().ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('GET'));
         expect(request.url, equals(v1('apps')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1450,9 +1440,9 @@ void main() {
 
       test('makes the correct request', () async {
         codePushClient.getChannels(appId: appId).ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('GET'));
         expect(request.url, equals(v1('apps/$appId/channels')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1534,9 +1524,9 @@ void main() {
       group('makes the correct request', () {
         test('when sideloadableOnly is not specified', () async {
           codePushClient.getReleases(appId: appId).ignore();
-          final request = verify(() => httpClient.send(captureAny()))
-              .captured
-              .single as http.BaseRequest;
+          final request =
+              verify(() => httpClient.send(captureAny())).captured.single
+                  as http.BaseRequest;
           expect(request.method, equals('GET'));
           expect(request.url, equals(v1('apps/$appId/releases')));
           expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1546,9 +1536,9 @@ void main() {
           codePushClient
               .getReleases(appId: appId, sideloadableOnly: true)
               .ignore();
-          final request = verify(() => httpClient.send(captureAny()))
-              .captured
-              .single as http.BaseRequest;
+          final request =
+              verify(() => httpClient.send(captureAny())).captured.single
+                  as http.BaseRequest;
           expect(request.method, equals('GET'));
           expect(
             request.url,
@@ -1699,10 +1689,8 @@ void main() {
         });
 
         test('deserializes GetReleasePatchesResponse', () async {
-          final patches = await codePushClient.getPatches(
-            appId: appId,
-            releaseId: 123,
-          );
+          final patches =
+              await codePushClient.getPatches(appId: appId, releaseId: 123);
           expect(patches, equals([patch]));
         });
       });
@@ -1723,14 +1711,16 @@ void main() {
               platform: platform,
             )
             .ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('GET'));
         expect(
           request.url,
           equals(
-            v1('apps/$appId/releases/$releaseId/artifacts?arch=$arch&platform=${platform.name}'),
+            v1(
+              'apps/$appId/releases/$releaseId/artifacts?arch=$arch&platform=${platform.name}',
+            ),
           ),
         );
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1812,12 +1802,13 @@ void main() {
           ),
         );
 
-        final actual = await codePushClient.getReleaseArtifacts(
-          appId: appId,
-          releaseId: releaseId,
-          arch: arch,
-          platform: platform,
-        );
+        final actual =
+            await codePushClient.getReleaseArtifacts(
+              appId: appId,
+              releaseId: releaseId,
+              arch: arch,
+              platform: platform,
+            );
         expect(json.encode(actual), equals(json.encode(expected)));
       });
     });
@@ -1830,9 +1821,9 @@ void main() {
         codePushClient
             .promotePatch(appId: appId, patchId: patchId, channelId: channelId)
             .ignore();
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
         expect(request.method, equals('POST'));
         expect(request.url, equals(v1('apps/$appId/patches/promote')));
         expect(request.hasHeaders(expectedHeaders), isTrue);
@@ -1888,10 +1879,8 @@ void main() {
 
       test('completes when request succeeds', () async {
         when(() => httpClient.send(any())).thenAnswer(
-          (_) async => http.StreamedResponse(
-            const Stream.empty(),
-            HttpStatus.created,
-          ),
+          (_) async =>
+              http.StreamedResponse(const Stream.empty(), HttpStatus.created),
         );
 
         await expectLater(
@@ -1903,14 +1892,15 @@ void main() {
           completes,
         );
 
-        final request = verify(() => httpClient.send(captureAny()))
-            .captured
-            .single as http.BaseRequest;
+        final request =
+            verify(() => httpClient.send(captureAny())).captured.single
+                as http.BaseRequest;
 
         expect(
           request.url,
-          codePushClient.hostedUri
-              .replace(path: '/api/v1/apps/$appId/patches/promote'),
+          codePushClient.hostedUri.replace(
+            path: '/api/v1/apps/$appId/patches/promote',
+          ),
         );
       });
     });
@@ -1926,8 +1916,6 @@ void main() {
 
 extension on http.BaseRequest {
   bool hasHeaders(Map<String, String> expectedHeaders) {
-    return headers.entries.every(
-      (entry) => headers[entry.key] == entry.value,
-    );
+    return headers.entries.every((entry) => headers[entry.key] == entry.value);
   }
 }

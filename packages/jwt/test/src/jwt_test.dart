@@ -21,8 +21,9 @@ void main() {
   final jwkKeyStoreJsonString =
       File(p.join('test', 'fixtures', 'jwk_key_store.json')).readAsStringSync();
   final keyValueKeyStoreString =
-      File(p.join('test', 'fixtures', 'key_value_key_store.json'))
-          .readAsStringSync();
+      File(
+        p.join('test', 'fixtures', 'key_value_key_store.json'),
+      ).readAsStringSync();
   final expiresAt = DateTime.fromMillisecondsSinceEpoch(1643687866 * 1000);
   final validTime = expiresAt.subtract(Duration(minutes: 15));
 
@@ -31,11 +32,9 @@ void main() {
   setUp(() {
     publicKeyStores.clear();
     getOverride = (Uri uri) async {
-      return Response(
-        keyStoreResponseBody,
-        HttpStatus.ok,
-        headers: {'cache-control': 'max-age=3600'},
-      );
+      return Response(keyStoreResponseBody, HttpStatus.ok, headers: {
+        'cache-control': 'max-age=3600',
+      });
     };
   });
 
@@ -50,12 +49,9 @@ void main() {
 
       test('can verify an expired jwt', () async {
         await expectLater(
-          () => verify(
-            token,
-            audience: {audience},
-            issuer: issuer,
-            publicKeysUrl: keyValuePublicKeysUrl,
-          ),
+          () => verify(token, audience: {
+            audience,
+          }, issuer: issuer, publicKeysUrl: keyValuePublicKeysUrl),
           throwsA(
             isA<JwtVerificationFailure>().having(
               (e) => e.reason,
@@ -66,24 +62,23 @@ void main() {
         );
       });
 
-      test('throws a JwtVerificationFailure if string is not valid jwt',
-          () async {
-        await expectLater(
-          () => verify(
-            'not.a.jwt',
-            audience: {audience},
-            issuer: issuer,
-            publicKeysUrl: keyValuePublicKeysUrl,
-          ),
-          throwsA(
-            isA<JwtVerificationFailure>().having(
-              (e) => e.reason,
-              'reason',
-              'JWT header is malformed.',
+      test(
+        'throws a JwtVerificationFailure if string is not valid jwt',
+        () async {
+          await expectLater(
+            () => verify('not.a.jwt', audience: {
+              audience,
+            }, issuer: issuer, publicKeysUrl: keyValuePublicKeysUrl),
+            throwsA(
+              isA<JwtVerificationFailure>().having(
+                (e) => e.reason,
+                'reason',
+                'JWT header is malformed.',
+              ),
             ),
-          ),
-        );
-      });
+          );
+        },
+      );
 
       test('throws exception if jwt has no matching public key id', () async {
         await withClock(Clock.fixed(validTime), () async {
@@ -105,44 +100,41 @@ void main() {
         });
       });
 
-      test('throws exception if invalid keys are provided by the publicKeysUrl',
-          () async {
-        getOverride = (Uri uri) async {
-          return Response(
-            '{"123": 456}',
-            HttpStatus.ok,
-            headers: {'cache-control': 'max-age=3600'},
-          );
-        };
+      test(
+        'throws exception if invalid keys are provided by the publicKeysUrl',
+        () async {
+          getOverride = (Uri uri) async {
+            return Response('{"123": 456}', HttpStatus.ok, headers: {
+              'cache-control': 'max-age=3600',
+            });
+          };
 
-        await withClock(Clock.fixed(validTime), () async {
-          await expectLater(
-            () => verify(
-              tokenWithNoMatchingKid,
-              audience: {audience},
-              issuer: issuer,
-              publicKeysUrl: keyValuePublicKeysUrl,
-            ),
-            throwsA(
-              isA<JwtVerificationFailure>().having(
-                (e) => e.reason,
-                'reason',
-                '''Invalid public keys returned by https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com.''',
+          await withClock(Clock.fixed(validTime), () async {
+            await expectLater(
+              () => verify(
+                tokenWithNoMatchingKid,
+                audience: {audience},
+                issuer: issuer,
+                publicKeysUrl: keyValuePublicKeysUrl,
               ),
-            ),
-          );
-        });
-      });
+              throwsA(
+                isA<JwtVerificationFailure>().having(
+                  (e) => e.reason,
+                  'reason',
+                  '''Invalid public keys returned by https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com.''',
+                ),
+              ),
+            );
+          });
+        },
+      );
 
       test('can verify an invalid audience', () async {
         await withClock(Clock.fixed(validTime), () async {
           try {
-            await verify(
-              token,
-              audience: {'invalid-audience'},
-              issuer: issuer,
-              publicKeysUrl: keyValuePublicKeysUrl,
-            );
+            await verify(token, audience: {
+              'invalid-audience',
+            }, issuer: issuer, publicKeysUrl: keyValuePublicKeysUrl);
             fail('should throw');
           } catch (error) {
             expect(
@@ -182,36 +174,31 @@ void main() {
 
       test('can verify a valid jwt', () async {
         await withClock(Clock.fixed(validTime), () async {
-          final jwt = await verify(
-            token,
-            audience: {audience},
-            issuer: issuer,
-            publicKeysUrl: keyValuePublicKeysUrl,
-          );
+          final jwt =
+              await verify(token, audience: {
+                audience,
+              }, issuer: issuer, publicKeysUrl: keyValuePublicKeysUrl);
           expect(jwt, isA<Jwt>());
         });
       });
 
       test('can verify a valid jwt (multiple audiences)', () async {
         await withClock(Clock.fixed(validTime), () async {
-          final jwt = await verify(
-            token,
-            audience: {'other-audience', audience},
-            issuer: issuer,
-            publicKeysUrl: keyValuePublicKeysUrl,
-          );
+          final jwt =
+              await verify(token, audience: {
+                'other-audience',
+                audience,
+              }, issuer: issuer, publicKeysUrl: keyValuePublicKeysUrl);
           expect(jwt, isA<Jwt>());
         });
       });
 
       test('can verify a valid jwt w/out auth_time', () async {
         await withClock(Clock.fixed(validTime), () async {
-          final jwt = await verify(
-            tokenNoAuthTime,
-            audience: {audience},
-            issuer: issuer,
-            publicKeysUrl: keyValuePublicKeysUrl,
-          );
+          final jwt =
+              await verify(tokenNoAuthTime, audience: {
+                audience,
+              }, issuer: issuer, publicKeysUrl: keyValuePublicKeysUrl);
           expect(jwt, isA<Jwt>());
         });
       });
@@ -230,12 +217,10 @@ void main() {
         test('can verify a valid jwt', () async {
           final time = DateTime(2024, 2, 21);
           await withClock(Clock.fixed(time), () async {
-            final jwt = await verify(
-              token,
-              audience: {audience},
-              issuer: issuer,
-              publicKeysUrl: jwkPublicKeysUrl,
-            );
+            final jwt =
+                await verify(token, audience: {
+                  audience,
+                }, issuer: issuer, publicKeysUrl: jwkPublicKeysUrl);
             expect(jwt, isA<Jwt>());
           });
         });

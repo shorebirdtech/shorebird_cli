@@ -54,21 +54,18 @@ environment:
     late InitCommand command;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
-          doctorRef.overrideWith(() => doctor),
-          gradlewRef.overrideWith(() => gradlew),
-          iosRef.overrideWith(() => ios),
-          loggerRef.overrideWith(() => logger),
-          platformRef.overrideWith(() => platform),
-          processRef.overrideWith(() => process),
-          pubspecEditorRef.overrideWith(() => pubspecEditor),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-        },
-      );
+      return runScoped(body, values: {
+        codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+        doctorRef.overrideWith(() => doctor),
+        gradlewRef.overrideWith(() => gradlew),
+        iosRef.overrideWith(() => ios),
+        loggerRef.overrideWith(() => logger),
+        platformRef.overrideWith(() => platform),
+        processRef.overrideWith(() => process),
+        pubspecEditorRef.overrideWith(() => pubspecEditor),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+      });
     }
 
     setUpAll(() {
@@ -157,12 +154,10 @@ environment:
       when(() => shorebirdEnv.hasPubspecYaml).thenReturn(false);
       final exitCode = await runWithOverrides(command.run);
       verify(
-        () => logger.err(
-          '''
+        () => logger.err('''
 Could not find a "pubspec.yaml".
 Please make sure you are running "shorebird init" from within your Flutter project.
-''',
-        ),
+'''),
       ).called(1);
       expect(exitCode, ExitCode.noInput.code);
     });
@@ -199,9 +194,7 @@ Please make sure you are running "shorebird init" from within your Flutter proje
       verifyNever(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       );
-      verify(
-        () => codePushClientWrapper.createApp(appName: appName),
-      ).called(1);
+      verify(() => codePushClientWrapper.createApp(appName: appName)).called(1);
     });
 
     test('does not prompt for name when --force', () async {
@@ -210,9 +203,7 @@ Please make sure you are running "shorebird init" from within your Flutter proje
       verifyNever(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       );
-      verify(
-        () => codePushClientWrapper.createApp(appName: appName),
-      ).called(1);
+      verify(() => codePushClientWrapper.createApp(appName: appName)).called(1);
     });
 
     test('--force overwrites existing shorebird.yaml', () async {
@@ -266,14 +257,15 @@ Please make sure you are running "shorebird init" from within your Flutter proje
 
       group('when ios directory is empty', () {
         setUp(() {
-          when(() => ios.flavors()).thenThrow(
-            MissingIOSProjectException(projectRoot.path),
-          );
+          when(
+            () => ios.flavors(),
+          ).thenThrow(MissingIOSProjectException(projectRoot.path));
         });
 
         test('exits with software error code', () async {
-          Directory(p.join(projectRoot.path, 'ios', 'Runner.xcodeproj'))
-              .createSync(recursive: true);
+          Directory(
+            p.join(projectRoot.path, 'ios', 'Runner.xcodeproj'),
+          ).createSync(recursive: true);
           final exitCode = await runWithOverrides(command.run);
           expect(exitCode, equals(ExitCode.software.code));
           verify(
@@ -301,20 +293,22 @@ Please make sure you are running "shorebird init" from within your Flutter proje
           when(() => argResults['display-name']).thenReturn(displayName);
         });
 
-        test('does not prompt for display name and uses correct display name',
-            () async {
-          final exitCode = await runWithOverrides(command.run);
-          expect(exitCode, equals(ExitCode.success.code));
-          verify(
-            () => shorebirdYamlFile.writeAsStringSync(
-              any(that: contains('app_id: $appId')),
-            ),
-          ).called(1);
-          verifyNever(() => logger.prompt(any()));
-          verify(
-            () => codePushClientWrapper.createApp(appName: displayName),
-          ).called(1);
-        });
+        test(
+          'does not prompt for display name and uses correct display name',
+          () async {
+            final exitCode = await runWithOverrides(command.run);
+            expect(exitCode, equals(ExitCode.success.code));
+            verify(
+              () => shorebirdYamlFile.writeAsStringSync(
+                any(that: contains('app_id: $appId')),
+              ),
+            ).called(1);
+            verifyNever(() => logger.prompt(any()));
+            verify(
+              () => codePushClientWrapper.createApp(appName: displayName),
+            ).called(1);
+          },
+        );
       });
 
       test('creates shorebird for an app without flavors', () async {
@@ -338,8 +332,9 @@ Please make sure you are running "shorebird init" from within your Flutter proje
             any(that: contains('app_id: $appId')),
           ),
         ).called(1);
-        verify(() => progress.complete('No product flavors detected.'))
-            .called(1);
+        verify(
+          () => progress.complete('No product flavors detected.'),
+        ).called(1);
       });
 
       test('creates shorebird for an app with flavors', () async {
@@ -357,8 +352,9 @@ Please make sure you are running "shorebird init" from within your Flutter proje
         when(() => ios.flavors()).thenReturn({'internal', 'stable'});
         final exitCode = await runWithOverrides(command.run);
         expect(exitCode, equals(ExitCode.success.code));
-        verify(() => progress.complete('2 product flavors detected:'))
-            .called(1);
+        verify(
+          () => progress.complete('2 product flavors detected:'),
+        ).called(1);
         verify(() => logger.info('  - internal')).called(1);
         verify(() => logger.info('  - stable')).called(1);
         verify(
@@ -433,23 +429,20 @@ flavors:
         );
         verifyInOrder([
           () => codePushClientWrapper.createApp(
-                appName: '$appName (development)',
-              ),
+            appName: '$appName (development)',
+          ),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (developmentInternal)',
-              ),
+            appName: '$appName (developmentInternal)',
+          ),
+          () =>
+              codePushClientWrapper.createApp(appName: '$appName (production)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (production)',
-              ),
+            appName: '$appName (productionInternal)',
+          ),
+          () => codePushClientWrapper.createApp(appName: '$appName (staging)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (productionInternal)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (staging)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (stagingInternal)',
-              ),
+            appName: '$appName (stagingInternal)',
+          ),
         ]);
       });
 
@@ -463,16 +456,14 @@ flavors:
           'test-appId-6',
         ];
         var index = 0;
-        when(() => ios.flavors()).thenReturn(
-          {
-            'development',
-            'developmentInternal',
-            'production',
-            'productionInternal',
-            'staging',
-            'stagingInternal',
-          },
-        );
+        when(() => ios.flavors()).thenReturn({
+          'development',
+          'developmentInternal',
+          'production',
+          'productionInternal',
+          'staging',
+          'stagingInternal',
+        });
         when(
           () => codePushClientWrapper.createApp(appName: any(named: 'appName')),
         ).thenAnswer((invocation) async {
@@ -500,23 +491,20 @@ flavors:
         );
         verifyInOrder([
           () => codePushClientWrapper.createApp(
-                appName: '$appName (development)',
-              ),
+            appName: '$appName (development)',
+          ),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (developmentInternal)',
-              ),
+            appName: '$appName (developmentInternal)',
+          ),
+          () =>
+              codePushClientWrapper.createApp(appName: '$appName (production)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (production)',
-              ),
+            appName: '$appName (productionInternal)',
+          ),
+          () => codePushClientWrapper.createApp(appName: '$appName (staging)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (productionInternal)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (staging)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (stagingInternal)',
-              ),
+            appName: '$appName (stagingInternal)',
+          ),
         ]);
       });
 
@@ -531,16 +519,14 @@ flavors:
           'test-appId-7',
         ];
         var index = 0;
-        when(() => ios.flavors()).thenReturn(
-          {
-            'development',
-            'developmentInternal',
-            'production',
-            'productionInternal',
-            'staging',
-            'stagingInternal',
-          },
-        );
+        when(() => ios.flavors()).thenReturn({
+          'development',
+          'developmentInternal',
+          'production',
+          'productionInternal',
+          'staging',
+          'stagingInternal',
+        });
         when(() => gradlew.productFlavors(any())).thenAnswer((_) async => {});
         when(
           () => codePushClientWrapper.createApp(appName: any(named: 'appName')),
@@ -566,23 +552,20 @@ flavors:
         );
         verifyInOrder([
           () => codePushClientWrapper.createApp(
-                appName: '$appName (development)',
-              ),
+            appName: '$appName (development)',
+          ),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (developmentInternal)',
-              ),
+            appName: '$appName (developmentInternal)',
+          ),
+          () =>
+              codePushClientWrapper.createApp(appName: '$appName (production)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (production)',
-              ),
+            appName: '$appName (productionInternal)',
+          ),
+          () => codePushClientWrapper.createApp(appName: '$appName (staging)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (productionInternal)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (staging)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (stagingInternal)',
-              ),
+            appName: '$appName (stagingInternal)',
+          ),
         ]);
       });
 
@@ -632,23 +615,20 @@ flavors:
         );
         verifyInOrder([
           () => codePushClientWrapper.createApp(
-                appName: '$appName (development)',
-              ),
+            appName: '$appName (development)',
+          ),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (developmentInternal)',
-              ),
+            appName: '$appName (developmentInternal)',
+          ),
+          () =>
+              codePushClientWrapper.createApp(appName: '$appName (production)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (production)',
-              ),
+            appName: '$appName (productionInternal)',
+          ),
+          () => codePushClientWrapper.createApp(appName: '$appName (staging)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (productionInternal)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (staging)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (stagingInternal)',
-              ),
+            appName: '$appName (stagingInternal)',
+          ),
         ]);
       });
 
@@ -698,23 +678,20 @@ flavors:
         );
         verifyInOrder([
           () => codePushClientWrapper.createApp(
-                appName: '$appName (development)',
-              ),
+            appName: '$appName (development)',
+          ),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (developmentInternal)',
-              ),
+            appName: '$appName (developmentInternal)',
+          ),
+          () =>
+              codePushClientWrapper.createApp(appName: '$appName (production)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (production)',
-              ),
+            appName: '$appName (productionInternal)',
+          ),
+          () => codePushClientWrapper.createApp(appName: '$appName (staging)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (productionInternal)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (staging)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (stagingInternal)',
-              ),
+            appName: '$appName (stagingInternal)',
+          ),
         ]);
       });
 
@@ -775,34 +752,28 @@ flavors:
         verifyInOrder([
           () => codePushClientWrapper.createApp(appName: '$appName (dev)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (devInternal)',
-              ),
+            appName: '$appName (devInternal)',
+          ),
+          () =>
+              codePushClientWrapper.createApp(appName: '$appName (production)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (production)',
-              ),
+            appName: '$appName (productionInternal)',
+          ),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (productionInternal)',
-              ),
+            appName: '$appName (development)',
+          ),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (development)',
-              ),
+            appName: '$appName (developmentInternal)',
+          ),
+          () => codePushClientWrapper.createApp(appName: '$appName (staging)'),
           () => codePushClientWrapper.createApp(
-                appName: '$appName (developmentInternal)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (staging)',
-              ),
-          () => codePushClientWrapper.createApp(
-                appName: '$appName (stagingInternal)',
-              ),
+            appName: '$appName (stagingInternal)',
+          ),
         ]);
       });
 
       group('with new flavors added', () {
-        final existingFlavors = {
-          'a': 'test-appId-1',
-          'b': 'test-appId-2',
-        };
+        final existingFlavors = {'a': 'test-appId-1', 'b': 'test-appId-2'};
 
         setUp(() {
           const androidVariants = {'a', 'b', 'c', 'd'};
@@ -816,24 +787,25 @@ flavors:
           when(() => shorebirdYaml.flavors).thenReturn(existingFlavors);
         });
 
-        test('exits with software error if retrieving existing app fails',
-            () async {
-          when(() => codePushClientWrapper.getApp(appId: any(named: 'appId')))
-              .thenThrow(Exception('oh no'));
-          final result = await runWithOverrides(command.run);
-          expect(result, ExitCode.software.code);
-        });
+        test(
+          'exits with software error if retrieving existing app fails',
+          () async {
+            when(
+              () => codePushClientWrapper.getApp(appId: any(named: 'appId')),
+            ).thenThrow(Exception('oh no'));
+            final result = await runWithOverrides(command.run);
+            expect(result, ExitCode.software.code);
+          },
+        );
 
         test('creates new flavor entries in shorebird.yaml', () async {
-          const newAppIds = [
-            'test-appId-3',
-            'test-appId-4',
-          ];
+          const newAppIds = ['test-appId-3', 'test-appId-4'];
           const appName = 'my-app';
           var index = 0;
 
-          when(() => codePushClientWrapper.getApp(appId: any(named: 'appId')))
-              .thenAnswer(
+          when(
+            () => codePushClientWrapper.getApp(appId: any(named: 'appId')),
+          ).thenAnswer(
             (_) async => AppMetadata(
               appId: appId,
               displayName: appName,
@@ -853,37 +825,27 @@ flavors:
 
           verify(() => logger.info('New flavors detected: c, d')).called(1);
           verifyNever(
-            () => codePushClientWrapper.createApp(
-              appName: '$appName (a)',
-            ),
+            () => codePushClientWrapper.createApp(appName: '$appName (a)'),
           );
           verifyNever(
-            () => codePushClientWrapper.createApp(
-              appName: '$appName (b)',
-            ),
+            () => codePushClientWrapper.createApp(appName: '$appName (b)'),
           );
           verify(
-            () => codePushClientWrapper.createApp(
-              appName: '$appName (c)',
-            ),
+            () => codePushClientWrapper.createApp(appName: '$appName (c)'),
           ).called(1);
           verify(
-            () => codePushClientWrapper.createApp(
-              appName: '$appName (d)',
-            ),
+            () => codePushClientWrapper.createApp(appName: '$appName (d)'),
           ).called(1);
           verify(
             () => shorebirdYamlFile.writeAsStringSync(
               any(
-                that: contains(
-                  '''
+                that: contains('''
 app_id: test_app_id
 flavors:
   a: test-appId-1
   b: test-appId-2
   c: test-appId-3
-  d: test-appId-4''',
-                ),
+  d: test-appId-4'''),
               ),
             ),
           ).called(1);
@@ -911,19 +873,17 @@ flutter:
       verify(
         () => logger.info(
           any(
-            that: stringContainsInOrder(
-              [
-                lightGreen.wrap('🐦 Shorebird initialized successfully!')!,
-                '✅ A shorebird app has been created.',
-                '✅ A "shorebird.yaml" has been created.',
-                '''✅ The "pubspec.yaml" has been updated to include "shorebird.yaml" as an asset.''',
-                '''📦 To create a new release use: "${lightCyan.wrap('shorebird release')}".''',
-                '''🚀 To push an update use: "${lightCyan.wrap('shorebird patch')}".''',
-                '''👀 To preview a release use: "${lightCyan.wrap('shorebird preview')}".''',
-                '''For more information about Shorebird, visit ${link(uri: Uri.parse('https://shorebird.dev'))}''',
-                '',
-              ],
-            ),
+            that: stringContainsInOrder([
+              lightGreen.wrap('🐦 Shorebird initialized successfully!')!,
+              '✅ A shorebird app has been created.',
+              '✅ A "shorebird.yaml" has been created.',
+              '''✅ The "pubspec.yaml" has been updated to include "shorebird.yaml" as an asset.''',
+              '''📦 To create a new release use: "${lightCyan.wrap('shorebird release')}".''',
+              '''🚀 To push an update use: "${lightCyan.wrap('shorebird patch')}".''',
+              '''👀 To preview a release use: "${lightCyan.wrap('shorebird preview')}".''',
+              '''For more information about Shorebird, visit ${link(uri: Uri.parse('https://shorebird.dev'))}''',
+              '',
+            ]),
           ),
         ),
       ).called(1);
@@ -939,12 +899,12 @@ flutter:
       await runWithOverrides(command.run);
       verifyInOrder([
         () => logger.info(
-              any(
-                that: contains(
-                  lightGreen.wrap('🐦 Shorebird initialized successfully!'),
-                ),
-              ),
+          any(
+            that: contains(
+              lightGreen.wrap('🐦 Shorebird initialized successfully!'),
             ),
+          ),
+        ),
         () => doctor.runValidators(any(), applyFixes: true),
       ]);
     });

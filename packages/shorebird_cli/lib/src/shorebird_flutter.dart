@@ -30,10 +30,7 @@ class ShorebirdFlutter {
       'https://github.com/shorebirdtech/flutter.git';
 
   /// Arguments to pass to `flutter precache`.
-  List<String> get precacheArgs => [
-        '--android',
-        if (platform.isMacOS) '--ios',
-      ];
+  List<String> get precacheArgs => ['--android', if (platform.isMacOS) '--ios'];
 
   String _workingDirectory({String? revision}) {
     revision ??= shorebirdEnv.flutterRevision;
@@ -55,10 +52,7 @@ class ShorebirdFlutter {
       await git.clone(
         url: flutterGitUrl,
         outputDirectory: targetDirectory.path,
-        args: [
-          '--filter=tree:0',
-          '--no-checkout',
-        ],
+        args: ['--filter=tree:0', '--no-checkout'],
       );
 
       // Checkout the correct revision.
@@ -77,12 +71,10 @@ class ShorebirdFlutter {
     );
 
     try {
-      await process.run(
-        executable,
-        ['precache', ...precacheArgs],
-        workingDirectory: targetDirectory.path,
-        runInShell: true,
-      );
+      await process.run(executable, [
+        'precache',
+        ...precacheArgs,
+      ], workingDirectory: targetDirectory.path, runInShell: true);
       precacheProgress.complete();
     } catch (_) {
       precacheProgress.fail('Failed to precache Flutter $version');
@@ -94,10 +86,9 @@ class ShorebirdFlutter {
 
   /// Whether the current revision is unmodified.
   Future<bool> isUnmodified({String? revision}) async {
-    final status = await git.status(
-      directory: _workingDirectory(revision: revision),
-      args: ['--untracked-files=no', '--porcelain'],
-    );
+    final status =
+        await git.status(directory: _workingDirectory(revision: revision), args:
+            ['--untracked-files=no', '--porcelain']);
     return status.isEmpty;
   }
 
@@ -107,12 +98,13 @@ class ShorebirdFlutter {
   /// parsed.
   Future<String?> getSystemVersion() async {
     const args = ['--version'];
-    final result = await process.run(
-      executable,
-      args,
-      runInShell: true,
-      useVendedFlutter: false,
-    );
+    final result =
+        await process.run(
+          executable,
+          args,
+          runInShell: true,
+          useVendedFlutter: false,
+        );
 
     if (result.exitCode != 0) {
       throw ProcessException(
@@ -164,9 +156,7 @@ class ShorebirdFlutter {
   /// parsed.
   Future<String?> getVersionString() async {
     final flutterRevision = shorebirdEnv.flutterRevision;
-    return getVersionForRevision(
-      flutterRevision: flutterRevision,
-    );
+    return getVersionForRevision(flutterRevision: flutterRevision);
   }
 
   /// The current Shorebird Flutter version as a [Version]. Returns null if the
@@ -192,12 +182,13 @@ class ShorebirdFlutter {
   Future<String?> getVersionForRevision({
     required String flutterRevision,
   }) async {
-    final result = await git.forEachRef(
-      contains: flutterRevision,
-      format: '%(refname:short)',
-      pattern: 'refs/remotes/origin/flutter_release/*',
-      directory: _workingDirectory(),
-    );
+    final result =
+        await git.forEachRef(
+          contains: flutterRevision,
+          format: '%(refname:short)',
+          pattern: 'refs/remotes/origin/flutter_release/*',
+          directory: _workingDirectory(),
+        );
 
     return LineSplitter.split(result)
         .map((e) => e.replaceFirst('origin/flutter_release/', ''))
@@ -208,29 +199,32 @@ class ShorebirdFlutter {
   /// Returns the git revision for the provided [version].
   /// e.g. 3.16.3 -> b9b23902966504a9778f4c07e3a3487fa84dcb2a
   Future<String?> getRevisionForVersion(String version) async {
-    final result = await git.revParse(
-      revision: 'refs/remotes/origin/flutter_release/$version',
-      directory: _workingDirectory(),
-    );
+    final result =
+        await git.revParse(
+          revision: 'refs/remotes/origin/flutter_release/$version',
+          directory: _workingDirectory(),
+        );
     return LineSplitter.split(result).toList().firstOrNull;
   }
 
   Future<List<String>> getVersions({String? revision}) async {
-    final result = await git.forEachRef(
-      format: '%(refname:short)',
-      pattern: 'refs/remotes/origin/flutter_release/*',
-      directory: _workingDirectory(revision: revision),
-    );
-    return LineSplitter.split(result)
-        .map((e) => e.replaceFirst('origin/flutter_release/', ''))
-        .toList();
+    final result =
+        await git.forEachRef(
+          format: '%(refname:short)',
+          pattern: 'refs/remotes/origin/flutter_release/*',
+          directory: _workingDirectory(revision: revision),
+        );
+    return LineSplitter.split(
+      result,
+    ).map((e) => e.replaceFirst('origin/flutter_release/', '')).toList();
   }
 
   Future<void> useVersion({required String version}) async {
-    final revision = await git.revParse(
-      revision: 'origin/flutter_release/$version',
-      directory: _workingDirectory(),
-    );
+    final revision =
+        await git.revParse(
+          revision: 'origin/flutter_release/$version',
+          directory: _workingDirectory(),
+        );
 
     await useRevision(revision: revision);
   }

@@ -113,11 +113,9 @@ class CodePushClientWrapper {
   Future<AppMetadata> getApp({required String appId}) async {
     final app = await maybeGetApp(appId: appId);
     if (app == null) {
-      logger.err(
-        '''
+      logger.err('''
 Could not find app with id: "$appId".
-This app may not exist or you may not have permission to view it.''',
-      );
+This app may not exist or you may not have permission to view it.''');
 
       throw ProcessExit(ExitCode.software.code);
     }
@@ -154,10 +152,8 @@ This app may not exist or you may not have permission to view it.''',
   }) async {
     final createChannelProgress = logger.progress('Creating channel');
     try {
-      final channel = await codePushClient.createChannel(
-        appId: appId,
-        channel: name,
-      );
+      final channel =
+          await codePushClient.createChannel(appId: appId, channel: name);
       createChannelProgress.complete();
       return channel;
     } catch (error) {
@@ -172,10 +168,7 @@ This app may not exist or you may not have permission to view it.''',
     required ReleasePlatform platform,
   }) {
     if (release.platformStatuses[platform] == ReleaseStatus.active) {
-      final uri = ShorebirdWebConsole.appReleaseUri(
-        release.appId,
-        release.id,
-      );
+      final uri = ShorebirdWebConsole.appReleaseUri(release.appId, release.id);
       logger.err(
         '''
 It looks like you have an existing ${platform.name} release for version ${lightCyan.wrap(release.version)}.
@@ -191,20 +184,16 @@ You can manage this release in the ${link(uri: uri, message: 'Shorebird Console'
     required String appId,
     required String releaseVersion,
   }) async {
-    final release = await maybeGetRelease(
-      appId: appId,
-      releaseVersion: releaseVersion,
-    );
+    final release =
+        await maybeGetRelease(appId: appId, releaseVersion: releaseVersion);
 
     if (release == null) {
-      logger.err(
-        '''
+      logger.err('''
 Release not found: "$releaseVersion"
 
 Patches can only be published for existing releases.
 Please create a release using "shorebird release" and try again.
-''',
-      );
+''');
       throw ProcessExit(ExitCode.software.code);
     }
 
@@ -217,10 +206,11 @@ Please create a release using "shorebird release" and try again.
   }) async {
     final fetchReleasesProgress = logger.progress('Fetching releases');
     try {
-      final releases = await codePushClient.getReleases(
-        appId: appId,
-        sideloadableOnly: sideloadableOnly,
-      );
+      final releases =
+          await codePushClient.getReleases(
+            appId: appId,
+            sideloadableOnly: sideloadableOnly,
+          );
       fetchReleasesProgress.complete();
       return releases;
     } catch (error) {
@@ -243,10 +233,8 @@ Please create a release using "shorebird release" and try again.
   }) async {
     final fetchReleasePatchesProgress = logger.progress('Fetching patches');
     try {
-      final patches = await codePushClient.getPatches(
-        appId: appId,
-        releaseId: releaseId,
-      );
+      final patches =
+          await codePushClient.getPatches(appId: appId, releaseId: releaseId);
       fetchReleasePatchesProgress.complete();
       return patches;
     } catch (error) {
@@ -261,16 +249,18 @@ Please create a release using "shorebird release" and try again.
     required ReleasePlatform platform,
   }) async {
     final createReleaseProgress = logger.progress('Creating release');
-    final flutterVersion = await shorebirdFlutter.getVersionForRevision(
-      flutterRevision: flutterRevision,
-    );
+    final flutterVersion =
+        await shorebirdFlutter.getVersionForRevision(
+          flutterRevision: flutterRevision,
+        );
     try {
-      final release = await codePushClient.createRelease(
-        appId: appId,
-        version: version,
-        flutterRevision: flutterRevision,
-        flutterVersion: flutterVersion,
-      );
+      final release =
+          await codePushClient.createRelease(
+            appId: appId,
+            version: version,
+            flutterRevision: flutterRevision,
+            flutterVersion: flutterVersion,
+          );
       await codePushClient.updateReleaseStatus(
         appId: appId,
         releaseId: release.id,
@@ -323,12 +313,13 @@ Please create a release using "shorebird release" and try again.
     );
     for (final arch in architectures) {
       try {
-        final artifacts = await codePushClient.getReleaseArtifacts(
-          appId: appId,
-          releaseId: releaseId,
-          arch: arch.arch,
-          platform: platform,
-        );
+        final artifacts =
+            await codePushClient.getReleaseArtifacts(
+              appId: appId,
+              releaseId: releaseId,
+              arch: arch.arch,
+              platform: platform,
+            );
         if (artifacts.isEmpty) {
           continue;
         }
@@ -352,17 +343,16 @@ Please create a release using "shorebird release" and try again.
       'Fetching $arch artifact',
     );
     try {
-      final artifacts = await codePushClient.getReleaseArtifacts(
-        appId: appId,
-        releaseId: releaseId,
-        arch: arch,
-        platform: platform,
-      );
+      final artifacts =
+          await codePushClient.getReleaseArtifacts(
+            appId: appId,
+            releaseId: releaseId,
+            arch: arch,
+            platform: platform,
+          );
       if (artifacts.isEmpty) {
-        throw CodePushNotFoundException(
-          message:
-              '''No artifact found for architecture $arch in release $releaseId''',
-        );
+        throw CodePushNotFoundException(message:
+            '''No artifact found for architecture $arch in release $releaseId''');
       }
       fetchReleaseArtifactProgress.complete();
       return artifacts.first;
@@ -381,17 +371,16 @@ Please create a release using "shorebird release" and try again.
       'Fetching $arch artifact',
     );
     try {
-      final artifacts = await codePushClient.getReleaseArtifacts(
-        appId: appId,
-        releaseId: releaseId,
-        arch: arch,
-        platform: platform,
-      );
+      final artifacts =
+          await codePushClient.getReleaseArtifacts(
+            appId: appId,
+            releaseId: releaseId,
+            arch: arch,
+            platform: platform,
+          );
       if (artifacts.isEmpty) {
-        throw CodePushNotFoundException(
-          message:
-              '''No artifact found for architecture $arch in release $releaseId''',
-        );
+        throw CodePushNotFoundException(message:
+            '''No artifact found for architecture $arch in release $releaseId''');
       }
       fetchReleaseArtifactProgress.complete();
       return artifacts.first;
@@ -459,11 +448,9 @@ Looked in:
         );
       } on CodePushConflictException catch (_) {
         // Newlines are due to how logger.info interacts with logger.progress.
-        logger.info(
-          '''
+        logger.info('''
 
-${arch.arch} artifact already exists, continuing...''',
-        );
+${arch.arch} artifact already exists, continuing...''');
       } catch (error) {
         _handleErrorAndExit(
           error,
@@ -487,11 +474,9 @@ ${arch.arch} artifact already exists, continuing...''',
       );
     } on CodePushConflictException catch (_) {
       // Newlines are due to how logger.info interacts with logger.progress.
-      logger.info(
-        '''
+      logger.info('''
 
-aab artifact already exists, continuing...''',
-      );
+aab artifact already exists, continuing...''');
     } catch (error) {
       _handleErrorAndExit(
         error,
@@ -537,11 +522,9 @@ aab artifact already exists, continuing...''',
         );
       } on CodePushConflictException catch (_) {
         // Newlines are due to how logger.info interacts with logger.progress.
-        logger.info(
-          '''
+        logger.info('''
 
-${arch.arch} artifact already exists, continuing...''',
-        );
+${arch.arch} artifact already exists, continuing...''');
       } catch (error) {
         _handleErrorAndExit(
           error,
@@ -565,11 +548,9 @@ ${arch.arch} artifact already exists, continuing...''',
       );
     } on CodePushConflictException catch (_) {
       // Newlines are due to how logger.info interacts with logger.progress.
-      logger.info(
-        '''
+      logger.info('''
 
-aar artifact already exists, continuing...''',
-      );
+aar artifact already exists, continuing...''');
     } catch (error) {
       _handleErrorAndExit(
         error,
@@ -586,8 +567,9 @@ aar artifact already exists, continuing...''',
   Future<Directory> _thinXcarchive({required String xcarchivePath}) async {
     final xcarchiveDirectoryName = p.basename(xcarchivePath);
     final tempDir = Directory.systemTemp.createTempSync();
-    final thinnedArchiveDirectory =
-        Directory(p.join(tempDir.path, xcarchiveDirectoryName));
+    final thinnedArchiveDirectory = Directory(
+      p.join(tempDir.path, xcarchiveDirectoryName),
+    );
     await io.copyPath(xcarchivePath, thinnedArchiveDirectory.path);
     thinnedArchiveDirectory
         .listSync(recursive: true)
@@ -672,9 +654,10 @@ aar artifact already exists, continuing...''',
         artifactPath: zippedAppFrameworkFile.path,
         arch: 'xcframework',
         platform: ReleasePlatform.ios,
-        hash: sha256
-            .convert(await zippedAppFrameworkFile.readAsBytes())
-            .toString(),
+        hash:
+            sha256
+                .convert(await zippedAppFrameworkFile.readAsBytes())
+                .toString(),
         canSideload: false,
         podfileLockHash: null,
       );
@@ -697,11 +680,12 @@ aar artifact already exists, continuing...''',
   }) async {
     final createPatchProgress = logger.progress('Creating patch');
     try {
-      final patch = await codePushClient.createPatch(
-        appId: appId,
-        releaseId: releaseId,
-        metadata: metadata.toJson(),
-      );
+      final patch =
+          await codePushClient.createPatch(
+            appId: appId,
+            releaseId: releaseId,
+            metadata: metadata.toJson(),
+          );
       createPatchProgress.complete();
       return patch;
     } catch (error) {
@@ -763,11 +747,12 @@ aar artifact already exists, continuing...''',
     required DeploymentTrack track,
     required Map<Arch, PatchArtifactBundle> patchArtifactBundles,
   }) async {
-    final patch = await createPatch(
-      appId: appId,
-      releaseId: releaseId,
-      metadata: metadata,
-    );
+    final patch =
+        await createPatch(
+          appId: appId,
+          releaseId: releaseId,
+          metadata: metadata,
+        );
 
     await createPatchArtifacts(
       appId: appId,
@@ -776,14 +761,9 @@ aar artifact already exists, continuing...''',
       patchArtifactBundles: patchArtifactBundles,
     );
 
-    final channel = await maybeGetChannel(
-          appId: appId,
-          name: track.channel,
-        ) ??
-        await createChannel(
-          appId: appId,
-          name: track.channel,
-        );
+    final channel =
+        await maybeGetChannel(appId: appId, name: track.channel) ??
+        await createChannel(appId: appId, name: track.channel);
 
     await promotePatch(appId: appId, patchId: patch.id, channel: channel);
 

@@ -32,16 +32,13 @@ void main() {
     late ShorebirdFlutter shorebirdFlutter;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          gitRef.overrideWith(() => git),
-          loggerRef.overrideWith(() => logger),
-          platformRef.overrideWith(() => platform),
-          processRef.overrideWith(() => process),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(body, values: {
+        gitRef.overrideWith(() => git),
+        loggerRef.overrideWith(() => logger),
+        platformRef.overrideWith(() => platform),
+        processRef.overrideWith(() => process),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUp(() {
@@ -95,12 +92,9 @@ void main() {
       when(() => shorebirdEnv.flutterDirectory).thenReturn(flutterDirectory);
       when(() => shorebirdEnv.flutterRevision).thenReturn(flutterRevision);
       when(
-        () => process.run(
-          'flutter',
-          ['--version'],
-          runInShell: true,
-          useVendedFlutter: false,
-        ),
+        () => process.run('flutter', [
+          '--version',
+        ], runInShell: true, useVendedFlutter: false),
       ).thenAnswer((_) async => versionProcessResult);
       when(() => versionProcessResult.exitCode).thenReturn(0);
       when(
@@ -143,25 +137,25 @@ void main() {
     });
 
     group('getSystemVersion', () {
-      test('throws ProcessException when process exits with non-zero code',
-          () async {
-        const error = 'oops';
-        when(() => versionProcessResult.exitCode)
-            .thenReturn(ExitCode.software.code);
-        when(() => versionProcessResult.stderr).thenReturn(error);
-        await expectLater(
-          runWithOverrides(shorebirdFlutter.getSystemVersion),
-          throwsA(isA<ProcessException>()),
-        );
-        verify(
-          () => process.run(
-            'flutter',
-            ['--version'],
-            runInShell: true,
-            useVendedFlutter: false,
-          ),
-        ).called(1);
-      });
+      test(
+        'throws ProcessException when process exits with non-zero code',
+        () async {
+          const error = 'oops';
+          when(
+            () => versionProcessResult.exitCode,
+          ).thenReturn(ExitCode.software.code);
+          when(() => versionProcessResult.stderr).thenReturn(error);
+          await expectLater(
+            runWithOverrides(shorebirdFlutter.getSystemVersion),
+            throwsA(isA<ProcessException>()),
+          );
+          verify(
+            () => process.run('flutter', [
+              '--version',
+            ], runInShell: true, useVendedFlutter: false),
+          ).called(1);
+        },
+      );
 
       test('returns null when cannot parse version', () async {
         when(() => versionProcessResult.stdout).thenReturn('');
@@ -170,12 +164,9 @@ void main() {
           completion(isNull),
         );
         verify(
-          () => process.run(
-            'flutter',
-            ['--version'],
-            runInShell: true,
-            useVendedFlutter: false,
-          ),
+          () => process.run('flutter', [
+            '--version',
+          ], runInShell: true, useVendedFlutter: false),
         ).called(1);
       });
 
@@ -190,12 +181,9 @@ Tools • Dart 3.0.6 • DevTools 2.23.1''');
           completion(equals('3.10.6')),
         );
         verify(
-          () => process.run(
-            'flutter',
-            ['--version'],
-            runInShell: true,
-            useVendedFlutter: false,
-          ),
+          () => process.run('flutter', [
+            '--version',
+          ], runInShell: true, useVendedFlutter: false),
         ).called(1);
       });
     });
@@ -212,17 +200,12 @@ Tools • Dart 3.0.6 • DevTools 2.23.1''');
               pattern: any(named: 'pattern'),
             ),
           ).thenThrow(
-            ProcessException(
-              'git',
-              [
-                'for-each-ref',
-                '--format',
-                '%(refname:short)',
-                'refs/remotes/origin/flutter_release/*',
-              ],
-              error,
-              ExitCode.software.code,
-            ),
+            ProcessException('git', [
+              'for-each-ref',
+              '--format',
+              '%(refname:short)',
+              'refs/remotes/origin/flutter_release/*',
+            ], error, ExitCode.software.code),
           );
         });
 
@@ -343,17 +326,12 @@ $revision
               pattern: any(named: 'pattern'),
             ),
           ).thenThrow(
-            ProcessException(
-              'git',
-              [
-                'for-each-ref',
-                '--format',
-                '%(refname:short)',
-                'refs/remotes/origin/flutter_release/*',
-              ],
-              error,
-              ExitCode.software.code,
-            ),
+            ProcessException('git', [
+              'for-each-ref',
+              '--format',
+              '%(refname:short)',
+              'refs/remotes/origin/flutter_release/*',
+            ], error, ExitCode.software.code),
           );
         });
 
@@ -523,35 +501,37 @@ origin/flutter_release/3.10.6''';
         ).called(1);
       });
 
-      test('throws ProcessException when git command exits non-zero code',
-          () async {
-        const errorMessage = 'oh no!';
-        when(
-          () => git.forEachRef(
-            directory: any(named: 'directory'),
-            format: any(named: 'format'),
-            pattern: any(named: 'pattern'),
-          ),
-        ).thenThrow(
-          ProcessException(
-            'git',
-            ['for-each-ref', '--format', format, pattern],
-            errorMessage,
-            ExitCode.software.code,
-          ),
-        );
-
-        expect(
-          runWithOverrides(shorebirdFlutter.getVersions),
-          throwsA(
-            isA<ProcessException>().having(
-              (e) => e.message,
-              'message',
-              errorMessage,
+      test(
+        'throws ProcessException when git command exits non-zero code',
+        () async {
+          const errorMessage = 'oh no!';
+          when(
+            () => git.forEachRef(
+              directory: any(named: 'directory'),
+              format: any(named: 'format'),
+              pattern: any(named: 'pattern'),
             ),
-          ),
-        );
-      });
+          ).thenThrow(
+            ProcessException('git', [
+              'for-each-ref',
+              '--format',
+              format,
+              pattern,
+            ], errorMessage, ExitCode.software.code),
+          );
+
+          expect(
+            runWithOverrides(shorebirdFlutter.getVersions),
+            throwsA(
+              isA<ProcessException>().having(
+                (e) => e.message,
+                'message',
+                errorMessage,
+              ),
+            ),
+          );
+        },
+      );
     });
 
     group('installRevision', () {
@@ -644,14 +624,10 @@ origin/flutter_release/3.10.6''';
           ),
         ).called(1);
         verify(
-          () => logger.progress(
-            'Installing Flutter 3.10.6 (test-revis)',
-          ),
+          () => logger.progress('Installing Flutter 3.10.6 (test-revis)'),
         ).called(1);
         verify(
-          () => progress.fail(
-            'Failed to install Flutter 3.10.6 (test-revis)',
-          ),
+          () => progress.fail('Failed to install Flutter 3.10.6 (test-revis)'),
         ).called(1);
       });
 
@@ -681,10 +657,7 @@ origin/flutter_release/3.10.6''';
                 'precache',
                 ...runWithOverrides(() => shorebirdFlutter.precacheArgs),
               ],
-              workingDirectory: p.join(
-                flutterDirectory.parent.path,
-                revision,
-              ),
+              workingDirectory: p.join(flutterDirectory.parent.path, revision),
               runInShell: true,
             ),
           ).called(1);
@@ -715,17 +688,12 @@ origin/flutter_release/3.10.6''';
                 'precache',
                 ...runWithOverrides(() => shorebirdFlutter.precacheArgs),
               ],
-              workingDirectory: p.join(
-                flutterDirectory.parent.path,
-                revision,
-              ),
+              workingDirectory: p.join(flutterDirectory.parent.path, revision),
               runInShell: true,
             ),
           ).called(1);
           verify(
-            () => logger.progress(
-              'Installing Flutter 3.10.6 (test-revis)',
-            ),
+            () => logger.progress('Installing Flutter 3.10.6 (test-revis)'),
           ).called(1);
           // Once for the installation and once for the precache.
           verify(progress.complete).called(2);
@@ -766,34 +734,33 @@ origin/flutter_release/3.10.6''';
         ).called(1);
       });
 
-      test('throws ProcessException when git command exits non-zero code',
-          () async {
-        const errorMessage = 'oh no!';
-        when(
-          () => git.status(
-            directory: any(named: 'directory'),
-            args: any(named: 'args'),
-          ),
-        ).thenThrow(
-          ProcessException(
-            'git',
-            ['status'],
-            errorMessage,
-            ExitCode.software.code,
-          ),
-        );
-
-        expect(
-          runWithOverrides(() => shorebirdFlutter.isUnmodified()),
-          throwsA(
-            isA<ProcessException>().having(
-              (e) => e.message,
-              'message',
-              errorMessage,
+      test(
+        'throws ProcessException when git command exits non-zero code',
+        () async {
+          const errorMessage = 'oh no!';
+          when(
+            () => git.status(
+              directory: any(named: 'directory'),
+              args: any(named: 'args'),
             ),
-          ),
-        );
-      });
+          ).thenThrow(
+            ProcessException('git', [
+              'status',
+            ], errorMessage, ExitCode.software.code),
+          );
+
+          expect(
+            runWithOverrides(() => shorebirdFlutter.isUnmodified()),
+            throwsA(
+              isA<ProcessException>().having(
+                (e) => e.message,
+                'message',
+                errorMessage,
+              ),
+            ),
+          );
+        },
+      );
     });
 
     group('useRevision', () {
@@ -809,10 +776,7 @@ origin/flutter_release/3.10.6''';
         verify(
           () => git.clone(
             url: ShorebirdFlutter.flutterGitUrl,
-            outputDirectory: p.join(
-              flutterDirectory.parent.path,
-              revision,
-            ),
+            outputDirectory: p.join(flutterDirectory.parent.path, revision),
             args: ['--filter=tree:0', '--no-checkout'],
           ),
         ).called(1);
@@ -820,8 +784,9 @@ origin/flutter_release/3.10.6''';
       });
 
       test('skips installation if revision already exists', () async {
-        Directory(p.join(flutterDirectory.parent.path, revision))
-            .createSync(recursive: true);
+        Directory(
+          p.join(flutterDirectory.parent.path, revision),
+        ).createSync(recursive: true);
         await expectLater(
           runWithOverrides(
             () => shorebirdFlutter.useRevision(revision: revision),
@@ -831,10 +796,7 @@ origin/flutter_release/3.10.6''';
         verifyNever(
           () => git.clone(
             url: ShorebirdFlutter.flutterGitUrl,
-            outputDirectory: p.join(
-              flutterDirectory.parent.path,
-              revision,
-            ),
+            outputDirectory: p.join(flutterDirectory.parent.path, revision),
             args: ['--filter=tree:0', '--no-checkout'],
           ),
         );
@@ -857,9 +819,7 @@ origin/flutter_release/3.10.6''';
 
       test('installs revision if it does not exist', () async {
         await expectLater(
-          runWithOverrides(
-            () => shorebirdFlutter.useVersion(version: version),
-          ),
+          runWithOverrides(() => shorebirdFlutter.useVersion(version: version)),
           completes,
         );
         verify(
@@ -871,10 +831,7 @@ origin/flutter_release/3.10.6''';
         verify(
           () => git.clone(
             url: ShorebirdFlutter.flutterGitUrl,
-            outputDirectory: p.join(
-              flutterDirectory.parent.path,
-              newRevision,
-            ),
+            outputDirectory: p.join(flutterDirectory.parent.path, newRevision),
             args: ['--filter=tree:0', '--no-checkout'],
           ),
         ).called(1);
@@ -882,12 +839,11 @@ origin/flutter_release/3.10.6''';
       });
 
       test('skips installation if revision already exists', () async {
-        Directory(p.join(flutterDirectory.parent.path, newRevision))
-            .createSync(recursive: true);
+        Directory(
+          p.join(flutterDirectory.parent.path, newRevision),
+        ).createSync(recursive: true);
         await expectLater(
-          runWithOverrides(
-            () => shorebirdFlutter.useVersion(version: version),
-          ),
+          runWithOverrides(() => shorebirdFlutter.useVersion(version: version)),
           completes,
         );
         verify(
@@ -899,10 +855,7 @@ origin/flutter_release/3.10.6''';
         verifyNever(
           () => git.clone(
             url: ShorebirdFlutter.flutterGitUrl,
-            outputDirectory: p.join(
-              flutterDirectory.parent.path,
-              newRevision,
-            ),
+            outputDirectory: p.join(flutterDirectory.parent.path, newRevision),
             args: ['--filter=tree:0', '--no-checkout'],
           ),
         );
@@ -919,9 +872,7 @@ origin/flutter_release/3.10.6''';
               revision: '771d07b2cf97cf107bae6eeedcf41bdc9db772fa',
             ),
           ),
-          equals(
-            '3.10.6 (771d07b2cf)',
-          ),
+          equals('3.10.6 (771d07b2cf)'),
         );
       });
 
@@ -934,9 +885,7 @@ origin/flutter_release/3.10.6''';
                 revision: '771d07b2cf97cf107bae6eeedcf41bdc9db772fa',
               ),
             ),
-            equals(
-              'unknown (771d07b2cf)',
-            ),
+            equals('unknown (771d07b2cf)'),
           );
         });
       });

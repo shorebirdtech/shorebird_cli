@@ -29,9 +29,7 @@ import 'package:shorebird_code_push_client/shorebird_code_push_client.dart';
 typedef ResolvePatcher = Patcher Function(ReleaseType releaseType);
 
 class PatchCommand extends ShorebirdCommand {
-  PatchCommand({
-    ResolvePatcher? resolvePatcher,
-  }) {
+  PatchCommand({ResolvePatcher? resolvePatcher}) {
     _resolvePatcher = resolvePatcher ?? getPatcher;
     argParser
       ..addMultiOption(
@@ -67,12 +65,9 @@ class PatchCommand extends ShorebirdCommand {
         'flavor',
         help: 'The product flavor to use when building the app.',
       )
-      ..addOption(
-        'release-version',
-        help: '''
+      ..addOption('release-version', help: '''
 The version of the associated release (e.g. "1.0.0"). This should be the version
-of the iOS app that is using this module.''',
-      )
+of the iOS app that is using this module.''')
       ..addFlag(
         'allow-native-diffs',
         help: allowNativeDiffsHelpText,
@@ -153,8 +148,9 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
 
   @override
   Future<int> run() async {
-    final patcherFutures =
-        results.releaseTypes.map(_resolvePatcher).map(createPatch);
+    final patcherFutures = results.releaseTypes
+        .map(_resolvePatcher)
+        .map(createPatch);
 
     for (final patcherFuture in patcherFutures) {
       await patcherFuture;
@@ -173,11 +169,7 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
           target: target,
         );
       case ReleaseType.ios:
-        return IosPatcher(
-          argResults: results,
-          flavor: flavor,
-          target: target,
-        );
+        return IosPatcher(argResults: results, flavor: flavor, target: target);
       case ReleaseType.iosFramework:
         return IosFrameworkPatcher(
           argResults: results,
@@ -185,11 +177,7 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
           target: target,
         );
       case ReleaseType.aar:
-        return AarPatcher(
-          argResults: results,
-          flavor: flavor,
-          target: target,
-        );
+        return AarPatcher(argResults: results, flavor: flavor, target: target);
     }
   }
 
@@ -210,10 +198,11 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
     final Release release;
     if (results.wasParsed('release-version')) {
       final releaseVersion = results['release-version'] as String;
-      release = await codePushClientWrapper.getRelease(
-        appId: appId,
-        releaseVersion: releaseVersion,
-      );
+      release =
+          await codePushClientWrapper.getRelease(
+            appId: appId,
+            releaseVersion: releaseVersion,
+          );
     } else if (shorebirdEnv.canAcceptUserInput) {
       release = await promptForRelease();
     } else {
@@ -222,13 +211,13 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
       );
       patchArtifactFile = await patcher.buildPatchArtifact();
       lastBuiltFlutterRevision = shorebirdEnv.flutterRevision;
-      final releaseVersion = await patcher.extractReleaseVersionFromArtifact(
-        patchArtifactFile,
-      );
-      release = await codePushClientWrapper.getRelease(
-        appId: appId,
-        releaseVersion: releaseVersion,
-      );
+      final releaseVersion =
+          await patcher.extractReleaseVersionFromArtifact(patchArtifactFile);
+      release =
+          await codePushClientWrapper.getRelease(
+            appId: appId,
+            releaseVersion: releaseVersion,
+          );
     }
 
     assertReleaseContainsPlatform(release: release, patcher: patcher);
@@ -240,17 +229,19 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
       throw ProcessExit(ExitCode.software.code);
     }
 
-    final releaseArtifact = await codePushClientWrapper.getReleaseArtifact(
-      appId: appId,
-      releaseId: release.id,
-      arch: patcher.primaryReleaseArtifactArch,
-      platform: patcher.releaseType.releasePlatform,
-    );
+    final releaseArtifact =
+        await codePushClientWrapper.getReleaseArtifact(
+          appId: appId,
+          releaseId: release.id,
+          arch: patcher.primaryReleaseArtifactArch,
+          platform: patcher.releaseType.releasePlatform,
+        );
 
-    final releaseArchive = await downloadPrimaryReleaseArtifact(
-      releaseArtifact: releaseArtifact,
-      patcher: patcher,
-    );
+    final releaseArchive =
+        await downloadPrimaryReleaseArtifact(
+          releaseArtifact: releaseArtifact,
+          patcher: patcher,
+        );
 
     final releaseFlutterShorebirdEnv = shorebirdEnv.copyWith(
       flutterRevisionOverride: release.flutterRevision,
@@ -262,22 +253,23 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
 
         // Don't built the patch artifact twice with the same Flutter revision.
         if (lastBuiltFlutterRevision != release.flutterRevision) {
-          patchArtifactFile = await patcher.buildPatchArtifact(
-            releaseVersion: release.version,
-          );
+          patchArtifactFile =
+              await patcher.buildPatchArtifact(releaseVersion: release.version);
         }
 
-        final diffStatus = await assertUnpatchableDiffs(
-          releaseArtifact: releaseArtifact,
-          releaseArchive: releaseArchive,
-          patchArchive: patchArtifactFile!,
-          patcher: patcher,
-        );
-        final patchArtifactBundles = await patcher.createPatchArtifacts(
-          appId: appId,
-          releaseId: release.id,
-          releaseArtifact: releaseArchive,
-        );
+        final diffStatus =
+            await assertUnpatchableDiffs(
+              releaseArtifact: releaseArtifact,
+              releaseArchive: releaseArchive,
+              patchArchive: patchArtifactFile!,
+              patcher: patcher,
+            );
+        final patchArtifactBundles =
+            await patcher.createPatchArtifacts(
+              appId: appId,
+              releaseId: release.id,
+              releaseArtifact: releaseArchive,
+            );
 
         final dryRun = results['dry-run'] == true;
         if (dryRun) {
@@ -303,16 +295,12 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
           patchArtifactBundles: patchArtifactBundles,
         );
       },
-      values: {
-        shorebirdEnvRef.overrideWith(() => releaseFlutterShorebirdEnv),
-      },
+      values: {shorebirdEnvRef.overrideWith(() => releaseFlutterShorebirdEnv)},
     );
   }
 
   Future<Release> promptForRelease() async {
-    final releases = await codePushClientWrapper.getReleases(
-      appId: appId,
-    );
+    final releases = await codePushClientWrapper.getReleases(appId: appId);
 
     if (releases.isEmpty) {
       logger.warn(
@@ -403,14 +391,12 @@ Please re-run the release command for this version or create a new release.''');
         '''🔍 Debug Info: ${lightCyan.wrap(patcher.debugInfoFile.path)}''',
     ];
 
-    logger.info(
-      '''
+    logger.info('''
 
 ${styleBold.wrap(lightGreen.wrap('🚀 Ready to publish a new patch!'))}
 
 ${summary.join('\n')}
-''',
-    );
+''');
 
     if (shorebirdEnv.canAcceptUserInput) {
       final confirm = logger.confirm('Would you like to continue?');
@@ -426,8 +412,9 @@ ${summary.join('\n')}
     required ReleaseArtifact releaseArtifact,
     required Patcher patcher,
   }) async {
-    final downloadProgress =
-        logger.progress('Downloading ${patcher.primaryReleaseArtifactArch}');
+    final downloadProgress = logger.progress(
+      'Downloading ${patcher.primaryReleaseArtifactArch}',
+    );
     final File artifactFile;
     try {
       artifactFile =

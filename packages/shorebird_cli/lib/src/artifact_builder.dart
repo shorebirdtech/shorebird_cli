@@ -34,9 +34,7 @@ class IpaBuildResult {
 /// {@endtemplate}
 class IosFrameworkBuildResult {
   /// {@macro ios_framework_build_result}
-  IosFrameworkBuildResult({
-    required this.kernelFile,
-  });
+  IosFrameworkBuildResult({required this.kernelFile});
 
   /// The app.dill file produced by this invocation of `flutter build ipa`.
   final File kernelFile;
@@ -100,17 +98,16 @@ class ArtifactBuilder {
         ...args,
       ];
 
-      final result = await process.run(
-        executable,
-        arguments,
-        runInShell: true,
-        environment: base64PublicKey?.toPublicKeyEnv(),
-      );
+      final result =
+          await process.run(
+            executable,
+            arguments,
+            runInShell: true,
+            environment: base64PublicKey?.toPublicKeyEnv(),
+          );
 
       if (result.exitCode != ExitCode.success.code) {
-        throw ArtifactBuildException(
-          'Failed to build: ${result.stderr}',
-        );
+        throw ArtifactBuildException('Failed to build: ${result.stderr}');
       }
     });
 
@@ -162,17 +159,16 @@ class ArtifactBuilder {
         ...args,
       ];
 
-      final result = await process.run(
-        executable,
-        arguments,
-        runInShell: true,
-        environment: base64PublicKey?.toPublicKeyEnv(),
-      );
+      final result =
+          await process.run(
+            executable,
+            arguments,
+            runInShell: true,
+            environment: base64PublicKey?.toPublicKeyEnv(),
+          );
 
       if (result.exitCode != ExitCode.success.code) {
-        throw ArtifactBuildException(
-          'Failed to build: ${result.stderr}',
-        );
+        throw ArtifactBuildException('Failed to build: ${result.stderr}');
       }
     });
     final projectRoot = shorebirdEnv.getShorebirdProjectRoot()!;
@@ -215,11 +211,7 @@ class ArtifactBuilder {
         ...args,
       ];
 
-      final result = await process.run(
-        executable,
-        arguments,
-        runInShell: true,
-      );
+      final result = await process.run(executable, arguments, runInShell: true);
 
       if (result.exitCode != ExitCode.success.code) {
         throw ArtifactBuildException('Failed to build: ${result.stderr}');
@@ -253,20 +245,21 @@ class ArtifactBuilder {
         ...args,
       ];
 
-      final result = await process.run(
-        executable,
-        arguments,
-        runInShell: true,
-        environment: base64PublicKey?.toPublicKeyEnv(),
-      );
+      final result =
+          await process.run(
+            executable,
+            arguments,
+            runInShell: true,
+            environment: base64PublicKey?.toPublicKeyEnv(),
+          );
 
       if (result.exitCode != ExitCode.success.code) {
         throw ArtifactBuildException('Failed to build: ${result.stderr}');
       }
 
-      if (result.stderr
-          .toString()
-          .contains('Encountered error while creating the IPA')) {
+      if (result.stderr.toString().contains(
+        'Encountered error while creating the IPA',
+      )) {
         final errorMessage = _failedToCreateIpaErrorMessage(
           stderr: result.stderr.toString(),
         );
@@ -304,11 +297,7 @@ Please file a bug at https://github.com/shorebirdtech/shorebird/issues/new with 
         ...args,
       ];
 
-      final result = await process.run(
-        executable,
-        arguments,
-        runInShell: true,
-      );
+      final result = await process.run(executable, arguments, runInShell: true);
 
       if (result.exitCode != ExitCode.success.code) {
         throw ArtifactBuildException('Failed to build: ${result.stderr}');
@@ -383,21 +372,20 @@ Please file a bug at https://github.com/shorebirdtech/shorebird/issues/new with 
 
     final arguments = ['--no-version-check', 'pub', 'get', '--offline'];
 
-    final result = await process.run(
-      executable,
-      arguments,
-      runInShell: true,
-      useVendedFlutter: false,
-    );
+    final result =
+        await process.run(
+          executable,
+          arguments,
+          runInShell: true,
+          useVendedFlutter: false,
+        );
 
     if (result.exitCode != ExitCode.success.code) {
-      logger.warn(
-        '''
+      logger.warn('''
 Build was successful, but `flutter pub get` failed to run after the build completed. You may see unexpected behavior in VS Code.
 
 Either run `flutter pub get` manually, or follow the steps in ${cannotRunInVSCodeUrl.toLink()}.
-''',
-      );
+''');
     }
   }
 
@@ -414,12 +402,13 @@ Either run `flutter pub get` manually, or follow the steps in ${cannotRunInVSCod
       appDillPath,
     ];
 
-    final result = await process.run(
-      shorebirdArtifacts.getArtifactPath(
-        artifact: ShorebirdArtifact.genSnapshot,
-      ),
-      arguments,
-    );
+    final result =
+        await process.run(
+          shorebirdArtifacts.getArtifactPath(
+            artifact: ShorebirdArtifact.genSnapshot,
+          ),
+          arguments,
+        );
 
     if (result.exitCode != ExitCode.success.code) {
       throw ArtifactBuildException(

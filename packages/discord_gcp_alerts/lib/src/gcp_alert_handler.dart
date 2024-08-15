@@ -31,17 +31,16 @@ Handler gcpAlertHandler({required String webhookUrl, http.Client? client}) {
             {'name': 'Resource', 'value': resource, 'inline': true},
             {'name': 'Condition', 'value': conditionName, 'inline': true},
           ],
-        }
+        },
       ],
       'attachments': const <dynamic>[],
     };
 
     final post = client?.post ?? http.post;
-    final response = await post(
-      Uri.parse(webhookUrl),
-      headers: {HttpHeaders.contentTypeHeader: ContentType.json.value},
-      body: json.encode(discordPayload),
-    );
+    final response =
+        await post(Uri.parse(webhookUrl), headers: {
+          HttpHeaders.contentTypeHeader: ContentType.json.value,
+        }, body: json.encode(discordPayload));
 
     return Response(response.statusCode, body: response.body);
   };

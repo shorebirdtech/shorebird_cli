@@ -62,9 +62,10 @@ class BuildApkCommand extends ShorebirdCommand {
     buildProgress.complete();
 
     final apkDirPath = p.join('build', 'app', 'outputs', 'apk');
-    final apkPath = flavor != null
-        ? p.join(apkDirPath, flavor, 'release', 'app-$flavor-release.apk')
-        : p.join(apkDirPath, 'release', 'app-release.apk');
+    final apkPath =
+        flavor != null
+            ? p.join(apkDirPath, flavor, 'release', 'app-$flavor-release.apk')
+            : p.join(apkDirPath, 'release', 'app-release.apk');
 
     logger.info('''
 📦 Generated an apk at:

@@ -18,12 +18,9 @@ void main() {
     late Directory logsDirectory;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(body, values: {
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUp(() {
@@ -188,19 +185,16 @@ void main() {
     late ShorebirdLogger logger;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(body, values: {
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUp(() {
       shorebirdEnv = MockShorebirdEnv();
-      when(() => shorebirdEnv.logsDirectory).thenReturn(
-        Directory.systemTemp.createTempSync(),
-      );
+      when(
+        () => shorebirdEnv.logsDirectory,
+      ).thenReturn(Directory.systemTemp.createTempSync());
       logger = ShorebirdLogger();
     });
 

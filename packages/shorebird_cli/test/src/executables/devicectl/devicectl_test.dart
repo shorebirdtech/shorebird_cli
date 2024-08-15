@@ -27,13 +27,10 @@ void main() {
     late Devicectl devicectl;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          idevicesyslogRef.overrideWith(() => idevicesyslog),
-          processRef.overrideWith(() => process),
-        },
-      );
+      return runScoped(body, values: {
+        idevicesyslogRef.overrideWith(() => idevicesyslog),
+        processRef.overrideWith(() => process),
+      });
     }
 
     setUpAll(() {
@@ -83,39 +80,45 @@ void main() {
         );
       });
 
-      test('returns null if no CoreDevice with the given deviceID can be found',
-          () async {
-        exitCode = ExitCode.success;
-        jsonOutput =
-            File('$fixturesPath/device_list_success.json').readAsStringSync();
-        expect(
-          await runWithOverrides(
-            () => devicectl.deviceForLaunch(deviceId: 'fake device id'),
-          ),
-          isNull,
-        );
-      });
+      test(
+        'returns null if no CoreDevice with the given deviceID can be found',
+        () async {
+          exitCode = ExitCode.success;
+          jsonOutput =
+              File('$fixturesPath/device_list_success.json').readAsStringSync();
+          expect(
+            await runWithOverrides(
+              () => devicectl.deviceForLaunch(deviceId: 'fake device id'),
+            ),
+            isNull,
+          );
+        },
+      );
 
       test('returns null if no CoreDevice can be found', () async {
         exitCode = ExitCode.success;
-        jsonOutput = File('$fixturesPath/device_list_success_empty.json')
-            .readAsStringSync();
+        jsonOutput =
+            File(
+              '$fixturesPath/device_list_success_empty.json',
+            ).readAsStringSync();
         expect(
           await runWithOverrides(() => devicectl.deviceForLaunch()),
           isNull,
         );
       });
 
-      test("returns a device if device's OS version is 17 or greater",
-          () async {
-        exitCode = ExitCode.success;
-        jsonOutput =
-            File('$fixturesPath/device_list_success.json').readAsStringSync();
-        expect(
-          await runWithOverrides(() => devicectl.deviceForLaunch()),
-          isNotNull,
-        );
-      });
+      test(
+        "returns a device if device's OS version is 17 or greater",
+        () async {
+          exitCode = ExitCode.success;
+          jsonOutput =
+              File('$fixturesPath/device_list_success.json').readAsStringSync();
+          expect(
+            await runWithOverrides(() => devicectl.deviceForLaunch()),
+            isNotNull,
+          );
+        },
+      );
     });
 
     group('installApp', () {
@@ -128,8 +131,9 @@ void main() {
 
       group('when no json output file is found', () {
         setUp(() {
-          when(() => process.run(any(), any()))
-              .thenAnswer((invocation) async => processResult);
+          when(
+            () => process.run(any(), any()),
+          ).thenAnswer((invocation) async => processResult);
         });
 
         group('when the command returns a non-zero exit code', () {
@@ -137,24 +141,26 @@ void main() {
             exitCode = ExitCode.cantCreate;
           });
 
-          test('throws a DevicectlException with underlying ProcessException',
-              () {
-            expect(
-              runWithOverrides(
-                () => devicectl.installApp(
-                  runnerApp: runnerApp,
-                  deviceId: deviceId,
+          test(
+            'throws a DevicectlException with underlying ProcessException',
+            () {
+              expect(
+                runWithOverrides(
+                  () => devicectl.installApp(
+                    runnerApp: runnerApp,
+                    deviceId: deviceId,
+                  ),
                 ),
-              ),
-              throwsA(
-                isA<DevicectlException>().having(
-                  (e) => e.underlyingException,
-                  'underlyingException',
-                  isA<ProcessException>(),
+                throwsA(
+                  isA<DevicectlException>().having(
+                    (e) => e.underlyingException,
+                    'underlyingException',
+                    isA<ProcessException>(),
+                  ),
                 ),
-              ),
-            );
-          });
+              );
+            },
+          );
         });
 
         group('when the command returns a zero exit code', () {
@@ -218,8 +224,10 @@ void main() {
 
         group('when output json does not contain app bundleId', () {
           setUp(() {
-            jsonOutput = File('$fixturesPath/install_success_no_bundle_id.json')
-                .readAsStringSync();
+            jsonOutput =
+                File(
+                  '$fixturesPath/install_success_no_bundle_id.json',
+                ).readAsStringSync();
           });
 
           test('throws DevicectlException', () {
@@ -243,12 +251,13 @@ void main() {
 
         group('when output json contains app bundleId', () {
           test("returns installed app's bundleId", () async {
-            final bundleId = await runWithOverrides(
-              () => devicectl.installApp(
-                runnerApp: runnerApp,
-                deviceId: deviceId,
-              ),
-            );
+            final bundleId =
+                await runWithOverrides(
+                  () => devicectl.installApp(
+                    runnerApp: runnerApp,
+                    deviceId: deviceId,
+                  ),
+                );
             expect(bundleId, 'dev.shorebird.ios-test');
           });
         });
@@ -266,24 +275,23 @@ void main() {
         });
 
         test(
-            '''throws a DevicectlException with the underlying NSError message''',
-            () async {
-          expect(
-            runWithOverrides(
-              () => devicectl.launchApp(
-                deviceId: deviceId,
-                bundleId: bundleId,
+          '''throws a DevicectlException with the underlying NSError message''',
+          () async {
+            expect(
+              runWithOverrides(
+                () =>
+                    devicectl.launchApp(deviceId: deviceId, bundleId: bundleId),
               ),
-            ),
-            throwsA(
-              isA<DevicectlException>().having(
-                (e) => '${e.underlyingException}',
-                'underlyingException',
-                '''Exception: Unable to launch dev.shorebird.ios-test because the device was not, or could not be, unlocked.''',
+              throwsA(
+                isA<DevicectlException>().having(
+                  (e) => '${e.underlyingException}',
+                  'underlyingException',
+                  '''Exception: Unable to launch dev.shorebird.ios-test because the device was not, or could not be, unlocked.''',
+                ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       });
 
       group('when launch succeeds', () {
@@ -296,10 +304,7 @@ void main() {
         test('completes successfully', () async {
           expect(
             runWithOverrides(
-              () => devicectl.launchApp(
-                deviceId: deviceId,
-                bundleId: bundleId,
-              ),
+              () => devicectl.launchApp(deviceId: deviceId, bundleId: bundleId),
             ),
             completes,
           );
@@ -317,14 +322,11 @@ void main() {
       late String launchJsonOutput;
 
       R runWithOverrides<R>(R Function() body) {
-        return runScoped(
-          body,
-          values: {
-            idevicesyslogRef.overrideWith(() => idevicesyslog),
-            loggerRef.overrideWith(() => logger),
-            processRef.overrideWith(() => process),
-          },
-        );
+        return runScoped(body, values: {
+          idevicesyslogRef.overrideWith(() => idevicesyslog),
+          loggerRef.overrideWith(() => logger),
+          processRef.overrideWith(() => process),
+        });
       }
 
       setUp(() {
@@ -332,11 +334,13 @@ void main() {
         logger = MockShorebirdLogger();
         progress = MockProgress();
 
-        when(() => idevicesyslog.startLogger(device: any(named: 'device')))
-            .thenAnswer((_) async => ExitCode.success.code);
+        when(
+          () => idevicesyslog.startLogger(device: any(named: 'device')),
+        ).thenAnswer((_) async => ExitCode.success.code);
         when(() => logger.progress(any())).thenReturn(progress);
-        when(() => process.run(any(), any(that: contains('list'))))
-            .thenAnswer((invocation) async {
+        when(() => process.run(any(), any(that: contains('list')))).thenAnswer((
+          invocation,
+        ) async {
           final processRunArgs =
               invocation.positionalArguments.last as List<String>;
           final jsonFilePath = processRunArgs.last;
@@ -347,8 +351,9 @@ void main() {
           }
           return processResult;
         });
-        when(() => process.run(any(), any(that: contains('install'))))
-            .thenAnswer((invocation) async {
+        when(
+          () => process.run(any(), any(that: contains('install'))),
+        ).thenAnswer((invocation) async {
           final processRunArgs =
               invocation.positionalArguments.last as List<String>;
           final jsonFilePath = processRunArgs.last;
@@ -359,8 +364,9 @@ void main() {
           }
           return processResult;
         });
-        when(() => process.run(any(), any(that: contains('launch'))))
-            .thenAnswer((invocation) async {
+        when(
+          () => process.run(any(), any(that: contains('launch'))),
+        ).thenAnswer((invocation) async {
           final processRunArgs =
               invocation.positionalArguments.last as List<String>;
           final jsonFilePath = processRunArgs.last;
@@ -375,9 +381,10 @@ void main() {
 
       group('when no device is found', () {
         setUp(() {
-          deviceListJsonOutput = File(
-            '$fixturesPath/device_list_success_empty.json',
-          ).readAsStringSync();
+          deviceListJsonOutput =
+              File(
+                '$fixturesPath/device_list_success_empty.json',
+              ).readAsStringSync();
         });
 
         test('returns exit code 70', () async {
@@ -395,9 +402,8 @@ void main() {
 
       group('when install fails', () {
         setUp(() {
-          deviceListJsonOutput = File(
-            '$fixturesPath/device_list_success.json',
-          ).readAsStringSync();
+          deviceListJsonOutput =
+              File('$fixturesPath/device_list_success.json').readAsStringSync();
           // I was not able to get this command to fail, so just use an empty
           // string as the output.
           installJsonOutput = '';
@@ -418,9 +424,8 @@ void main() {
 
       group('when launch fails', () {
         setUp(() {
-          deviceListJsonOutput = File(
-            '$fixturesPath/device_list_success.json',
-          ).readAsStringSync();
+          deviceListJsonOutput =
+              File('$fixturesPath/device_list_success.json').readAsStringSync();
           installJsonOutput =
               File('$fixturesPath/install_success.json').readAsStringSync();
           launchJsonOutput =
@@ -442,9 +447,8 @@ void main() {
 
       group('when install and launch succeed', () {
         setUp(() {
-          deviceListJsonOutput = File(
-            '$fixturesPath/device_list_success.json',
-          ).readAsStringSync();
+          deviceListJsonOutput =
+              File('$fixturesPath/device_list_success.json').readAsStringSync();
           installJsonOutput =
               File('$fixturesPath/install_success.json').readAsStringSync();
           launchJsonOutput =
@@ -496,8 +500,10 @@ void main() {
         setUp(() {
           // This fixture is synthetic, as I was not able to get this command
           // to fail.
-          jsonOutput = File('$fixturesPath/device_list_success_no_devices.json')
-              .readAsStringSync();
+          jsonOutput =
+              File(
+                '$fixturesPath/device_list_success_no_devices.json',
+              ).readAsStringSync();
         });
 
         test('throws a DevicectlException', () {

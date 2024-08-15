@@ -91,11 +91,11 @@ class CodePushClient {
     http.Client? httpClient,
     Uri? hostedUri,
     Map<String, String>? customHeaders,
-  })  : _httpClient = _CodePushHttpClient(
-          httpClient ?? http.Client(),
-          {...standardHeaders, ...?customHeaders},
-        ),
-        hostedUri = hostedUri ?? Uri.https('api.shorebird.dev');
+  }) : _httpClient = _CodePushHttpClient(httpClient ?? http.Client(), {
+         ...standardHeaders,
+         ...?customHeaders,
+       }),
+       hostedUri = hostedUri ?? Uri.https('api.shorebird.dev');
 
   /// The standard headers applied to all requests.
   static const standardHeaders = <String, String>{'x-version': packageVersion};
@@ -164,10 +164,8 @@ class CodePushClient {
     final uploadResponse = await _httpClient.send(uploadRequest);
 
     if (!uploadResponse.isSuccess) {
-      throw CodePushException(
-        message:
-            '''Failed to upload artifact (${uploadResponse.reasonPhrase} '${uploadResponse.statusCode})''',
-      );
+      throw CodePushException(message:
+          '''Failed to upload artifact (${uploadResponse.reasonPhrase} '${uploadResponse.statusCode})''');
     }
   }
 
@@ -216,20 +214,19 @@ class CodePushClient {
     final uploadResponse = await _httpClient.send(uploadRequest);
 
     if (!uploadResponse.isSuccess) {
-      throw CodePushException(
-        message:
-            '''Failed to upload artifact (${uploadResponse.reasonPhrase} '${uploadResponse.statusCode})''',
-      );
+      throw CodePushException(message:
+          '''Failed to upload artifact (${uploadResponse.reasonPhrase} '${uploadResponse.statusCode})''');
     }
   }
 
   /// Create a new app with the provided [displayName].
   /// Returns the newly created app.
   Future<App> createApp({required String displayName}) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_v1/apps'),
-      body: json.encode({'display_name': displayName}),
-    );
+    final response =
+        await _httpClient.post(
+          Uri.parse('$_v1/apps'),
+          body: json.encode({'display_name': displayName}),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -243,10 +240,11 @@ class CodePushClient {
     required String appId,
     required String channel,
   }) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_v1/apps/$appId/channels'),
-      body: json.encode({'channel': channel}),
-    );
+    final response =
+        await _httpClient.post(
+          Uri.parse('$_v1/apps/$appId/channels'),
+          body: json.encode({'channel': channel}),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -265,10 +263,11 @@ class CodePushClient {
       releaseId: releaseId,
       metadata: metadata,
     );
-    final response = await _httpClient.post(
-      Uri.parse('$_v1/apps/$appId/patches'),
-      body: json.encode(request.toJson()),
-    );
+    final response =
+        await _httpClient.post(
+          Uri.parse('$_v1/apps/$appId/patches'),
+          body: json.encode(request.toJson()),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -286,15 +285,16 @@ class CodePushClient {
     String? flutterVersion,
     String? displayName,
   }) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_v1/apps/$appId/releases'),
-      body: json.encode({
-        'version': version,
-        'flutter_revision': flutterRevision,
-        if (flutterVersion != null) 'flutter_version': flutterVersion,
-        if (displayName != null) 'display_name': displayName,
-      }),
-    );
+    final response =
+        await _httpClient.post(
+          Uri.parse('$_v1/apps/$appId/releases'),
+          body: json.encode({
+            'version': version,
+            'flutter_revision': flutterRevision,
+            if (flutterVersion != null) 'flutter_version': flutterVersion,
+            if (displayName != null) 'display_name': displayName,
+          }),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -312,16 +312,17 @@ class CodePushClient {
     required ReleaseStatus status,
     Json? metadata,
   }) async {
-    final response = await _httpClient.patch(
-      Uri.parse('$_v1/apps/$appId/releases/$releaseId'),
-      body: json.encode(
-        UpdateReleaseRequest(
-          status: status,
-          platform: platform,
-          metadata: metadata,
-        ).toJson(),
-      ),
-    );
+    final response =
+        await _httpClient.patch(
+          Uri.parse('$_v1/apps/$appId/releases/$releaseId'),
+          body: json.encode(
+            UpdateReleaseRequest(
+              status: status,
+              platform: platform,
+              metadata: metadata,
+            ).toJson(),
+          ),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -331,13 +332,12 @@ class CodePushClient {
   /// Create a new Shorebird user with the provided [name].
   ///
   /// The email associated with the user's JWT will be used as the user's email.
-  Future<User> createUser({
-    required String name,
-  }) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_v1/users'),
-      body: jsonEncode(CreateUserRequest(name: name).toJson()),
-    );
+  Future<User> createUser({required String name}) async {
+    final response =
+        await _httpClient.post(
+          Uri.parse('$_v1/users'),
+          body: jsonEncode(CreateUserRequest(name: name).toJson()),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -349,9 +349,7 @@ class CodePushClient {
 
   /// Delete the app with the provided [appId].
   Future<void> deleteApp({required String appId}) async {
-    final response = await _httpClient.delete(
-      Uri.parse('$_v1/apps/$appId'),
-    );
+    final response = await _httpClient.delete(Uri.parse('$_v1/apps/$appId'));
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -360,9 +358,7 @@ class CodePushClient {
 
   /// List all apps for the current account.
   Future<List<AppMetadata>> getApps() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_v1/apps'),
-    );
+    final response = await _httpClient.get(Uri.parse('$_v1/apps'));
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -376,9 +372,8 @@ class CodePushClient {
 
   /// List all channels for the provided [appId].
   Future<List<Channel>> getChannels({required String appId}) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_v1/apps/$appId/channels'),
-    );
+    final response =
+        await _httpClient.get(Uri.parse('$_v1/apps/$appId/channels'));
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -395,13 +390,9 @@ class CodePushClient {
     required String appId,
     bool sideloadableOnly = false,
   }) async {
-    var uri = Uri.parse(
-      '$_v1/apps/$appId/releases',
-    );
+    var uri = Uri.parse('$_v1/apps/$appId/releases');
     if (sideloadableOnly) {
-      uri = uri.replace(
-        queryParameters: {'sideloadable': 'true'},
-      );
+      uri = uri.replace(queryParameters: {'sideloadable': 'true'});
     }
 
     final response = await _httpClient.get(uri);
@@ -421,9 +412,10 @@ class CodePushClient {
     required String appId,
     required int releaseId,
   }) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_v1/apps/$appId/releases/$releaseId/patches'),
-    );
+    final response =
+        await _httpClient.get(
+          Uri.parse('$_v1/apps/$appId/releases/$releaseId/patches'),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -442,14 +434,15 @@ class CodePushClient {
     String? arch,
     ReleasePlatform? platform,
   }) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_v1/apps/$appId/releases/$releaseId/artifacts').replace(
-        queryParameters: {
-          if (arch != null) 'arch': arch,
-          if (platform != null) 'platform': platform.name,
-        },
-      ),
-    );
+    final response =
+        await _httpClient.get(
+          Uri.parse(
+            '$_v1/apps/$appId/releases/$releaseId/artifacts',
+          ).replace(queryParameters: {
+            if (arch != null) 'arch': arch,
+            if (platform != null) 'platform': platform.name,
+          }),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);
@@ -467,10 +460,11 @@ class CodePushClient {
     required int patchId,
     required int channelId,
   }) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_v1/apps/$appId/patches/promote'),
-      body: json.encode({'patch_id': patchId, 'channel_id': channelId}),
-    );
+    final response =
+        await _httpClient.post(
+          Uri.parse('$_v1/apps/$appId/patches/promote'),
+          body: json.encode({'patch_id': patchId, 'channel_id': channelId}),
+        );
 
     if (!response.isSuccess) {
       throw _parseErrorResponse(response.statusCode, response.body);

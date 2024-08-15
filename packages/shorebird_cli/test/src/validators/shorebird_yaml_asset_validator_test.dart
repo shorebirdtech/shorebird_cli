@@ -13,13 +13,10 @@ void main() {
     late PubspecEditor pubspecEditor;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          pubspecEditorRef.overrideWith(() => pubspecEditor),
-        },
-      );
+      return runScoped(body, values: {
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        pubspecEditorRef.overrideWith(() => pubspecEditor),
+      });
     }
 
     setUp(() {
@@ -61,33 +58,27 @@ void main() {
           when(
             () => shorebirdEnv.pubspecContainsShorebirdYaml,
           ).thenReturn(true);
-          final results = await runWithOverrides(
-            ShorebirdYamlAssetValidator().validate,
-          );
+          final results =
+              await runWithOverrides(ShorebirdYamlAssetValidator().validate);
           expect(results.map((res) => res.severity), isEmpty);
         },
       );
 
       test('returns an error if pubspec.yaml file does not exist', () async {
         when(() => shorebirdEnv.hasPubspecYaml).thenReturn(false);
-        final results = await runWithOverrides(
-          ShorebirdYamlAssetValidator().validate,
-        );
+        final results =
+            await runWithOverrides(ShorebirdYamlAssetValidator().validate);
         expect(results, hasLength(1));
         expect(results.first.severity, ValidationIssueSeverity.error);
-        expect(
-          results.first.message,
-          startsWith('No pubspec.yaml file found'),
-        );
+        expect(results.first.message, startsWith('No pubspec.yaml file found'));
         expect(results.first.fix, isNull);
       });
 
       test('returns error if shorebird.yaml is missing from assets', () async {
         when(() => shorebirdEnv.hasPubspecYaml).thenReturn(true);
         when(() => shorebirdEnv.pubspecContainsShorebirdYaml).thenReturn(false);
-        final results = await runWithOverrides(
-          ShorebirdYamlAssetValidator().validate,
-        );
+        final results =
+            await runWithOverrides(ShorebirdYamlAssetValidator().validate);
         expect(results, hasLength(1));
         expect(
           results.first,
@@ -108,9 +99,8 @@ void main() {
         when(
           () => pubspecEditor.addShorebirdYamlToPubspecAssets(),
         ).thenAnswer((_) {});
-        final results = await runWithOverrides(
-          ShorebirdYamlAssetValidator().validate,
-        );
+        final results =
+            await runWithOverrides(ShorebirdYamlAssetValidator().validate);
         expect(results, hasLength(1));
         expect(results.first.fix, isNotNull);
         await runWithOverrides(() => results.first.fix!());

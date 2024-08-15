@@ -16,9 +16,9 @@ class EngineConfig {
   });
 
   const EngineConfig.empty()
-      : localEngineSrcPath = null,
-        localEngine = null,
-        localEngineHost = null;
+    : localEngineSrcPath = null,
+      localEngine = null,
+      localEngineHost = null;
 
   final String? localEngineSrcPath;
   final String? localEngine;

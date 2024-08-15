@@ -9,24 +9,27 @@ Future<void> main() async {
   final apps = await client.getApps();
 
   // Create a new Shorebird application.
-  final app = await client.createApp(
-    displayName: '<DISPLAY NAME>', // e.g. 'Shorebird Example'
-  );
+  final app =
+      await client.createApp(
+        displayName: '<DISPLAY NAME>', // e.g. 'Shorebird Example'
+      );
 
   // Create a channel.
-  final channel = await client.createChannel(
-    appId: app.id,
-    channel: '<CHANNEL>', // e.g. 'stable'
-  );
+  final channel =
+      await client.createChannel(
+        appId: app.id,
+        channel: '<CHANNEL>', // e.g. 'stable'
+      );
 
   // Create a release.
-  final release = await client.createRelease(
-    appId: app.id,
-    version: '<VERSION>', // e.g. '1.0.0'
-    flutterRevision:
-        '<FLUTTER_REVISION>', // e.g. 83305b5088e6fe327fb3334a73ff190828d85713,
-    displayName: '<DISPLAY NAME>', // e.g. 'v1.0.0'
-  );
+  final release =
+      await client.createRelease(
+        appId: app.id,
+        version: '<VERSION>', // e.g. '1.0.0'
+        flutterRevision:
+            '<FLUTTER_REVISION>', // e.g. 83305b5088e6fe327fb3334a73ff190828d85713,
+        displayName: '<DISPLAY NAME>', // e.g. 'v1.0.0'
+      );
 
   // Create a release artifact.
   await client.createReleaseArtifact(
@@ -41,25 +44,27 @@ Future<void> main() async {
   );
 
   // Create a new patch.
-  final patch = await client.createPatch(
-    appId: app.id,
-    releaseId: release.id,
-    metadata: const CreatePatchMetadata(
-      releasePlatform: ReleasePlatform.android,
-      usedIgnoreAssetChangesFlag: false,
-      hasAssetChanges: false,
-      usedIgnoreNativeChangesFlag: false,
-      hasNativeChanges: false,
-      linkPercentage: null,
-      environment: BuildEnvironmentMetadata(
-        flutterRevision: '<FLUTTER_REVISION>', // e.g. '83305b5088e6'
-        operatingSystem: 'Windows',
-        operatingSystemVersion: '10',
-        shorebirdVersion: '1.2.3',
-        xcodeVersion: null,
-      ),
-    ).toJson(),
-  );
+  final patch =
+      await client.createPatch(
+        appId: app.id,
+        releaseId: release.id,
+        metadata:
+            const CreatePatchMetadata(
+              releasePlatform: ReleasePlatform.android,
+              usedIgnoreAssetChangesFlag: false,
+              hasAssetChanges: false,
+              usedIgnoreNativeChangesFlag: false,
+              hasNativeChanges: false,
+              linkPercentage: null,
+              environment: BuildEnvironmentMetadata(
+                flutterRevision: '<FLUTTER_REVISION>', // e.g. '83305b5088e6'
+                operatingSystem: 'Windows',
+                operatingSystemVersion: '10',
+                shorebirdVersion: '1.2.3',
+                xcodeVersion: null,
+              ),
+            ).toJson(),
+      );
 
   // Create a patch artifact.
   await client.createPatchArtifact(

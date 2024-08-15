@@ -34,8 +34,8 @@ class IosFrameworkReleaser extends Releaser {
 
   /// The directory where the release artifacts are stored.
   Directory get releaseDirectory => Directory(
-        p.join(shorebirdEnv.getShorebirdProjectRoot()!.path, 'release'),
-      );
+    p.join(shorebirdEnv.getShorebirdProjectRoot()!.path, 'release'),
+  );
 
   @override
   bool get requiresReleaseVersionArg => true;
@@ -91,23 +91,14 @@ class IosFrameworkReleaser extends Releaser {
     if (targetLibraryDirectory.existsSync()) {
       targetLibraryDirectory.deleteSync(recursive: true);
     }
-    await copyPath(
-      sourceLibraryDirectory.path,
-      targetLibraryDirectory.path,
-    );
+    await copyPath(sourceLibraryDirectory.path, targetLibraryDirectory.path);
 
     // Rename Flutter.xcframework to ShorebirdFlutter.xcframework to avoid
     // Xcode warning users about the .xcframework signature changing.
     Directory(
-      p.join(
-        targetLibraryDirectory.path,
-        'Flutter.xcframework',
-      ),
+      p.join(targetLibraryDirectory.path, 'Flutter.xcframework'),
     ).renameSync(
-      p.join(
-        targetLibraryDirectory.path,
-        'ShorebirdFlutter.xcframework',
-      ),
+      p.join(targetLibraryDirectory.path, 'ShorebirdFlutter.xcframework'),
     );
 
     return targetLibraryDirectory;

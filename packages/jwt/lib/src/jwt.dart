@@ -40,11 +40,7 @@ Future<PublicKeyStore?> _getPublicKeys(String url) async {
     return null;
   }
 
-  publicKeyStores.set(
-    url,
-    publicKeyStore,
-    ttl: Duration(seconds: maxAge),
-  );
+  publicKeyStores.set(url, publicKeyStore, ttl: Duration(seconds: maxAge));
 
   return publicKeyStore;
 }
@@ -100,10 +96,7 @@ Future<Jwt> verify(
   return jwt;
 }
 
-Future<void> _verifyHeader(
-  JwtHeader header,
-  Iterable<String> keyIds,
-) async {
+Future<void> _verifyHeader(JwtHeader header, Iterable<String> keyIds) async {
   if (header.typ != 'JWT') {
     throw const JwtVerificationFailure('Invalid token type.');
   }

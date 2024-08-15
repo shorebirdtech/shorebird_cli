@@ -51,12 +51,10 @@ class DoctorCommand extends ShorebirdCommand {
     if (flutterVersion != null) {
       shorebirdFlutterPrefix.write(' $flutterVersion');
     }
-    output.writeln(
-      '''
+    output.writeln('''
 Shorebird $packageVersion • git@github.com:shorebirdtech/shorebird.git
 $shorebirdFlutterPrefix • revision ${shorebirdEnv.flutterRevision}
-Engine • revision ${shorebirdEnv.shorebirdEngineRevision}''',
-    );
+Engine • revision ${shorebirdEnv.shorebirdEngineRevision}''');
 
     if (verbose) {
       final notDetected = red.wrap('not detected');

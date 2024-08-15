@@ -60,26 +60,26 @@ abstract class ArchiveDiffer {
   /// The subset of [fileSetDiff] that contains only changes that result from
   /// edited assets.
   FileSetDiff assetsFileSetDiff(FileSetDiff fileSetDiff) => FileSetDiff(
-        addedPaths: fileSetDiff.addedPaths.where(isAssetFilePath).toSet(),
-        removedPaths: fileSetDiff.removedPaths.where(isAssetFilePath).toSet(),
-        changedPaths: fileSetDiff.changedPaths.where(isAssetFilePath).toSet(),
-      );
+    addedPaths: fileSetDiff.addedPaths.where(isAssetFilePath).toSet(),
+    removedPaths: fileSetDiff.removedPaths.where(isAssetFilePath).toSet(),
+    changedPaths: fileSetDiff.changedPaths.where(isAssetFilePath).toSet(),
+  );
 
   /// The subset of [fileSetDiff] that contains only changes that result from
   /// edited Dart code.
   FileSetDiff dartFileSetDiff(FileSetDiff fileSetDiff) => FileSetDiff(
-        addedPaths: fileSetDiff.addedPaths.where(isDartFilePath).toSet(),
-        removedPaths: fileSetDiff.removedPaths.where(isDartFilePath).toSet(),
-        changedPaths: fileSetDiff.changedPaths.where(isDartFilePath).toSet(),
-      );
+    addedPaths: fileSetDiff.addedPaths.where(isDartFilePath).toSet(),
+    removedPaths: fileSetDiff.removedPaths.where(isDartFilePath).toSet(),
+    changedPaths: fileSetDiff.changedPaths.where(isDartFilePath).toSet(),
+  );
 
   /// The subset of [fileSetDiff] that contains only changes that result from
   /// edited native code.
   FileSetDiff nativeFileSetDiff(FileSetDiff fileSetDiff) => FileSetDiff(
-        addedPaths: fileSetDiff.addedPaths.where(isNativeFilePath).toSet(),
-        removedPaths: fileSetDiff.removedPaths.where(isNativeFilePath).toSet(),
-        changedPaths: fileSetDiff.changedPaths.where(isNativeFilePath).toSet(),
-      );
+    addedPaths: fileSetDiff.addedPaths.where(isNativeFilePath).toSet(),
+    removedPaths: fileSetDiff.removedPaths.where(isNativeFilePath).toSet(),
+    changedPaths: fileSetDiff.changedPaths.where(isNativeFilePath).toSet(),
+  );
 
   /// Files that have been added, removed, or that have changed between the
   /// archives at the two provided paths.
@@ -100,10 +100,12 @@ abstract class ArchiveDiffer {
 
       return {
         for (final file in zipDirectory.fileHeaders)
-          // Zip files contain an (optional) crc32 checksum for a file. IPAs and
-          // AARs seem to always include this for files, so a quick way for us
-          // to tell if file contents differ is if their checksums differ.
-          file.filename: file.crc32!.toString(),
+                  // Zip files contain an (optional) crc32 checksum for a file. IPAs and
+                  // AARs seem to always include this for files, so a quick way for us
+                  // to tell if file contents differ is if their checksums differ.
+                  file
+                  .filename:
+              file.crc32!.toString(),
       };
     });
   }

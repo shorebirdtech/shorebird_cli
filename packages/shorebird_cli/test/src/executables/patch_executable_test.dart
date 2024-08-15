@@ -23,15 +23,12 @@ void main() {
     late PatchExecutable patchExecutable;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          cacheRef.overrideWith(() => cache),
-          platformRef.overrideWith(() => platform),
-          processRef.overrideWith(() => shorebirdProcess),
-          patchExecutableRef.overrideWith(() => patchExecutable),
-        },
-      );
+      return runScoped(body, values: {
+        cacheRef.overrideWith(() => cache),
+        platformRef.overrideWith(() => platform),
+        processRef.overrideWith(() => shorebirdProcess),
+        patchExecutableRef.overrideWith(() => patchExecutable),
+      });
     }
 
     setUp(() {
@@ -45,16 +42,14 @@ void main() {
           any(),
           runInShell: any(named: 'runInShell'),
         ),
-      ).thenAnswer(
-        (invocation) async {
-          final args = invocation.positionalArguments[1] as List<String>;
-          final diffPath = args[2];
-          File(diffPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('diff');
-          return patchProcessResult;
-        },
-      );
+      ).thenAnswer((invocation) async {
+        final args = invocation.positionalArguments[1] as List<String>;
+        final diffPath = args[2];
+        File(diffPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('diff');
+        return patchProcessResult;
+      });
       patchProcessResult = MockShorebirdProcessResult();
       when(() => patchProcessResult.exitCode).thenReturn(ExitCode.success.code);
 
@@ -68,12 +63,10 @@ void main() {
 
     test('runs the correct program', () async {
       final tmpDir = Directory.systemTemp.createTempSync();
-      final releaseArtifactFile = File(
-        p.join(tmpDir.path, 'release_artifact'),
-      )..createSync(recursive: true);
-      final patchArtifactFile = File(
-        p.join(tmpDir.path, 'patch_artifact'),
-      )..createSync(recursive: true);
+      final releaseArtifactFile = File(p.join(tmpDir.path, 'release_artifact'))
+        ..createSync(recursive: true);
+      final patchArtifactFile = File(p.join(tmpDir.path, 'patch_artifact'))
+        ..createSync(recursive: true);
 
       await runWithOverrides(
         () => patchExecutable.run(

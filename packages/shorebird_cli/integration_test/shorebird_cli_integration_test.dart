@@ -17,16 +17,13 @@ import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
 
 R runWithOverrides<R>(R Function() body) {
-  return runScoped(
-    body,
-    values: {
-      authRef,
-      httpClientRef,
-      loggerRef,
-      platformRef,
-      shorebirdEnvRef,
-    },
-  );
+  return runScoped(body, values: {
+    authRef,
+    httpClientRef,
+    loggerRef,
+    platformRef,
+    shorebirdEnvRef,
+  });
 }
 
 void main() {
@@ -66,10 +63,7 @@ void main() {
   test('--version', () {
     final result = runCommand('shorebird --version', workingDirectory: '.');
     expect(result.stderr, isEmpty);
-    expect(
-      result.stdout,
-      stringContainsInOrder(['Engine', 'revision']),
-    );
+    expect(result.stdout, stringContainsInOrder(['Engine', 'revision']));
     expect(result.exitCode, equals(0));
   });
 
@@ -90,8 +84,9 @@ void main() {
       final uuid = const Uuid().v4().replaceAll('-', '_');
       final testAppName = 'test_app_$uuid';
       final tempDir = Directory.systemTemp.createTempSync();
-      final subDirWithSpace =
-          Directory(p.join(tempDir.path, 'flutter directory'))..createSync();
+      final subDirWithSpace = Directory(
+        p.join(tempDir.path, 'flutter directory'),
+      )..createSync();
       var cwd = subDirWithSpace.path;
 
       // Create the default flutter counter app
@@ -126,21 +121,13 @@ void main() {
         completion(
           contains(
             isA<AppMetadata>()
-                .having(
-                  (a) => a.appId,
-                  'appId',
-                  shorebirdYaml.appId,
-                )
+                .having((a) => a.appId, 'appId', shorebirdYaml.appId)
                 .having(
                   (a) => a.latestReleaseVersion,
                   'latestReleaseVersion',
                   null,
                 )
-                .having(
-                  (a) => a.latestPatchNumber,
-                  'latestPatchNumber',
-                  null,
-                ),
+                .having((a) => a.latestPatchNumber, 'latestPatchNumber', null),
           ),
         ),
       );
@@ -175,21 +162,13 @@ void main() {
         completion(
           contains(
             isA<AppMetadata>()
-                .having(
-                  (a) => a.appId,
-                  'appId',
-                  shorebirdYaml.appId,
-                )
+                .having((a) => a.appId, 'appId', shorebirdYaml.appId)
                 .having(
                   (a) => a.latestReleaseVersion,
                   'latestReleaseVersion',
                   releaseVersion,
                 )
-                .having(
-                  (a) => a.latestPatchNumber,
-                  'latestPatchNumber',
-                  null,
-                ),
+                .having((a) => a.latestPatchNumber, 'latestPatchNumber', null),
           ),
         ),
       );
@@ -221,21 +200,13 @@ void main() {
         completion(
           contains(
             isA<AppMetadata>()
-                .having(
-                  (a) => a.appId,
-                  'appId',
-                  shorebirdYaml.appId,
-                )
+                .having((a) => a.appId, 'appId', shorebirdYaml.appId)
                 .having(
                   (a) => a.latestReleaseVersion,
                   'latestReleaseVersion',
                   '1.0.0+1',
                 )
-                .having(
-                  (a) => a.latestPatchNumber,
-                  'latestPatchNumber',
-                  1,
-                ),
+                .having((a) => a.latestPatchNumber, 'latestPatchNumber', 1),
           ),
         ),
       );
@@ -285,20 +256,19 @@ Future<bool> isPatchAvailable({
   required String arch,
   required String channel,
 }) async {
-  final response = await http.post(
-    Uri.parse(Platform.environment['SHOREBIRD_HOSTED_URL']!).replace(
-      path: '/api/v1/patches/check',
-    ),
-    body: jsonEncode(
-      {
-        'release_version': releaseVersion,
-        'platform': platform,
-        'arch': arch,
-        'app_id': appId,
-        'channel': channel,
-      },
-    ),
-  );
+  final response =
+      await http.post(
+        Uri.parse(
+          Platform.environment['SHOREBIRD_HOSTED_URL']!,
+        ).replace(path: '/api/v1/patches/check'),
+        body: jsonEncode({
+          'release_version': releaseVersion,
+          'platform': platform,
+          'arch': arch,
+          'app_id': appId,
+          'channel': channel,
+        }),
+      );
   if (response.statusCode != HttpStatus.ok) {
     throw Exception('Patch Check Failure: ${response.statusCode}');
   }

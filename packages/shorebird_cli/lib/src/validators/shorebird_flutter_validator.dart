@@ -64,9 +64,8 @@ class ShorebirdFlutterValidator extends Validator {
 
     String? pathFlutterVersionString;
     try {
-      pathFlutterVersionString = await _getFlutterVersion(
-        useVendedFlutter: false,
-      );
+      pathFlutterVersionString =
+          await _getFlutterVersion(useVendedFlutter: false);
     } on CommandNotFoundException catch (_) {
       // If there is no system Flutter, we don't throw a validation exception.
     } catch (error) {
@@ -79,8 +78,9 @@ class ShorebirdFlutterValidator extends Validator {
 
     if (shorebirdFlutterVersionString != null &&
         pathFlutterVersionString != null) {
-      final shorebirdFlutterVersion =
-          Version.parse(shorebirdFlutterVersionString);
+      final shorebirdFlutterVersion = Version.parse(
+        shorebirdFlutterVersionString,
+      );
       final pathFlutterVersion = Version.parse(pathFlutterVersionString);
       if (shorebirdFlutterVersion.major != pathFlutterVersion.major ||
           shorebirdFlutterVersion.minor != pathFlutterVersion.minor) {
@@ -100,7 +100,8 @@ This can cause unexpected behavior if you are switching between the tools and th
         flutterStorageEnvironmentValue.isNotEmpty) {
       issues.add(
         ValidationIssue.warning(
-          message: 'Shorebird does not respect the FLUTTER_STORAGE_BASE_URL '
+          message:
+              'Shorebird does not respect the FLUTTER_STORAGE_BASE_URL '
               'environment variable at this time',
         ),
       );
@@ -112,9 +113,10 @@ This can cause unexpected behavior if you are switching between the tools and th
   Future<String> _getFlutterVersion({bool useVendedFlutter = true}) async {
     final String? version;
     try {
-      version = useVendedFlutter
-          ? await shorebirdFlutter.getVersionString()
-          : await shorebirdFlutter.getSystemVersion();
+      version =
+          useVendedFlutter
+              ? await shorebirdFlutter.getVersionString()
+              : await shorebirdFlutter.getSystemVersion();
     } on ProcessException catch (error) {
       if (error.errorCode == 127) throw CommandNotFoundException();
 

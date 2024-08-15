@@ -4,21 +4,19 @@ import 'package:test/test.dart';
 void main() {
   group(GetReleaseArtifactsResponse, () {
     test('can be (de)serialized', () {
-      const response = GetReleaseArtifactsResponse(
-        artifacts: [
-          ReleaseArtifact(
-            id: 42,
-            releaseId: 1,
-            arch: 'aarch64',
-            platform: ReleasePlatform.android,
-            hash: '#',
-            size: 1337,
-            url: 'https://example.com',
-            podfileLockHash: 'podfile-lock-hash',
-            canSideload: true,
-          ),
-        ],
-      );
+      const response = GetReleaseArtifactsResponse(artifacts: [
+        ReleaseArtifact(
+          id: 42,
+          releaseId: 1,
+          arch: 'aarch64',
+          platform: ReleasePlatform.android,
+          hash: '#',
+          size: 1337,
+          url: 'https://example.com',
+          podfileLockHash: 'podfile-lock-hash',
+          canSideload: true,
+        ),
+      ]);
       expect(
         GetReleaseArtifactsResponse.fromJson(response.toJson()).toJson(),
         equals(response.toJson()),

@@ -22,19 +22,18 @@ class IDeviceSysLog {
   /// The location of the libimobiledevice library, which contains
   /// idevicesyslog.
   static Directory get libimobiledeviceDirectory => Directory(
-        p.join(
-          shorebirdEnv.flutterDirectory.path,
-          'bin',
-          'cache',
-          'artifacts',
-          'libimobiledevice',
-        ),
-      );
+    p.join(
+      shorebirdEnv.flutterDirectory.path,
+      'bin',
+      'cache',
+      'artifacts',
+      'libimobiledevice',
+    ),
+  );
 
   /// The location of the idevicesyslog executable.
-  static File get idevicesyslogExecutable => File(
-        p.join(libimobiledeviceDirectory.path, 'idevicesyslog'),
-      );
+  static File get idevicesyslogExecutable =>
+      File(p.join(libimobiledeviceDirectory.path, 'idevicesyslog'));
 
   /// The libraries that idevicesyslog depends on.
   @visibleForTesting
@@ -76,19 +75,18 @@ class IDeviceSysLog {
       'launching idevicesyslog with DYLD_LIBRARY_PATH=$_dyldPathEntry',
     );
 
-    final loggerProcess = await process.start(
-      idevicesyslogExecutable.path,
-      [
-        '-u',
-        device.udid,
-        // If the device is not connected via USB, we need to specify the
-        // network flag.
-        if (!device.isWired) '--network',
-      ],
-      environment: {
-        'DYLD_LIBRARY_PATH': _dyldPathEntry,
-      },
-    );
+    final loggerProcess =
+        await process.start(
+          idevicesyslogExecutable.path,
+          [
+            '-u',
+            device.udid,
+            // If the device is not connected via USB, we need to specify the
+            // network flag.
+            if (!device.isWired) '--network',
+          ],
+          environment: {'DYLD_LIBRARY_PATH': _dyldPathEntry},
+        );
 
     loggerProcess.stdout
         .transform<String>(utf8.decoder)

@@ -90,10 +90,8 @@ class PreviewCommand extends ShorebirdCommand {
     required Release releaseWithAllPlatforms,
     required Release release,
   }) {
-    final nonPreviewablePlatforms =
-        releaseWithAllPlatforms.activePlatforms.where(
-      (p) => !release.activePlatforms.contains(p),
-    );
+    final nonPreviewablePlatforms = releaseWithAllPlatforms.activePlatforms
+        .where((p) => !release.activePlatforms.contains(p));
 
     for (final platform in nonPreviewablePlatforms) {
       final message =
@@ -166,15 +164,17 @@ class PreviewCommand extends ShorebirdCommand {
     //
     // With these two lists, we can now determine if a platform is previewable
     // or not, by making a difference between the two lists.
-    final (releasesWithAllPlatforms, releasesWithPreviewablePlatforms) = await (
-      codePushClientWrapper.getReleases(appId: appId),
-      codePushClientWrapper.getReleases(
-        appId: appId,
-        sideloadableOnly: true,
-      )
-    ).wait;
+    final (releasesWithAllPlatforms, releasesWithPreviewablePlatforms) =
+        await (
+          codePushClientWrapper.getReleases(appId: appId),
+          codePushClientWrapper.getReleases(
+            appId: appId,
+            sideloadableOnly: true,
+          ),
+        ).wait;
 
-    final releaseVersion = results['release-version'] as String? ??
+    final releaseVersion =
+        results['release-version'] as String? ??
         // Prompt only for releases that have previewable platforms.
         await promptForReleaseVersion(releasesWithPreviewablePlatforms);
 
@@ -187,13 +187,15 @@ class PreviewCommand extends ShorebirdCommand {
       return ExitCode.success.code;
     }
 
-    final availablePlatforms = release.activePlatforms
-        .where((p) => supportedReleasePlatforms.contains(p))
-        .toList();
+    final availablePlatforms =
+        release.activePlatforms
+            .where((p) => supportedReleasePlatforms.contains(p))
+            .toList();
 
     if (availablePlatforms.isEmpty) {
-      final activePlatformsString =
-          release.activePlatforms.map((p) => p.displayName).join(', ');
+      final activePlatformsString = release.activePlatforms
+          .map((p) => p.displayName)
+          .join(', ');
       logger.err(
         '''This release can only be previewed on platforms that support $activePlatformsString''',
       );
@@ -232,17 +234,17 @@ class PreviewCommand extends ShorebirdCommand {
 
     return switch (releasePlatform) {
       ReleasePlatform.android => installAndLaunchAndroid(
-          appId: appId,
-          release: release,
-          deviceId: deviceId,
-          track: track,
-        ),
+        appId: appId,
+        release: release,
+        deviceId: deviceId,
+        track: track,
+      ),
       ReleasePlatform.ios => installAndLaunchIos(
-          appId: appId,
-          release: release,
-          deviceId: deviceId,
-          track: track,
-        ),
+        appId: appId,
+        release: release,
+        deviceId: deviceId,
+        track: track,
+      ),
     };
   }
 
@@ -291,12 +293,13 @@ class PreviewCommand extends ShorebirdCommand {
     late ReleaseArtifact releaseAabArtifact;
 
     try {
-      releaseAabArtifact = await codePushClientWrapper.getReleaseArtifact(
-        appId: appId,
-        releaseId: release.id,
-        arch: 'aab',
-        platform: platform,
-      );
+      releaseAabArtifact =
+          await codePushClientWrapper.getReleaseArtifact(
+            appId: appId,
+            releaseId: release.id,
+            arch: 'aab',
+            platform: platform,
+          );
     } catch (e, s) {
       logger
         ..err('Error getting release artifact: $e')
@@ -410,12 +413,13 @@ class PreviewCommand extends ShorebirdCommand {
     late ReleaseArtifact releaseRunnerArtifact;
 
     try {
-      releaseRunnerArtifact = await codePushClientWrapper.getReleaseArtifact(
-        appId: appId,
-        releaseId: release.id,
-        arch: 'runner',
-        platform: platform,
-      );
+      releaseRunnerArtifact =
+          await codePushClientWrapper.getReleaseArtifact(
+            appId: appId,
+            releaseId: release.id,
+            arch: 'runner',
+            platform: platform,
+          );
     } catch (e, s) {
       logger
         ..err('Error getting release artifact: $e')
@@ -440,9 +444,10 @@ class PreviewCommand extends ShorebirdCommand {
           runnerDirectory.createSync(recursive: true);
         }
 
-        final archiveFile = await artifactManager.downloadFile(
-          Uri.parse(releaseRunnerArtifact.url),
-        );
+        final archiveFile =
+            await artifactManager.downloadFile(
+              Uri.parse(releaseRunnerArtifact.url),
+            );
         await artifactManager.extractZip(
           zipFile: archiveFile,
           outputDirectory: runnerDirectory,
@@ -481,9 +486,10 @@ class PreviewCommand extends ShorebirdCommand {
       }
 
       final shouldUseDeviceCtl = deviceForLaunch != null;
-      final progressCompleteMessage = deviceForLaunch != null
-          ? 'Using device ${deviceForLaunch.name}'
-          : '''No iOS 17+ device found, looking for devices running iOS 16 or lower''';
+      final progressCompleteMessage =
+          deviceForLaunch != null
+              ? 'Using device ${deviceForLaunch.name}'
+              : '''No iOS 17+ device found, looking for devices running iOS 16 or lower''';
       deviceLocateProgress.complete(progressCompleteMessage);
 
       final int installExitCode;
@@ -491,16 +497,18 @@ class PreviewCommand extends ShorebirdCommand {
         logger.detail(
           '''Using devicectl to install and launch on device ${deviceForLaunch.udid}.''',
         );
-        installExitCode = await devicectl.installAndLaunchApp(
-          runnerAppDirectory: runnerDirectory,
-          device: deviceForLaunch,
-        );
+        installExitCode =
+            await devicectl.installAndLaunchApp(
+              runnerAppDirectory: runnerDirectory,
+              device: deviceForLaunch,
+            );
       } else {
         logger.detail('Using ios-deploy to install and launch.');
-        installExitCode = await iosDeploy.installAndLaunchApp(
-          bundlePath: runnerDirectory.path,
-          deviceId: deviceId,
-        );
+        installExitCode =
+            await iosDeploy.installAndLaunchApp(
+              bundlePath: runnerDirectory.path,
+              deviceId: deviceId,
+            );
       }
 
       return installExitCode;
@@ -625,8 +633,9 @@ class PreviewCommand extends ShorebirdCommand {
 }
 
 extension Previewable on Release {
-  List<ReleasePlatform> get activePlatforms => platformStatuses.entries
-      .where((e) => e.value == ReleaseStatus.active)
-      .map((e) => e.key)
-      .toList();
+  List<ReleasePlatform> get activePlatforms =>
+      platformStatuses.entries
+          .where((e) => e.value == ReleaseStatus.active)
+          .map((e) => e.key)
+          .toList();
 }

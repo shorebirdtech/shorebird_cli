@@ -40,8 +40,10 @@ void main() {
       );
 
       expect(
-        link(uri: Uri.parse('http://example.com'), message: 'Example')
-            .removeAnsiEscapes(),
+        link(
+          uri: Uri.parse('http://example.com'),
+          message: 'Example',
+        ).removeAnsiEscapes(),
         equals('[Example](http://example.com)'),
       );
     });

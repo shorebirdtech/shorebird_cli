@@ -49,12 +49,9 @@ void main() {
     }
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(body, values: {
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUp(() {
@@ -99,32 +96,36 @@ void main() {
           p.join(projectRoot.path, 'android', 'app', 'src', 'main'),
         );
 
-        final results = await runWithOverrides(
-          AndroidInternetPermissionValidator().validate,
-        );
+        final results =
+            await runWithOverrides(
+              AndroidInternetPermissionValidator().validate,
+            );
 
         expect(results.map((res) => res.severity), isEmpty);
       },
     );
 
-    test('returns an error if AndroidManifest.xml file does not exist',
-        () async {
-      Directory(
-        p.join(projectRoot.path, 'android', 'app', 'src', 'main'),
-      ).createSync(recursive: true);
+    test(
+      'returns an error if AndroidManifest.xml file does not exist',
+      () async {
+        Directory(
+          p.join(projectRoot.path, 'android', 'app', 'src', 'main'),
+        ).createSync(recursive: true);
 
-      final results = await runWithOverrides(
-        AndroidInternetPermissionValidator().validate,
-      );
+        final results =
+            await runWithOverrides(
+              AndroidInternetPermissionValidator().validate,
+            );
 
-      expect(results, hasLength(1));
-      expect(results.first.severity, ValidationIssueSeverity.error);
-      expect(
-        results.first.message,
-        startsWith('No AndroidManifest.xml file found at'),
-      );
-      expect(results.first.fix, isNull);
-    });
+        expect(results, hasLength(1));
+        expect(results.first.severity, ValidationIssueSeverity.error);
+        expect(
+          results.first.message,
+          startsWith('No AndroidManifest.xml file found at'),
+        );
+        expect(results.first.fix, isNull);
+      },
+    );
 
     group('when the INTERNET permission is commented out', () {
       test('returns error', () async {
@@ -141,19 +142,17 @@ void main() {
           manifestPath,
         );
 
-        final results = await runWithOverrides(
-          AndroidInternetPermissionValidator().validate,
-        );
+        final results =
+            await runWithOverrides(
+              AndroidInternetPermissionValidator().validate,
+            );
 
         expect(results, hasLength(1));
         expect(
           results.first,
           equals(
-            ValidationIssue(
-              severity: ValidationIssueSeverity.error,
-              message:
-                  '''${p.join('android', 'app', 'src', 'main', 'AndroidManifest.xml')} is missing the INTERNET permission.''',
-            ),
+            ValidationIssue(severity: ValidationIssueSeverity.error, message:
+                '''${p.join('android', 'app', 'src', 'main', 'AndroidManifest.xml')} is missing the INTERNET permission.'''),
           ),
         );
       });
@@ -171,19 +170,17 @@ void main() {
 
         writeManifestToPath(manifestWithNoPermissions, manifestPath);
 
-        final results = await runWithOverrides(
-          AndroidInternetPermissionValidator().validate,
-        );
+        final results =
+            await runWithOverrides(
+              AndroidInternetPermissionValidator().validate,
+            );
 
         expect(results, hasLength(1));
         expect(
           results.first,
           equals(
-            ValidationIssue(
-              severity: ValidationIssueSeverity.error,
-              message:
-                  '''${p.join('android', 'app', 'src', 'main', 'AndroidManifest.xml')} is missing the INTERNET permission.''',
-            ),
+            ValidationIssue(severity: ValidationIssueSeverity.error, message:
+                '''${p.join('android', 'app', 'src', 'main', 'AndroidManifest.xml')} is missing the INTERNET permission.'''),
           ),
         );
       });
@@ -199,24 +196,19 @@ void main() {
           'main',
         );
 
-        writeManifestToPath(
-          manifestWithNonInternetPermissions,
-          manifestPath,
-        );
+        writeManifestToPath(manifestWithNonInternetPermissions, manifestPath);
 
-        final results = await runWithOverrides(
-          AndroidInternetPermissionValidator().validate,
-        );
+        final results =
+            await runWithOverrides(
+              AndroidInternetPermissionValidator().validate,
+            );
 
         expect(results, hasLength(1));
         expect(
           results.first,
           equals(
-            ValidationIssue(
-              severity: ValidationIssueSeverity.error,
-              message:
-                  '''${p.join('android', 'app', 'src', 'main', 'AndroidManifest.xml')} is missing the INTERNET permission.''',
-            ),
+            ValidationIssue(severity: ValidationIssueSeverity.error, message:
+                '''${p.join('android', 'app', 'src', 'main', 'AndroidManifest.xml')} is missing the INTERNET permission.'''),
           ),
         );
       });
@@ -229,17 +221,19 @@ void main() {
           p.join(projectRoot.path, 'android', 'app', 'src', 'main'),
         );
 
-        var results = await runWithOverrides(
-          AndroidInternetPermissionValidator().validate,
-        );
+        var results =
+            await runWithOverrides(
+              AndroidInternetPermissionValidator().validate,
+            );
         expect(results, hasLength(1));
         expect(results.first.fix, isNotNull);
 
         await runWithOverrides(() => results.first.fix!());
 
-        results = await runWithOverrides(
-          AndroidInternetPermissionValidator().validate,
-        );
+        results =
+            await runWithOverrides(
+              AndroidInternetPermissionValidator().validate,
+            );
         expect(results, isEmpty);
       });
     });

@@ -18,13 +18,10 @@ void main() {
     late Adb adb;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          androidSdkRef.overrideWith(() => androidSdk),
-          processRef.overrideWith(() => process),
-        },
-      );
+      return runScoped(() => body(), values: {
+        androidSdkRef.overrideWith(() => androidSdk),
+        processRef.overrideWith(() => process),
+      });
     }
 
     setUpAll(() {
@@ -37,14 +34,9 @@ void main() {
       adb = Adb();
 
       when(() => androidSdk.adbPath).thenReturn(adbPath);
-      when(
-        () => process.run(any(), any()),
-      ).thenAnswer(
-        (_) async => const ShorebirdProcessResult(
-          exitCode: 0,
-          stdout: '',
-          stderr: '',
-        ),
+      when(() => process.run(any(), any())).thenAnswer(
+        (_) async =>
+            const ShorebirdProcessResult(exitCode: 0, stdout: '', stderr: ''),
       );
     });
 
@@ -65,9 +57,7 @@ void main() {
       });
 
       test('throws process exits with non-zero exit code', () async {
-        when(
-          () => process.run(any(), any()),
-        ).thenAnswer(
+        when(() => process.run(any(), any())).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 1,
             stdout: '',
@@ -130,9 +120,7 @@ void main() {
       });
 
       test('throws process exits with non-zero exit code', () async {
-        when(
-          () => process.run(any(), any()),
-        ).thenAnswer(
+        when(() => process.run(any(), any())).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 1,
             stdout: '',
@@ -210,9 +198,7 @@ void main() {
         final logcatProcess = MockProcess();
         const logcatStdout = Stream<List<int>>.empty();
 
-        when(
-          () => logcatProcess.stdout,
-        ).thenAnswer((_) => logcatStdout);
+        when(() => logcatProcess.stdout).thenAnswer((_) => logcatStdout);
         when(() => process.start(any(), any())).thenAnswer((invocation) async {
           final executable = invocation.positionalArguments[0] as String;
           if (executable == adbPath) return logcatProcess;

@@ -80,28 +80,29 @@ void main() {
       );
     }
 
-    File setupIOSShorebirdYaml() => File(
-          p.join(
-            runnerPath(),
-            'Frameworks',
-            'App.framework',
-            'flutter_assets',
-            'shorebird.yaml',
-          ),
-        )
+    File setupIOSShorebirdYaml() =>
+        File(
+            p.join(
+              runnerPath(),
+              'Frameworks',
+              'App.framework',
+              'flutter_assets',
+              'shorebird.yaml',
+            ),
+          )
           ..createSync(recursive: true)
           ..writeAsStringSync('app_id: $appId', flush: true);
 
     Future<void> setupAndroidShorebirdYaml(Invocation invocation) async {
       File(
-        p.join(
-          (invocation.namedArguments[#outputDirectory] as Directory).path,
-          'base',
-          'assets',
-          'flutter_assets',
-          'shorebird.yaml',
-        ),
-      )
+          p.join(
+            (invocation.namedArguments[#outputDirectory] as Directory).path,
+            'base',
+            'assets',
+            'flutter_assets',
+            'shorebird.yaml',
+          ),
+        )
         ..createSync(recursive: true)
         ..writeAsStringSync('app_id: $appId', flush: true);
     }
@@ -110,19 +111,20 @@ void main() {
       final tempDir = Directory.systemTemp.createTempSync();
       final aabDirectory = Directory(p.join(tempDir.path, 'app-release'))
         ..createSync(recursive: true);
-      final yamlContents = [
-        'app_id: $appId\n',
-        if (channel != null) 'channel: $channel\n',
-      ].join();
+      final yamlContents =
+          [
+            'app_id: $appId\n',
+            if (channel != null) 'channel: $channel\n',
+          ].join();
       File(
-        p.join(
-          aabDirectory.path,
-          'base',
-          'assets',
-          'flutter_assets',
-          'shorebird.yaml',
-        ),
-      )
+          p.join(
+            aabDirectory.path,
+            'base',
+            'assets',
+            'flutter_assets',
+            'shorebird.yaml',
+          ),
+        )
         ..createSync(recursive: true)
         ..writeAsStringSync(yamlContents);
 
@@ -153,20 +155,17 @@ void main() {
 
     R runWithOverrides<R>(R Function() body) {
       return HttpOverrides.runZoned(
-        () => runScoped(
-          body,
-          values: {
-            artifactManagerRef.overrideWith(() => artifactManager),
-            authRef.overrideWith(() => auth),
-            cacheRef.overrideWith(() => cache),
-            codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
-            httpClientRef.overrideWith(() => httpClient),
-            loggerRef.overrideWith(() => logger),
-            platformRef.overrideWith(() => platform),
-            shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-            shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-          },
-        ),
+        () => runScoped(body, values: {
+          artifactManagerRef.overrideWith(() => artifactManager),
+          authRef.overrideWith(() => auth),
+          cacheRef.overrideWith(() => cache),
+          codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+          httpClientRef.overrideWith(() => httpClient),
+          loggerRef.overrideWith(() => logger),
+          platformRef.overrideWith(() => platform),
+          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+        }),
       );
     }
 
@@ -295,11 +294,7 @@ void main() {
           () => runWithOverrides(command.run),
           throwsA(exception),
         );
-        verify(
-          () => codePushClientWrapper.getReleases(
-            appId: appId,
-          ),
-        ).called(1);
+        verify(() => codePushClientWrapper.getReleases(appId: appId)).called(1);
       });
     });
 
@@ -309,9 +304,9 @@ void main() {
         when(() => platform.isMacOS).thenReturn(false);
         when(() => platform.isWindows).thenReturn(true);
 
-        when(() => release.platformStatuses).thenReturn({
-          ReleasePlatform.ios: ReleaseStatus.active,
-        });
+        when(
+          () => release.platformStatuses,
+        ).thenReturn({ReleasePlatform.ios: ReleaseStatus.active});
       });
 
       test('prints error message and exits with code 70', () async {
@@ -336,24 +331,19 @@ void main() {
 
       R runWithOverrides<R>(R Function() body) {
         return HttpOverrides.runZoned(
-          () => runScoped(
-            body,
-            values: {
-              adbRef.overrideWith(() => adb),
-              artifactManagerRef.overrideWith(() => artifactManager),
-              authRef.overrideWith(() => auth),
-              bundletoolRef.overrideWith(() => bundletool),
-              cacheRef.overrideWith(() => cache),
-              codePushClientWrapperRef.overrideWith(
-                () => codePushClientWrapper,
-              ),
-              httpClientRef.overrideWith(() => httpClient),
-              loggerRef.overrideWith(() => logger),
-              platformRef.overrideWith(() => platform),
-              shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-              shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-            },
-          ),
+          () => runScoped(body, values: {
+            adbRef.overrideWith(() => adb),
+            artifactManagerRef.overrideWith(() => artifactManager),
+            authRef.overrideWith(() => auth),
+            bundletoolRef.overrideWith(() => bundletool),
+            cacheRef.overrideWith(() => cache),
+            codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+            httpClientRef.overrideWith(() => httpClient),
+            loggerRef.overrideWith(() => logger),
+            platformRef.overrideWith(() => platform),
+            shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+            shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+          }),
         );
       }
 
@@ -423,39 +413,41 @@ void main() {
 
       // This should probably be outside of the android group, but because
       // we want to verify that android-specific behavior is used, here it is.
-      group('when release has a mix of supported and unsupported platforms',
-          () {
-        setUp(() {
-          when(() => platform.isLinux).thenReturn(false);
-          when(() => platform.isMacOS).thenReturn(false);
-          when(() => platform.isWindows).thenReturn(true);
+      group(
+        'when release has a mix of supported and unsupported platforms',
+        () {
+          setUp(() {
+            when(() => platform.isLinux).thenReturn(false);
+            when(() => platform.isMacOS).thenReturn(false);
+            when(() => platform.isWindows).thenReturn(true);
 
-          when(
-            () => artifactManager.extractZip(
-              zipFile: any(named: 'zipFile'),
-              outputDirectory: any(named: 'outputDirectory'),
-            ),
-          ).thenAnswer(setupAndroidShorebirdYaml);
+            when(
+              () => artifactManager.extractZip(
+                zipFile: any(named: 'zipFile'),
+                outputDirectory: any(named: 'outputDirectory'),
+              ),
+            ).thenAnswer(setupAndroidShorebirdYaml);
 
-          when(() => release.platformStatuses).thenReturn({
-            ReleasePlatform.ios: ReleaseStatus.active,
-            ReleasePlatform.android: ReleaseStatus.active,
+            when(() => release.platformStatuses).thenReturn({
+              ReleasePlatform.ios: ReleaseStatus.active,
+              ReleasePlatform.android: ReleaseStatus.active,
+            });
           });
-        });
 
-        test('does not prompt for platform, uses android', () async {
-          await runWithOverrides(command.run);
+          test('does not prompt for platform, uses android', () async {
+            await runWithOverrides(command.run);
 
-          verify(() => bundletool.installApks(apks: apksPath())).called(1);
-          verifyNever(
-            () => logger.chooseOne<String>(
-              any(),
-              choices: any(named: 'choices'),
-              display: any(named: 'display'),
-            ),
-          );
-        });
-      });
+            verify(() => bundletool.installApks(apks: apksPath())).called(1);
+            verifyNever(
+              () => logger.chooseOne<String>(
+                any(),
+                choices: any(named: 'choices'),
+                display: any(named: 'display'),
+              ),
+            );
+          });
+        },
+      );
 
       group('setChannelOnAab', () {
         late File aabFile;
@@ -488,10 +480,8 @@ void main() {
             test('sets shorebird.yaml channel to target channel', () async {
               aabFile = createAabFile(channel: null);
               await runWithOverrides(
-                () => command.setChannelOnAab(
-                  aabFile: aabFile,
-                  channel: 'live',
-                ),
+                () =>
+                    command.setChannelOnAab(aabFile: aabFile, channel: 'live'),
               );
 
               final updatedShorebirdYamlFile =
@@ -596,8 +586,9 @@ channel: ${track.channel}
         late Progress mockDownloadingProgress;
         setUp(() {
           mockDownloadingProgress = MockProgress();
-          when(() => logger.progress('Downloading release'))
-              .thenReturn(mockDownloadingProgress);
+          when(
+            () => logger.progress('Downloading release'),
+          ).thenReturn(mockDownloadingProgress);
         });
 
         test('downloading release progress completes', () async {
@@ -717,8 +708,9 @@ channel: ${track.channel}
           ).thenAnswer(setupAndroidShorebirdYaml);
 
           final exception = Exception('oops');
-          when(() => adb.startApp(package: any(named: 'package')))
-              .thenThrow(exception);
+          when(
+            () => adb.startApp(package: any(named: 'package')),
+          ).thenThrow(exception);
         });
 
         test('exits with code 70', () async {
@@ -789,8 +781,9 @@ channel: ${track.channel}
 
       group('when in a shorebird project without flavors', () {
         setUp(() {
-          when(() => shorebirdEnv.getShorebirdYaml())
-              .thenReturn(const ShorebirdYaml(appId: 'test-app-id'));
+          when(
+            () => shorebirdEnv.getShorebirdYaml(),
+          ).thenReturn(const ShorebirdYaml(appId: 'test-app-id'));
           when(() => argResults.wasParsed('app-id')).thenReturn(false);
           when(() => argResults['app-id']).thenReturn(null);
         });
@@ -812,21 +805,16 @@ channel: ${track.channel}
       group('when in shorebird project with flavors', () {
         setUp(() {
           when(() => shorebirdEnv.getShorebirdYaml()).thenReturn(
-            const ShorebirdYaml(
-              appId: 'test-app-id',
-              flavors: {
-                'dev': 'dev-app-id',
-                'prod': 'prod-app-id',
-              },
-            ),
+            const ShorebirdYaml(appId: 'test-app-id', flavors: {
+              'dev': 'dev-app-id',
+              'prod': 'prod-app-id',
+            }),
           );
           when(() => argResults.wasParsed('app-id')).thenReturn(false);
           when(() => argResults['app-id']).thenReturn(null);
           when(
-            () => logger.chooseOne<String>(
-              any(),
-              choices: any(named: 'choices'),
-            ),
+            () =>
+                logger.chooseOne<String>(any(), choices: any(named: 'choices')),
           ).thenReturn('dev');
         });
 
@@ -834,10 +822,7 @@ channel: ${track.channel}
           await runWithOverrides(command.run);
 
           verify(
-            () => logger.chooseOne<String>(
-              any(),
-              choices: ['dev', 'prod'],
-            ),
+            () => logger.chooseOne<String>(any(), choices: ['dev', 'prod']),
           ).called(1);
         });
       });
@@ -865,13 +850,15 @@ channel: ${track.channel}
         test('queries for apps', () async {
           final result = await runWithOverrides(command.run);
           expect(result, equals(ExitCode.success.code));
-          final captured = verify(
-            () => logger.chooseOne<AppMetadata>(
-              any(),
-              choices: any(named: 'choices'),
-              display: captureAny(named: 'display'),
-            ),
-          ).captured.single as String Function(AppMetadata);
+          final captured =
+              verify(
+                    () => logger.chooseOne<AppMetadata>(
+                      any(),
+                      choices: any(named: 'choices'),
+                      display: captureAny(named: 'display'),
+                    ),
+                  ).captured.single
+                  as String Function(AppMetadata);
           expect(captured(app), equals(app.displayName));
           verify(() => codePushClientWrapper.getApps()).called(1);
         });
@@ -901,13 +888,15 @@ channel: ${track.channel}
         test('prompts for platforms', () async {
           final result = await runWithOverrides(command.run);
           expect(result, equals(ExitCode.success.code));
-          final platforms = verify(
-            () => logger.chooseOne<String>(
-              any(),
-              choices: captureAny(named: 'choices'),
-              display: any(named: 'display'),
-            ),
-          ).captured.single as List<String>;
+          final platforms =
+              verify(
+                    () => logger.chooseOne<String>(
+                      any(),
+                      choices: captureAny(named: 'choices'),
+                      display: any(named: 'display'),
+                    ),
+                  ).captured.single
+                  as List<String>;
           expect(
             platforms,
             equals([
@@ -922,8 +911,9 @@ channel: ${track.channel}
         setUp(() {
           when(() => argResults.wasParsed('app-id')).thenReturn(false);
           when(() => argResults['app-id']).thenReturn(null);
-          when(() => codePushClientWrapper.getApps())
-              .thenAnswer((_) async => []);
+          when(
+            () => codePushClientWrapper.getApps(),
+          ).thenAnswer((_) async => []);
         });
 
         test('exits early with success code', () async {
@@ -994,13 +984,15 @@ channel: ${track.channel}
         test('queries for releases', () async {
           final result = await runWithOverrides(command.run);
           expect(result, equals(ExitCode.success.code));
-          final captured = verify(
-            () => logger.chooseOne<Release>(
-              any(),
-              choices: any(named: 'choices'),
-              display: captureAny(named: 'display'),
-            ),
-          ).captured.single as String Function(Release);
+          final captured =
+              verify(
+                    () => logger.chooseOne<Release>(
+                      any(),
+                      choices: any(named: 'choices'),
+                      display: captureAny(named: 'display'),
+                    ),
+                  ).captured.single
+                  as String Function(Release);
           expect(captured(release), equals(releaseVersion));
           verify(
             () => codePushClientWrapper.getReleases(
@@ -1030,10 +1022,8 @@ channel: ${track.channel}
           ),
         ).called(1);
         verify(
-          () => adb.startApp(
-            package: any(named: 'package'),
-            deviceId: deviceId,
-          ),
+          () =>
+              adb.startApp(package: any(named: 'package'), deviceId: deviceId),
         ).called(1);
         verify(
           () => adb.logcat(filter: any(named: 'filter'), deviceId: deviceId),
@@ -1056,9 +1046,7 @@ channel: ${track.channel}
           final result = await runWithOverrides(command.run);
           expect(result, equals(ExitCode.software.code));
           verify(
-            () => logger.err(
-              'Error getting release artifact: Exception: oops',
-            ),
+            () => logger.err('Error getting release artifact: Exception: oops'),
           ).called(1);
         });
       });
@@ -1072,25 +1060,21 @@ channel: ${track.channel}
 
       R runWithOverrides<R>(R Function() body) {
         return HttpOverrides.runZoned(
-          () => runScoped(
-            body,
-            values: {
-              adbRef.overrideWith(() => adb),
-              artifactManagerRef.overrideWith(() => artifactManager),
-              authRef.overrideWith(() => auth),
-              bundletoolRef.overrideWith(() => bundletool),
-              cacheRef.overrideWith(() => cache),
-              codePushClientWrapperRef
-                  .overrideWith(() => codePushClientWrapper),
-              devicectlRef.overrideWith(() => devicectl),
-              httpClientRef.overrideWith(() => httpClient),
-              iosDeployRef.overrideWith(() => iosDeploy),
-              loggerRef.overrideWith(() => logger),
-              platformRef.overrideWith(() => platform),
-              shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-              shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-            },
-          ),
+          () => runScoped(body, values: {
+            adbRef.overrideWith(() => adb),
+            artifactManagerRef.overrideWith(() => artifactManager),
+            authRef.overrideWith(() => auth),
+            bundletoolRef.overrideWith(() => bundletool),
+            cacheRef.overrideWith(() => cache),
+            codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+            devicectlRef.overrideWith(() => devicectl),
+            httpClientRef.overrideWith(() => httpClient),
+            iosDeployRef.overrideWith(() => iosDeploy),
+            loggerRef.overrideWith(() => logger),
+            platformRef.overrideWith(() => platform),
+            shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+            shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+          }),
         );
       }
 
@@ -1112,8 +1096,9 @@ channel: ${track.channel}
           ),
         ).thenAnswer((_) async {});
 
-        when(() => devicectl.deviceForLaunch(deviceId: any(named: 'deviceId')))
-            .thenAnswer((_) async => null);
+        when(
+          () => devicectl.deviceForLaunch(deviceId: any(named: 'deviceId')),
+        ).thenAnswer((_) async => null);
         when(
           () => devicectl.installAndLaunchApp(
             runnerAppDirectory: any(named: 'runnerAppDirectory'),
@@ -1170,9 +1155,7 @@ channel: ${track.channel}
       group('when downloading release artifact fails', () {
         final exception = Exception('oops');
         setUp(() {
-          when(
-            () => artifactManager.downloadFile(any()),
-          ).thenThrow(exception);
+          when(() => artifactManager.downloadFile(any())).thenThrow(exception);
         });
 
         test('exits with code 70', () async {
@@ -1217,13 +1200,15 @@ channel: ${track.channel}
         const devicectlDeviceId = '12345';
         setUp(() {
           when(() => appleDevice.udid).thenReturn(devicectlDeviceId);
-          when(() => devicectl.listAvailableIosDevices())
-              .thenAnswer((_) async => [appleDevice]);
+          when(
+            () => devicectl.listAvailableIosDevices(),
+          ).thenAnswer((_) async => [appleDevice]);
         });
 
         test('uses matching devicectl device if found', () async {
-          when(() => argResults['device-id'])
-              .thenAnswer((_) => devicectlDeviceId);
+          when(
+            () => argResults['device-id'],
+          ).thenAnswer((_) => devicectlDeviceId);
 
           setupIOSShorebirdYaml();
           await runWithOverrides(command.run);
@@ -1235,8 +1220,9 @@ channel: ${track.channel}
 
         group('when no devicectl devices have matching id', () {
           setUp(() {
-            when(() => argResults['device-id'])
-                .thenAnswer((_) => 'not-a-device-id');
+            when(
+              () => argResults['device-id'],
+            ).thenAnswer((_) => 'not-a-device-id');
             setupIOSShorebirdYaml();
           });
 
@@ -1261,9 +1247,7 @@ channel: ${track.channel}
       group('when devicectl returns a usable device', () {
         setUp(() {
           when(
-            () => devicectl.deviceForLaunch(
-              deviceId: any(named: 'deviceId'),
-            ),
+            () => devicectl.deviceForLaunch(deviceId: any(named: 'deviceId')),
           ).thenAnswer((_) async => appleDevice);
           setupIOSShorebirdYaml();
         });
@@ -1338,17 +1322,18 @@ channel: ${track.channel}
         late File shorebirdYaml;
         setUp(() {
           when(() => argResults['staging']).thenReturn(true);
-          shorebirdYaml = File(
-            p.join(
-              runnerPath(),
-              'Frameworks',
-              'App.framework',
-              'flutter_assets',
-              'shorebird.yaml',
-            ),
-          )
-            ..createSync(recursive: true)
-            ..writeAsStringSync('app_id: $appId', flush: true);
+          shorebirdYaml =
+              File(
+                  p.join(
+                    runnerPath(),
+                    'Frameworks',
+                    'App.framework',
+                    'flutter_assets',
+                    'shorebird.yaml',
+                  ),
+                )
+                ..createSync(recursive: true)
+                ..writeAsStringSync('app_id: $appId', flush: true);
           when(
             () => iosDeploy.installAndLaunchApp(
               bundlePath: any(named: 'bundlePath'),
@@ -1395,9 +1380,7 @@ channel: ${DeploymentTrack.staging.channel}
           final result = await runWithOverrides(command.run);
           expect(result, equals(ExitCode.software.code));
           verify(
-            () => logger.err(
-              'Error getting release artifact: Exception: oops',
-            ),
+            () => logger.err('Error getting release artifact: Exception: oops'),
           ).called(1);
         });
       });
@@ -1406,15 +1389,16 @@ channel: ${DeploymentTrack.staging.channel}
         setUp(() {
           final releaseWithAllPlatforms = MockRelease();
           when(() => releaseWithAllPlatforms.id).thenReturn(releaseId);
-          when(() => releaseWithAllPlatforms.version)
-              .thenReturn(releaseVersion);
+          when(
+            () => releaseWithAllPlatforms.version,
+          ).thenReturn(releaseVersion);
           when(() => releaseWithAllPlatforms.platformStatuses).thenReturn({
             ReleasePlatform.ios: ReleaseStatus.active,
             ReleasePlatform.android: ReleaseStatus.active,
           });
-          when(() => release.platformStatuses).thenReturn({
-            ReleasePlatform.ios: ReleaseStatus.active,
-          });
+          when(
+            () => release.platformStatuses,
+          ).thenReturn({ReleasePlatform.ios: ReleaseStatus.active});
           when(
             () => codePushClientWrapper.getReleases(
               appId: any(named: 'appId'),
@@ -1422,40 +1406,36 @@ channel: ${DeploymentTrack.staging.channel}
             ),
           ).thenAnswer((_) async => [release]);
           when(
-            () => codePushClientWrapper.getReleases(
-              appId: any(named: 'appId'),
-            ),
+            () => codePushClientWrapper.getReleases(appId: any(named: 'appId')),
           ).thenAnswer((_) async => [releaseWithAllPlatforms]);
         });
 
-        test(
-          'does not warn since the user explicitly asked for iOS',
-          () async {
-            final exitCode = await runWithOverrides(command.run);
-            expect(exitCode, equals(ExitCode.software.code));
+        test('does not warn since the user explicitly asked for iOS', () async {
+          final exitCode = await runWithOverrides(command.run);
+          expect(exitCode, equals(ExitCode.software.code));
 
-            verifyNever(
-              () => logger.warn(
-                '''The ${ReleasePlatform.android.displayName} artifact for this release is not previewable.''',
-              ),
-            );
-          },
-        );
+          verifyNever(
+            () => logger.warn(
+              '''The ${ReleasePlatform.android.displayName} artifact for this release is not previewable.''',
+            ),
+          );
+        });
       });
 
       group('when the ios release is not sideloadable', () {
         setUp(() {
           final releaseWithAllPlatforms = MockRelease();
           when(() => releaseWithAllPlatforms.id).thenReturn(releaseId);
-          when(() => releaseWithAllPlatforms.version)
-              .thenReturn(releaseVersion);
+          when(
+            () => releaseWithAllPlatforms.version,
+          ).thenReturn(releaseVersion);
           when(() => releaseWithAllPlatforms.platformStatuses).thenReturn({
             ReleasePlatform.ios: ReleaseStatus.active,
             ReleasePlatform.android: ReleaseStatus.active,
           });
-          when(() => release.platformStatuses).thenReturn({
-            ReleasePlatform.android: ReleaseStatus.active,
-          });
+          when(
+            () => release.platformStatuses,
+          ).thenReturn({ReleasePlatform.android: ReleaseStatus.active});
           when(
             () => codePushClientWrapper.getReleases(
               appId: any(named: 'appId'),
@@ -1463,9 +1443,7 @@ channel: ${DeploymentTrack.staging.channel}
             ),
           ).thenAnswer((_) async => [release]);
           when(
-            () => codePushClientWrapper.getReleases(
-              appId: any(named: 'appId'),
-            ),
+            () => codePushClientWrapper.getReleases(appId: any(named: 'appId')),
           ).thenAnswer((_) async => [releaseWithAllPlatforms]);
         });
 
@@ -1501,25 +1479,21 @@ channel: ${DeploymentTrack.staging.channel}
 
       R runWithOverrides<R>(R Function() body) {
         return HttpOverrides.runZoned(
-          () => runScoped(
-            body,
-            values: {
-              adbRef.overrideWith(() => adb),
-              artifactManagerRef.overrideWith(() => artifactManager),
-              authRef.overrideWith(() => auth),
-              bundletoolRef.overrideWith(() => bundletool),
-              cacheRef.overrideWith(() => cache),
-              codePushClientWrapperRef
-                  .overrideWith(() => codePushClientWrapper),
-              devicectlRef.overrideWith(() => devicectl),
-              httpClientRef.overrideWith(() => httpClient),
-              iosDeployRef.overrideWith(() => iosDeploy),
-              loggerRef.overrideWith(() => logger),
-              platformRef.overrideWith(() => platform),
-              shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-              shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-            },
-          ),
+          () => runScoped(body, values: {
+            adbRef.overrideWith(() => adb),
+            artifactManagerRef.overrideWith(() => artifactManager),
+            authRef.overrideWith(() => auth),
+            bundletoolRef.overrideWith(() => bundletool),
+            cacheRef.overrideWith(() => cache),
+            codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+            devicectlRef.overrideWith(() => devicectl),
+            httpClientRef.overrideWith(() => httpClient),
+            iosDeployRef.overrideWith(() => iosDeploy),
+            loggerRef.overrideWith(() => logger),
+            platformRef.overrideWith(() => platform),
+            shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+            shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+          }),
         );
       }
 
@@ -1544,8 +1518,9 @@ channel: ${DeploymentTrack.staging.channel}
           ),
         ).thenAnswer((_) async {});
 
-        when(() => devicectl.deviceForLaunch(deviceId: any(named: 'deviceId')))
-            .thenAnswer((_) async => null);
+        when(
+          () => devicectl.deviceForLaunch(deviceId: any(named: 'deviceId')),
+        ).thenAnswer((_) async => null);
         when(
           () => devicectl.installAndLaunchApp(
             runnerAppDirectory: any(named: 'runnerAppDirectory'),
@@ -1577,8 +1552,9 @@ channel: ${DeploymentTrack.staging.channel}
         ).thenAnswer((_) async => iosReleaseArtifact);
 
         when(() => androidReleaseArtifact.id).thenReturn(androidArtifactId);
-        when(() => androidReleaseArtifact.url)
-            .thenReturn(androidReleaseArtifactUrl);
+        when(
+          () => androidReleaseArtifact.url,
+        ).thenReturn(androidReleaseArtifactUrl);
 
         when(
           () => codePushClientWrapper.getReleaseArtifact(
@@ -1629,15 +1605,16 @@ channel: ${DeploymentTrack.staging.channel}
           setUp(() {
             final releaseWithAllPlatforms = MockRelease();
             when(() => releaseWithAllPlatforms.id).thenReturn(releaseId);
-            when(() => releaseWithAllPlatforms.version)
-                .thenReturn(releaseVersion);
+            when(
+              () => releaseWithAllPlatforms.version,
+            ).thenReturn(releaseVersion);
             when(() => releaseWithAllPlatforms.platformStatuses).thenReturn({
               ReleasePlatform.ios: ReleaseStatus.active,
               ReleasePlatform.android: ReleaseStatus.active,
             });
-            when(() => release.platformStatuses).thenReturn({
-              ReleasePlatform.ios: ReleaseStatus.active,
-            });
+            when(
+              () => release.platformStatuses,
+            ).thenReturn({ReleasePlatform.ios: ReleaseStatus.active});
             when(
               () => codePushClientWrapper.getReleases(
                 appId: any(named: 'appId'),
@@ -1645,9 +1622,8 @@ channel: ${DeploymentTrack.staging.channel}
               ),
             ).thenAnswer((_) async => [release]);
             when(
-              () => codePushClientWrapper.getReleases(
-                appId: any(named: 'appId'),
-              ),
+              () =>
+                  codePushClientWrapper.getReleases(appId: any(named: 'appId')),
             ).thenAnswer((_) async => [releaseWithAllPlatforms]);
           });
 
@@ -1743,15 +1719,16 @@ channel: ${DeploymentTrack.staging.channel}
           setUp(() {
             final releaseWithAllPlatforms = MockRelease();
             when(() => releaseWithAllPlatforms.id).thenReturn(releaseId);
-            when(() => releaseWithAllPlatforms.version)
-                .thenReturn(releaseVersion);
+            when(
+              () => releaseWithAllPlatforms.version,
+            ).thenReturn(releaseVersion);
             when(() => releaseWithAllPlatforms.platformStatuses).thenReturn({
               ReleasePlatform.ios: ReleaseStatus.active,
               ReleasePlatform.android: ReleaseStatus.active,
             });
-            when(() => release.platformStatuses).thenReturn({
-              ReleasePlatform.android: ReleaseStatus.active,
-            });
+            when(
+              () => release.platformStatuses,
+            ).thenReturn({ReleasePlatform.android: ReleaseStatus.active});
             when(
               () => codePushClientWrapper.getReleases(
                 appId: any(named: 'appId'),
@@ -1759,9 +1736,8 @@ channel: ${DeploymentTrack.staging.channel}
               ),
             ).thenAnswer((_) async => [release]);
             when(
-              () => codePushClientWrapper.getReleases(
-                appId: any(named: 'appId'),
-              ),
+              () =>
+                  codePushClientWrapper.getReleases(appId: any(named: 'appId')),
             ).thenAnswer((_) async => [releaseWithAllPlatforms]);
           });
 

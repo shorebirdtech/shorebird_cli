@@ -15,9 +15,7 @@ extension AnsiEscapes on String {
     // Links are in the form of '\x1B]8;;<uri>\x1B\\<text>\x1B]8;;\x1B\\'
     //
     // See https://github.com/felangel/mason/blob/38a525b0607d8723df3b5b3fcc2c087efd9e1c93/packages/mason_logger/lib/src/link.dart
-    final hyperlinkRegex = RegExp(
-      r'\x1B\]8;;(.+)\x1B\\(.+)\x1B\]8;;\x1B\\',
-    );
+    final hyperlinkRegex = RegExp(r'\x1B\]8;;(.+)\x1B\\(.+)\x1B\]8;;\x1B\\');
     final ansiEscapeRegex = RegExp(r'\x1B\[[0-?]*[ -/]*[@-~]');
 
     // Replace all links with markdown links

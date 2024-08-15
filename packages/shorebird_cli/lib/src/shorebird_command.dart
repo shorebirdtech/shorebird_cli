@@ -15,16 +15,15 @@ typedef HashFunction = String Function(List<int> bytes);
 /// Signature for a function which takes a path to a zip file.
 typedef UnzipFn = Future<void> Function(String zipFilePath, String outputDir);
 
-typedef CodePushClientBuilder = CodePushClient Function({
-  required http.Client httpClient,
-  Uri? hostedUri,
-});
+typedef CodePushClientBuilder =
+    CodePushClient Function({required http.Client httpClient, Uri? hostedUri});
 
-typedef StartProcess = Future<Process> Function(
-  String executable,
-  List<String> arguments, {
-  bool runInShell,
-});
+typedef StartProcess =
+    Future<Process> Function(
+      String executable,
+      List<String> arguments, {
+      bool runInShell,
+    });
 
 abstract class ShorebirdCommand extends Command<int> {
   // We don't currently have a test involving both a CommandRunner

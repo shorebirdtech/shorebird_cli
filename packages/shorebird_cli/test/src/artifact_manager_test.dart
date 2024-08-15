@@ -29,17 +29,14 @@ void main() {
     late ShorebirdProcess shorebirdProcess;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          cacheRef.overrideWith(() => cache),
-          httpClientRef.overrideWith(() => httpClient),
-          loggerRef.overrideWith(() => logger),
-          patchExecutableRef.overrideWith(() => patchExecutable),
-          processRef.overrideWith(() => shorebirdProcess),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(body, values: {
+        cacheRef.overrideWith(() => cache),
+        httpClientRef.overrideWith(() => httpClient),
+        loggerRef.overrideWith(() => logger),
+        patchExecutableRef.overrideWith(() => patchExecutable),
+        processRef.overrideWith(() => shorebirdProcess),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUpAll(() {
@@ -55,35 +52,29 @@ void main() {
       shorebirdProcess = MockShorebirdProcess();
       shorebirdEnv = MockShorebirdEnv();
 
-      when(() => cache.getArtifactDirectory(any()))
-          .thenReturn(cacheArtifactDirectory);
+      when(
+        () => cache.getArtifactDirectory(any()),
+      ).thenReturn(cacheArtifactDirectory);
       when(() => cache.updateAll()).thenAnswer((_) async {});
 
       when(() => httpClient.send(any())).thenAnswer(
         (_) async => http.StreamedResponse(const Stream.empty(), HttpStatus.ok),
       );
 
-      when(() => shorebirdEnv.getShorebirdProjectRoot())
-          .thenReturn(projectRoot);
+      when(
+        () => shorebirdEnv.getShorebirdProjectRoot(),
+      ).thenReturn(projectRoot);
 
       artifactManager = ArtifactManager();
 
       patchExecutable = MockPatchExecutable();
       when(
         () => patchExecutable.run(
-          releaseArtifactPath: any(
-            named: 'releaseArtifactPath',
-          ),
-          patchArtifactPath: any(
-            named: 'patchArtifactPath',
-          ),
-          diffPath: any(
-            named: 'diffPath',
-          ),
+          releaseArtifactPath: any(named: 'releaseArtifactPath'),
+          patchArtifactPath: any(named: 'patchArtifactPath'),
+          diffPath: any(named: 'diffPath'),
         ),
-      ).thenAnswer(
-        (_) async {},
-      );
+      ).thenAnswer((_) async {});
     });
 
     group('createDiff', () {
@@ -113,11 +104,7 @@ void main() {
                   'message',
                   'Release artifact does not exist',
                 )
-                .having(
-                  (e) => e.path,
-                  'path',
-                  'not/a/real/file',
-                ),
+                .having((e) => e.path, 'path', 'not/a/real/file'),
           ),
         );
       });
@@ -137,11 +124,7 @@ void main() {
                   'message',
                   'Patch artifact does not exist',
                 )
-                .having(
-                  (e) => e.path,
-                  'path',
-                  'not/a/real/file',
-                ),
+                .having((e) => e.path, 'path', 'not/a/real/file'),
           ),
         );
       });
@@ -153,9 +136,7 @@ void main() {
             patchArtifactPath: patchArtifactFile.path,
             diffPath: any(named: 'diffPath'),
           ),
-        ).thenThrow(
-          PatchFailedException('error'),
-        );
+        ).thenThrow(PatchFailedException('error'));
 
         await expectLater(
           () => runWithOverrides(
@@ -165,22 +146,19 @@ void main() {
             ),
           ),
           throwsA(
-            isA<Exception>().having(
-              (e) => e.toString(),
-              'exception',
-              'error',
-            ),
+            isA<Exception>().having((e) => e.toString(), 'exception', 'error'),
           ),
         );
       });
 
       test('returns diff path when creating diff succeeds', () async {
-        final diffPath = await runWithOverrides(
-          () => artifactManager.createDiff(
-            releaseArtifactPath: releaseArtifactFile.path,
-            patchArtifactPath: patchArtifactFile.path,
-          ),
-        );
+        final diffPath =
+            await runWithOverrides(
+              () => artifactManager.createDiff(
+                releaseArtifactPath: releaseArtifactFile.path,
+                patchArtifactPath: patchArtifactFile.path,
+              ),
+            );
 
         expect(diffPath, endsWith('diff.patch'));
         verify(
@@ -206,9 +184,8 @@ void main() {
 
         await expectLater(
           () => runWithOverrides(
-            () async => artifactManager.downloadFile(
-              Uri.parse('https://example.com'),
-            ),
+            () async =>
+                artifactManager.downloadFile(Uri.parse('https://example.com')),
           ),
           throwsA(
             isA<Exception>().having(
@@ -221,11 +198,12 @@ void main() {
       });
 
       test('returns path to file when download succeeds', () async {
-        final result = await runWithOverrides(
-          () async => artifactManager.downloadFile(
-            Uri.parse('https://example.com'),
-          ),
-        );
+        final result =
+            await runWithOverrides(
+              () async => artifactManager.downloadFile(
+                Uri.parse('https://example.com'),
+              ),
+            );
 
         expect(result.path, endsWith('artifact'));
       });
@@ -233,12 +211,13 @@ void main() {
       test('returns provided output path when specified', () async {
         final tempDir = Directory.systemTemp.createTempSync();
         final outFile = File(p.join(tempDir.path, 'file.out'));
-        final result = await runWithOverrides(
-          () async => artifactManager.downloadFile(
-            Uri.parse('https://example.com'),
-            outputPath: outFile.path,
-          ),
-        );
+        final result =
+            await runWithOverrides(
+              () async => artifactManager.downloadFile(
+                Uri.parse('https://example.com'),
+                outputPath: outFile.path,
+              ),
+            );
 
         expect(result.path, equals(outFile.path));
       });
@@ -291,57 +270,50 @@ void main() {
           expect(result, isNull);
         });
 
-        test('returns a path containing stripReleaseDebugSymbols if it exists',
-            () {
-          final stripNativeDebugLibsDirectory = Directory(
-            p.join(
-              strippedNativeLibsDirectory.path,
-              'release',
-              'stripReleaseDebugSymbols',
-              'out',
-              'lib',
-            ),
-          )..createSync(recursive: true);
+        test(
+          'returns a path containing stripReleaseDebugSymbols if it exists',
+          () {
+            final stripNativeDebugLibsDirectory = Directory(
+              p.join(
+                strippedNativeLibsDirectory.path,
+                'release',
+                'stripReleaseDebugSymbols',
+                'out',
+                'lib',
+              ),
+            )..createSync(recursive: true);
 
-          // Create paths with and without the stripReleaseDebugSymbols
-          // directory to ensure the method returns the correct path when both
-          // exist.
-          Directory(
-            p.join(
-              strippedNativeLibsDirectory.path,
-              'release',
-              'out',
-              'lib',
-            ),
-          ).createSync(recursive: true);
+            // Create paths with and without the stripReleaseDebugSymbols
+            // directory to ensure the method returns the correct path when both
+            // exist.
+            Directory(
+              p.join(strippedNativeLibsDirectory.path, 'release', 'out', 'lib'),
+            ).createSync(recursive: true);
 
-          final result = ArtifactManager.androidArchsDirectory(
-            projectRoot: projectRoot,
-          );
+            final result = ArtifactManager.androidArchsDirectory(
+              projectRoot: projectRoot,
+            );
 
-          expect(result, isNotNull);
-          expect(result!.path, equals(stripNativeDebugLibsDirectory.path));
-        });
+            expect(result, isNotNull);
+            expect(result!.path, equals(stripNativeDebugLibsDirectory.path));
+          },
+        );
 
         test(
-            '''returns a path not containing stripReleaseDebugSymbols no path containing stripReleaseDebugSymbols exists''',
-            () {
-          final noStripReleaseDebugSymbolsPath = Directory(
-            p.join(
-              strippedNativeLibsDirectory.path,
-              'release',
-              'out',
-              'lib',
-            ),
-          )..createSync(recursive: true);
+          '''returns a path not containing stripReleaseDebugSymbols no path containing stripReleaseDebugSymbols exists''',
+          () {
+            final noStripReleaseDebugSymbolsPath = Directory(
+              p.join(strippedNativeLibsDirectory.path, 'release', 'out', 'lib'),
+            )..createSync(recursive: true);
 
-          final result = ArtifactManager.androidArchsDirectory(
-            projectRoot: projectRoot,
-          );
+            final result = ArtifactManager.androidArchsDirectory(
+              projectRoot: projectRoot,
+            );
 
-          expect(result, isNotNull);
-          expect(result!.path, equals(noStripReleaseDebugSymbolsPath.path));
-        });
+            expect(result, isNotNull);
+            expect(result!.path, equals(noStripReleaseDebugSymbolsPath.path));
+          },
+        );
       });
 
       group('with a flavor named "internal"', () {
@@ -357,59 +329,61 @@ void main() {
         });
 
         test(
-            '''returns a path containing stripInternalReleaseDebugSymbols if it exists''',
-            () {
-          final stripNativeDebugLibsDirectory = Directory(
-            p.join(
-              strippedNativeLibsDirectory.path,
-              'internalRelease',
-              'stripInternalReleaseDebugSymbols',
-              'out',
-              'lib',
-            ),
-          )..createSync(recursive: true);
+          '''returns a path containing stripInternalReleaseDebugSymbols if it exists''',
+          () {
+            final stripNativeDebugLibsDirectory = Directory(
+              p.join(
+                strippedNativeLibsDirectory.path,
+                'internalRelease',
+                'stripInternalReleaseDebugSymbols',
+                'out',
+                'lib',
+              ),
+            )..createSync(recursive: true);
 
-          // Create paths with and without the stripReleaseDebugSymbols
-          // directory to ensure the method returns the correct path when both
-          // exist.
-          Directory(
-            p.join(
-              strippedNativeLibsDirectory.path,
-              'internalRelease',
-              'out',
-              'lib',
-            ),
-          ).createSync(recursive: true);
+            // Create paths with and without the stripReleaseDebugSymbols
+            // directory to ensure the method returns the correct path when both
+            // exist.
+            Directory(
+              p.join(
+                strippedNativeLibsDirectory.path,
+                'internalRelease',
+                'out',
+                'lib',
+              ),
+            ).createSync(recursive: true);
 
-          final result = ArtifactManager.androidArchsDirectory(
-            projectRoot: projectRoot,
-            flavor: flavor,
-          );
+            final result = ArtifactManager.androidArchsDirectory(
+              projectRoot: projectRoot,
+              flavor: flavor,
+            );
 
-          expect(result, isNotNull);
-          expect(result!.path, equals(stripNativeDebugLibsDirectory.path));
-        });
+            expect(result, isNotNull);
+            expect(result!.path, equals(stripNativeDebugLibsDirectory.path));
+          },
+        );
 
         test(
-            '''returns a path not containing stripInternalReleaseDebugSymbols no path containing stripInternalReleaseDebugSymbols exists''',
-            () {
-          final noStripReleaseDebugSymbolsPath = Directory(
-            p.join(
-              strippedNativeLibsDirectory.path,
-              'internalRelease',
-              'out',
-              'lib',
-            ),
-          )..createSync(recursive: true);
+          '''returns a path not containing stripInternalReleaseDebugSymbols no path containing stripInternalReleaseDebugSymbols exists''',
+          () {
+            final noStripReleaseDebugSymbolsPath = Directory(
+              p.join(
+                strippedNativeLibsDirectory.path,
+                'internalRelease',
+                'out',
+                'lib',
+              ),
+            )..createSync(recursive: true);
 
-          final result = ArtifactManager.androidArchsDirectory(
-            projectRoot: projectRoot,
-            flavor: flavor,
-          );
+            final result = ArtifactManager.androidArchsDirectory(
+              projectRoot: projectRoot,
+              flavor: flavor,
+            );
 
-          expect(result, isNotNull);
-          expect(result!.path, equals(noStripReleaseDebugSymbolsPath.path));
-        });
+            expect(result, isNotNull);
+            expect(result!.path, equals(noStripReleaseDebugSymbolsPath.path));
+          },
+        );
       });
     });
 
@@ -496,10 +470,7 @@ void main() {
     group('getIpa', () {
       group('when ipa build directory does not exist', () {
         test('returns null', () {
-          expect(
-            runWithOverrides(artifactManager.getIpa),
-            isNull,
-          );
+          expect(runWithOverrides(artifactManager.getIpa), isNull);
         });
       });
 
@@ -509,12 +480,7 @@ void main() {
 
         setUp(() {
           ipaBuildDirectory = Directory(
-            p.join(
-              projectRoot.path,
-              'build',
-              'ios',
-              'ipa',
-            ),
+            p.join(projectRoot.path, 'build', 'ios', 'ipa'),
           )..createSync(recursive: true);
           ipaFile = File(p.join(ipaBuildDirectory.path, 'Runner.ipa'))
             ..createSync();
@@ -530,10 +496,7 @@ void main() {
         test('returns null when multiple ipa files exist', () {
           File(p.join(ipaBuildDirectory.path, 'Runner2.ipa')).createSync();
 
-          expect(
-            runWithOverrides(artifactManager.getIpa),
-            isNull,
-          );
+          expect(runWithOverrides(artifactManager.getIpa), isNull);
           verify(
             () => logger.detail(
               'More than one .ipa file found in ${ipaBuildDirectory.path}',
@@ -544,10 +507,7 @@ void main() {
         test('returns null when no ipa files exist', () {
           ipaFile.deleteSync();
 
-          expect(
-            runWithOverrides(artifactManager.getIpa),
-            isNull,
-          );
+          expect(runWithOverrides(artifactManager.getIpa), isNull);
 
           verify(
             () => logger.detail(
@@ -581,13 +541,7 @@ void main() {
         expect(
           runWithOverrides(artifactManager.getAppXcframeworkDirectory).path,
           equals(
-            p.join(
-              projectRoot.path,
-              'build',
-              'ios',
-              'framework',
-              'Release',
-            ),
+            p.join(projectRoot.path, 'build', 'ios', 'framework', 'Release'),
           ),
         );
       });

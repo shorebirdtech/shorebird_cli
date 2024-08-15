@@ -25,15 +25,12 @@ void main() {
     late Bundletool bundletool;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          androidSdkRef.overrideWith(() => androidSdk),
-          cacheRef.overrideWith(() => cache),
-          javaRef.overrideWith(() => java),
-          processRef.overrideWith(() => process),
-        },
-      );
+      return runScoped(body, values: {
+        androidSdkRef.overrideWith(() => androidSdk),
+        cacheRef.overrideWith(() => cache),
+        javaRef.overrideWith(() => java),
+        processRef.overrideWith(() => process),
+      });
     }
 
     setUp(() {
@@ -63,11 +60,8 @@ void main() {
 
       test('throws exception if process returns non-zero exit code', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 1,
@@ -91,17 +85,11 @@ void main() {
 
       test('completes when process succeeds', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
-          (_) async => const ShorebirdProcessResult(
-            exitCode: 0,
-            stdout: '',
-            stderr: '',
-          ),
+          (_) async =>
+              const ShorebirdProcessResult(exitCode: 0, stdout: '', stderr: ''),
         );
         await expectLater(
           runWithOverrides(
@@ -135,11 +123,8 @@ void main() {
 
       test('throws exception if process returns non-zero exit code', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 1,
@@ -162,17 +147,11 @@ void main() {
       test('completes when process succeeds', () async {
         const deviceId = '1234';
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
-          (_) async => const ShorebirdProcessResult(
-            exitCode: 0,
-            stdout: '',
-            stderr: '',
-          ),
+          (_) async =>
+              const ShorebirdProcessResult(exitCode: 0, stdout: '', stderr: ''),
         );
         await expectLater(
           runWithOverrides(
@@ -203,11 +182,8 @@ void main() {
     group('getPackageName', () {
       test('throws exception if process returns non-zero exit code', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 1,
@@ -216,9 +192,8 @@ void main() {
           ),
         );
         await expectLater(
-          () => runWithOverrides(
-            () => bundletool.getPackageName(appBundlePath),
-          ),
+          () =>
+              runWithOverrides(() => bundletool.getPackageName(appBundlePath)),
           throwsA(
             isA<Exception>().having(
               (e) => e.toString(),
@@ -231,11 +206,8 @@ void main() {
 
       test('returns the correct package name', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 0,
@@ -244,9 +216,10 @@ void main() {
           ),
         );
 
-        final versionName = await runWithOverrides(
-          () => bundletool.getPackageName(appBundlePath),
-        );
+        final versionName =
+            await runWithOverrides(
+              () => bundletool.getPackageName(appBundlePath),
+            );
         expect(versionName, equals('com.example.app'));
         verify(
           () => process.run(
@@ -272,11 +245,8 @@ void main() {
     group('getVersionName', () {
       test('throws exception if process returns non-zero exit code', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 1,
@@ -285,9 +255,8 @@ void main() {
           ),
         );
         await expectLater(
-          () => runWithOverrides(
-            () => bundletool.getVersionName(appBundlePath),
-          ),
+          () =>
+              runWithOverrides(() => bundletool.getVersionName(appBundlePath)),
           throwsA(
             isA<Exception>().having(
               (e) => e.toString(),
@@ -300,11 +269,8 @@ void main() {
 
       test('returns the correct version name', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 0,
@@ -313,9 +279,10 @@ void main() {
           ),
         );
 
-        final versionName = await runWithOverrides(
-          () => bundletool.getVersionName(appBundlePath),
-        );
+        final versionName =
+            await runWithOverrides(
+              () => bundletool.getVersionName(appBundlePath),
+            );
         expect(versionName, equals('1.2.3'));
         verify(
           () => process.run(
@@ -341,11 +308,8 @@ void main() {
     group('getVersionCode', () {
       test('throws exception if process returns non-zero exit code', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 1,
@@ -354,9 +318,8 @@ void main() {
           ),
         );
         await expectLater(
-          () => runWithOverrides(
-            () => bundletool.getVersionCode(appBundlePath),
-          ),
+          () =>
+              runWithOverrides(() => bundletool.getVersionCode(appBundlePath)),
           throwsA(
             isA<Exception>().having(
               (e) => e.toString(),
@@ -369,11 +332,8 @@ void main() {
 
       test('returns the correct version code', () async {
         when(
-          () => process.run(
-            any(),
-            any(),
-            environment: any(named: 'environment'),
-          ),
+          () =>
+              process.run(any(), any(), environment: any(named: 'environment')),
         ).thenAnswer(
           (_) async => const ShorebirdProcessResult(
             exitCode: 0,
@@ -381,9 +341,10 @@ void main() {
             stderr: '',
           ),
         );
-        final versionCode = await runWithOverrides(
-          () => bundletool.getVersionCode(appBundlePath),
-        );
+        final versionCode =
+            await runWithOverrides(
+              () => bundletool.getVersionCode(appBundlePath),
+            );
         expect(versionCode, equals('42'));
         verify(
           () => process.run(

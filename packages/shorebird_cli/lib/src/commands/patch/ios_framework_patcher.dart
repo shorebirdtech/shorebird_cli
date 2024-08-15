@@ -83,14 +83,13 @@ class IosFrameworkPatcher extends Patcher {
     required ReleaseArtifact releaseArtifact,
     required File releaseArchive,
     required File patchArchive,
-  }) =>
-      patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
-        localArchive: patchArchive,
-        releaseArchive: releaseArchive,
-        archiveDiffer: const IosArchiveDiffer(),
-        allowAssetChanges: allowAssetDiffs,
-        allowNativeChanges: allowNativeDiffs,
-      );
+  }) => patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
+    localArchive: patchArchive,
+    releaseArchive: releaseArchive,
+    archiveDiffer: const IosArchiveDiffer(),
+    allowAssetChanges: allowAssetDiffs,
+    allowNativeChanges: allowNativeDiffs,
+  );
 
   @override
   Future<File> buildPatchArtifact({String? releaseVersion}) async {
@@ -101,9 +100,10 @@ class IosFrameworkPatcher extends Patcher {
 
     final IosFrameworkBuildResult buildResult;
     try {
-      buildResult = await artifactBuilder.buildIosFramework(
-        args: argResults.forwardedArgs,
-      );
+      buildResult =
+          await artifactBuilder.buildIosFramework(
+            args: argResults.forwardedArgs,
+          );
     } on ArtifactBuildException catch (error) {
       buildProgress.fail(error.message);
       throw ProcessExit(ExitCode.software.code);
@@ -150,23 +150,15 @@ class IosFrameworkPatcher extends Patcher {
     );
     final releaseXcframeworkPath = tempDir.path;
 
-    unzipProgress
-        .complete('Extracted release artifact to $releaseXcframeworkPath');
+    unzipProgress.complete(
+      'Extracted release artifact to $releaseXcframeworkPath',
+    );
     final releaseArtifactFile = File(
-      p.join(
-        releaseXcframeworkPath,
-        'ios-arm64',
-        'App.framework',
-        'App',
-      ),
+      p.join(releaseXcframeworkPath, 'ios-arm64', 'App.framework', 'App'),
     );
 
     final aotSnapshotFile = File(
-      p.join(
-        shorebirdEnv.getShorebirdProjectRoot()!.path,
-        'build',
-        'out.aot',
-      ),
+      p.join(shorebirdEnv.getShorebirdProjectRoot()!.path, 'build', 'out.aot'),
     );
     final useLinker = AotTools.usesLinker(shorebirdEnv.flutterRevision);
     if (useLinker) {
@@ -189,10 +181,11 @@ class IosFrameworkPatcher extends Patcher {
       try {
         // If the aot_tools executable supports the dump_blobs command, we
         // can generate a stable diff base and use that to create a patch.
-        patchBaseFile = await aotTools.generatePatchDiffBase(
-          analyzeSnapshotPath: analyzeSnapshotPath,
-          releaseSnapshot: releaseArtifactFile,
-        );
+        patchBaseFile =
+            await aotTools.generatePatchDiffBase(
+              analyzeSnapshotPath: analyzeSnapshotPath,
+              releaseSnapshot: releaseArtifactFile,
+            );
         patchBaseProgress.complete();
       } catch (error) {
         patchBaseProgress.fail('$error');
@@ -272,15 +265,16 @@ class IosFrameworkPatcher extends Patcher {
 
     final linkProgress = logger.progress('Linking AOT files');
     try {
-      lastBuildLinkPercentage = await aotTools.link(
-        base: releaseArtifact.path,
-        patch: aotSnapshot.path,
-        analyzeSnapshot: analyzeSnapshot.path,
-        genSnapshot: genSnapshot,
-        kernel: _appDillCopyPath,
-        outputPath: _vmcodeOutputPath,
-        workingDirectory: buildDirectory.path,
-      );
+      lastBuildLinkPercentage =
+          await aotTools.link(
+            base: releaseArtifact.path,
+            patch: aotSnapshot.path,
+            analyzeSnapshot: analyzeSnapshot.path,
+            genSnapshot: genSnapshot,
+            kernel: _appDillCopyPath,
+            outputPath: _vmcodeOutputPath,
+            workingDirectory: buildDirectory.path,
+          );
     } catch (error) {
       linkProgress.fail('Failed to link AOT files: $error');
       throw ProcessExit(ExitCode.software.code);

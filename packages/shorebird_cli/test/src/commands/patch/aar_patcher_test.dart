@@ -51,24 +51,21 @@ void main() {
     late AarPatcher patcher;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          artifactBuilderRef.overrideWith(() => artifactBuilder),
-          artifactManagerRef.overrideWith(() => artifactManager),
-          codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
-          engineConfigRef.overrideWith(() => const EngineConfig.empty()),
-          loggerRef.overrideWith(() => logger),
-          patchDiffCheckerRef.overrideWith(() => patchDiffChecker),
-          platformRef.overrideWith(() => platform),
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-          shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
-          shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
-          shorebirdAndroidArtifactsRef.overrideWith(
-            () => shorebirdAndroidArtifacts,
-          ),
-        },
-      );
+      return runScoped(body, values: {
+        artifactBuilderRef.overrideWith(() => artifactBuilder),
+        artifactManagerRef.overrideWith(() => artifactManager),
+        codePushClientWrapperRef.overrideWith(() => codePushClientWrapper),
+        engineConfigRef.overrideWith(() => const EngineConfig.empty()),
+        loggerRef.overrideWith(() => logger),
+        patchDiffCheckerRef.overrideWith(() => patchDiffChecker),
+        platformRef.overrideWith(() => platform),
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+        shorebirdFlutterRef.overrideWith(() => shorebirdFlutter),
+        shorebirdValidatorRef.overrideWith(() => shorebirdValidator),
+        shorebirdAndroidArtifactsRef.overrideWith(
+          () => shorebirdAndroidArtifacts,
+        ),
+      });
     }
 
     void setUpExtractedAarDirectory(Directory root) {
@@ -149,11 +146,13 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
-              supportedOperatingSystems:
-                  any(named: 'supportedOperatingSystems'),
+              supportedOperatingSystems: any(
+                named: 'supportedOperatingSystems',
+              ),
             ),
           ).thenAnswer((_) async {});
         });
@@ -189,8 +188,9 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
             ),
           ).thenThrow(exception);
@@ -201,8 +201,9 @@ void main() {
           when(
             () => shorebirdValidator.validatePreconditions(
               checkUserIsAuthenticated: any(named: 'checkUserIsAuthenticated'),
-              checkShorebirdInitialized:
-                  any(named: 'checkShorebirdInitialized'),
+              checkShorebirdInitialized: any(
+                named: 'checkShorebirdInitialized',
+              ),
               validators: any(named: 'validators'),
             ),
           ).thenThrow(exception);
@@ -239,13 +240,14 @@ void main() {
       });
 
       test('forwards result from patchDiffChecker', () async {
-        final result = await runWithOverrides(
-          () => patcher.assertUnpatchableDiffs(
-            releaseArtifact: FakeReleaseArtifact(),
-            releaseArchive: File(''),
-            patchArchive: File(''),
-          ),
-        );
+        final result =
+            await runWithOverrides(
+              () => patcher.assertUnpatchableDiffs(
+                releaseArtifact: FakeReleaseArtifact(),
+                releaseArchive: File(''),
+                patchArchive: File(''),
+              ),
+            );
         expect(result, equals(diffStatus));
         verify(
           () => patchDiffChecker.confirmUnpatchableDiffsIfNecessary(
@@ -328,10 +330,9 @@ void main() {
             );
 
             verify(
-              () => artifactBuilder.buildAar(
-                buildNumber: buildNumber,
-                args: ['--verbose'],
-              ),
+              () => artifactBuilder.buildAar(buildNumber: buildNumber, args: [
+                '--verbose',
+              ]),
             ).called(1);
           });
         });
@@ -389,9 +390,9 @@ void main() {
 
       setUp(() {
         releaseArtifactFile = File('');
-        when(() => artifactManager.downloadFile(any())).thenAnswer(
-          (_) async => releaseArtifactFile,
-        );
+        when(
+          () => artifactManager.downloadFile(any()),
+        ).thenAnswer((_) async => releaseArtifactFile);
 
         when(
           () => codePushClientWrapper.getReleaseArtifacts(
@@ -424,9 +425,9 @@ void main() {
             releaseArtifactPath: any(named: 'releaseArtifactPath'),
           ),
         ).thenAnswer((_) async {
-          final diffPath =
-              File(p.join(Directory.systemTemp.createTempSync().path, 'diff'))
-                ..createSync();
+          final diffPath = File(
+            p.join(Directory.systemTemp.createTempSync().path, 'diff'),
+          )..createSync();
           return diffPath.path;
         });
       });
@@ -481,13 +482,14 @@ void main() {
 
       group('when successful', () {
         test('returns map of archs to patch artifacts', () async {
-          final patchArtifacts = await runWithOverrides(
-            () => patcher.createPatchArtifacts(
-              appId: appId,
-              releaseId: releaseId,
-              releaseArtifact: releaseArtifactFile,
-            ),
-          );
+          final patchArtifacts =
+              await runWithOverrides(
+                () => patcher.createPatchArtifacts(
+                  appId: appId,
+                  releaseId: releaseId,
+                  releaseArtifact: releaseArtifactFile,
+                ),
+              );
 
           expect(patchArtifacts, hasLength(3));
           expect(
@@ -536,9 +538,10 @@ void main() {
           hasNativeChanges: false,
         );
 
-        final metadata = await runWithOverrides(
-          () => patcher.createPatchMetadata(diffStatus),
-        );
+        final metadata =
+            await runWithOverrides(
+              () => patcher.createPatchMetadata(diffStatus),
+            );
 
         expect(
           metadata,

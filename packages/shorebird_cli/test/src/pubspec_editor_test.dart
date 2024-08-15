@@ -17,12 +17,9 @@ void main() {
     late PubspecEditor pubspecEditor;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        () => body(),
-        values: {
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(() => body(), values: {
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUpAll(() {
@@ -44,9 +41,8 @@ void main() {
 
         test('does nothing', () {
           expect(
-            () => runWithOverrides(
-              pubspecEditor.addShorebirdYamlToPubspecAssets,
-            ),
+            () =>
+                runWithOverrides(pubspecEditor.addShorebirdYamlToPubspecAssets),
             returnsNormally,
           );
           verifyNever(() => shorebirdEnv.getFlutterProjectRoot());
@@ -132,42 +128,42 @@ flutter:
             );
             expect(
               pubspecFile.readAsStringSync(),
-              equals(
-                '''
+              equals('''
 $basePubspecContents
 flutter:
  assets:
    - shorebird.yaml
-''',
-              ),
+'''),
             );
           });
-          test('creates assets and adds shorebird.yaml (non-empty flutter)',
-              () {
-            pubspecFile
-              ..createSync()
-              ..writeAsStringSync('''
+          test(
+            'creates assets and adds shorebird.yaml (non-empty flutter)',
+            () {
+              pubspecFile
+                ..createSync()
+                ..writeAsStringSync('''
 $basePubspecContents
 flutter:
  uses-material-design: true
 ''');
-            IOOverrides.runZoned(
-              () => runWithOverrides(
-                pubspecEditor.addShorebirdYamlToPubspecAssets,
-              ),
-              getCurrentDirectory: () => tempDir,
-            );
-            expect(
-              pubspecFile.readAsStringSync(),
-              equals('''
+              IOOverrides.runZoned(
+                () => runWithOverrides(
+                  pubspecEditor.addShorebirdYamlToPubspecAssets,
+                ),
+                getCurrentDirectory: () => tempDir,
+              );
+              expect(
+                pubspecFile.readAsStringSync(),
+                equals('''
 $basePubspecContents
 flutter:
  assets:
   - shorebird.yaml
  uses-material-design: true
 '''),
-            );
-          });
+              );
+            },
+          );
           test('adds shorebird.yaml to assets (existing assets)', () {
             pubspecFile
               ..createSync()

@@ -9,19 +9,12 @@ part of 'create_app_request.dart';
 // **************************************************************************
 
 CreateAppRequest _$CreateAppRequestFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
-      'CreateAppRequest',
-      json,
-      ($checkedConvert) {
-        final val = CreateAppRequest(
-          displayName: $checkedConvert('display_name', (v) => v as String),
-        );
-        return val;
-      },
-      fieldKeyMap: const {'displayName': 'display_name'},
-    );
+    $checkedCreate('CreateAppRequest', json, ($checkedConvert) {
+      final val = CreateAppRequest(
+        displayName: $checkedConvert('display_name', (v) => v as String),
+      );
+      return val;
+    }, fieldKeyMap: const {'displayName': 'display_name'});
 
 Map<String, dynamic> _$CreateAppRequestToJson(CreateAppRequest instance) =>
-    <String, dynamic>{
-      'display_name': instance.displayName,
-    };
+    <String, dynamic>{'display_name': instance.displayName};

@@ -26,12 +26,9 @@ void main() {
     late Ios ios;
 
     R runWithOverrides<R>(R Function() body) {
-      return runScoped(
-        body,
-        values: {
-          shorebirdEnvRef.overrideWith(() => shorebirdEnv),
-        },
-      );
+      return runScoped(body, values: {
+        shorebirdEnvRef.overrideWith(() => shorebirdEnv),
+      });
     }
 
     setUp(() {
@@ -42,12 +39,9 @@ void main() {
     group(MissingIOSProjectException, () {
       test('toString', () {
         const exception = MissingIOSProjectException('test_project_path');
-        expect(
-          exception.toString(),
-          '''
+        expect(exception.toString(), '''
 Could not find an iOS project in test_project_path.
-To add iOS, run "flutter create . --platforms ios"''',
-        );
+To add iOS, run "flutter create . --platforms ios"''');
       });
     });
 
@@ -64,46 +58,53 @@ To add iOS, run "flutter create . --platforms ios"''',
         ]);
       });
 
-      group('when both export-method and export-options-plist are provided',
-          () {
+      group(
+        'when both export-method and export-options-plist are provided',
+        () {
+          setUp(() {
+            when(
+              () => argResults.wasParsed(CommonArguments.exportMethodArg.name),
+            ).thenReturn(true);
+            when(
+              () => argResults[CommonArguments.exportOptionsPlistArg.name],
+            ).thenReturn('/path/to/export.plist');
+          });
+
+          test('throws ArgumentError', () {
+            expect(
+              () => ios.exportOptionsPlistFromArgs(argResults),
+              throwsArgumentError,
+            );
+          });
+        },
+      );
+
+      group('when export-method is provided', () {
         setUp(() {
           when(
             () => argResults.wasParsed(CommonArguments.exportMethodArg.name),
           ).thenReturn(true);
           when(
+            () => argResults[CommonArguments.exportMethodArg.name],
+          ).thenReturn(ExportMethod.adHoc.argName);
+          when(
             () => argResults[CommonArguments.exportOptionsPlistArg.name],
-          ).thenReturn('/path/to/export.plist');
+          ).thenReturn(null);
         });
 
-        test('throws ArgumentError', () {
-          expect(
-            () => ios.exportOptionsPlistFromArgs(argResults),
-            throwsArgumentError,
-          );
-        });
-      });
-
-      group('when export-method is provided', () {
-        setUp(() {
-          when(() => argResults.wasParsed(CommonArguments.exportMethodArg.name))
-              .thenReturn(true);
-          when(() => argResults[CommonArguments.exportMethodArg.name])
-              .thenReturn(ExportMethod.adHoc.argName);
-          when(() => argResults[CommonArguments.exportOptionsPlistArg.name])
-              .thenReturn(null);
-        });
-
-        test('generates an export options plist with that export method',
-            () async {
-          final exportOptionsPlistFile = ios.exportOptionsPlistFromArgs(
-            argResults,
-          );
-          final exportOptionsPlist = Plist(file: exportOptionsPlistFile);
-          expect(
-            exportOptionsPlist.properties['method'],
-            ExportMethod.adHoc.argName,
-          );
-        });
+        test(
+          'generates an export options plist with that export method',
+          () async {
+            final exportOptionsPlistFile = ios.exportOptionsPlistFromArgs(
+              argResults,
+            );
+            final exportOptionsPlist = Plist(file: exportOptionsPlistFile);
+            expect(
+              exportOptionsPlist.properties['method'],
+              ExportMethod.adHoc.argName,
+            );
+          },
+        );
       });
 
       group('when export-options-plist is provided', () {
@@ -140,9 +141,8 @@ To add iOS, run "flutter create . --platforms ios"''',
 
           test('throws InvalidExportOptionsPlistException', () async {
             final tmpDir = Directory.systemTemp.createTempSync();
-            final exportPlistFile = File(
-              p.join(tmpDir.path, 'export.plist'),
-            )..writeAsStringSync(exportPlistContent);
+            final exportPlistFile = File(p.join(tmpDir.path, 'export.plist'))
+              ..writeAsStringSync(exportPlistContent);
             when(
               () => argResults[CommonArguments.exportOptionsPlistArg.name],
             ).thenReturn(exportPlistFile.path);
@@ -160,43 +160,52 @@ To add iOS, run "flutter create . --platforms ios"''',
         });
       });
 
-      group('when neither export-method nor export-options-plist is provided',
-          () {
-        setUp(() {
-          when(() => argResults.wasParsed(CommonArguments.exportMethodArg.name))
-              .thenReturn(false);
-          when(() => argResults[CommonArguments.exportOptionsPlistArg.name])
-              .thenReturn(null);
-        });
+      group(
+        'when neither export-method nor export-options-plist is provided',
+        () {
+          setUp(() {
+            when(
+              () => argResults.wasParsed(CommonArguments.exportMethodArg.name),
+            ).thenReturn(false);
+            when(
+              () => argResults[CommonArguments.exportOptionsPlistArg.name],
+            ).thenReturn(null);
+          });
 
-        test('generates an export options plist with app-store export method',
+          test(
+            'generates an export options plist with app-store export method',
             () async {
-          final exportOptionsPlistFile =
-              ios.exportOptionsPlistFromArgs(argResults);
-          final exportOptionsPlist = Plist(file: exportOptionsPlistFile);
-          expect(
-            exportOptionsPlist.properties['method'],
-            ExportMethod.appStore.argName,
-          );
+              final exportOptionsPlistFile = ios.exportOptionsPlistFromArgs(
+                argResults,
+              );
+              final exportOptionsPlist = Plist(file: exportOptionsPlistFile);
+              expect(
+                exportOptionsPlist.properties['method'],
+                ExportMethod.appStore.argName,
+              );
 
-          final exportOptionsPlistMap =
-              PropertyListSerialization.propertyListWithString(
-            exportOptionsPlistFile.readAsStringSync(),
-          ) as Map<String, Object>;
-          expect(
-            exportOptionsPlistMap['manageAppVersionAndBuildNumber'],
-            isFalse,
+              final exportOptionsPlistMap =
+                  PropertyListSerialization.propertyListWithString(
+                        exportOptionsPlistFile.readAsStringSync(),
+                      )
+                      as Map<String, Object>;
+              expect(
+                exportOptionsPlistMap['manageAppVersionAndBuildNumber'],
+                isFalse,
+              );
+              expect(exportOptionsPlistMap['signingStyle'], 'automatic');
+              expect(exportOptionsPlistMap['uploadBitcode'], isFalse);
+              expect(exportOptionsPlistMap['method'], 'app-store');
+            },
           );
-          expect(exportOptionsPlistMap['signingStyle'], 'automatic');
-          expect(exportOptionsPlistMap['uploadBitcode'], isFalse);
-          expect(exportOptionsPlistMap['method'], 'app-store');
-        });
-      });
+        },
+      );
 
       group('when export-method option does not exist', () {
         setUp(() {
-          when(() => argResults.options)
-              .thenReturn([CommonArguments.exportOptionsPlistArg.name]);
+          when(
+            () => argResults.options,
+          ).thenReturn([CommonArguments.exportOptionsPlistArg.name]);
         });
 
         test('does not check whether export-method was parsed', () {
@@ -229,8 +238,9 @@ To add iOS, run "flutter create . --platforms ios"''',
 
       setUp(() {
         projectRoot = Directory.systemTemp.createTempSync();
-        when(() => shorebirdEnv.getFlutterProjectRoot())
-            .thenReturn(projectRoot);
+        when(
+          () => shorebirdEnv.getFlutterProjectRoot(),
+        ).thenReturn(projectRoot);
       });
 
       group('when ios directory does not exist', () {

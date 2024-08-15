@@ -52,13 +52,14 @@ class ShorebirdProcess {
       '''[Process.run] $resolvedExecutable ${resolvedArguments.join(' ')}${workingDirectory == null ? '' : ' (in $workingDirectory)'}''',
     );
 
-    final result = await processWrapper.run(
-      resolvedExecutable,
-      resolvedArguments,
-      runInShell: runInShell,
-      workingDirectory: workingDirectory,
-      environment: resolvedEnvironment,
-    );
+    final result =
+        await processWrapper.run(
+          resolvedExecutable,
+          resolvedArguments,
+          runInShell: runInShell,
+          workingDirectory: workingDirectory,
+          environment: resolvedEnvironment,
+        );
 
     _logResult(result);
 
@@ -117,9 +118,7 @@ class ShorebirdProcess {
     final resolvedEnvironment = environment ?? {};
     if (useVendedFlutter) {
       // Note: this will overwrite existing environment values.
-      resolvedEnvironment.addAll(
-        _environmentOverrides(executable: executable),
-      );
+      resolvedEnvironment.addAll(_environmentOverrides(executable: executable));
     }
     final resolvedExecutable = _resolveExecutable(
       executable,
@@ -151,9 +150,7 @@ class ShorebirdProcess {
     final resolvedEnvironment = baseEnvironment ?? {};
     if (useVendedFlutter) {
       // Note: this will overwrite existing environment values.
-      resolvedEnvironment.addAll(
-        _environmentOverrides(executable: executable),
-      );
+      resolvedEnvironment.addAll(_environmentOverrides(executable: executable));
     }
 
     return resolvedEnvironment;
@@ -216,9 +213,7 @@ $stderr''');
     }
   }
 
-  Map<String, String> _environmentOverrides({
-    required String executable,
-  }) {
+  Map<String, String> _environmentOverrides({required String executable}) {
     if (executable == 'flutter') {
       // If this ever changes we also need to update the `shorebird` shell
       // wrapper which downloads runs Flutter to fetch artifacts the first time.
@@ -260,13 +255,14 @@ class ProcessWrapper {
     Map<String, String>? environment,
     String? workingDirectory,
   }) async {
-    final result = await Process.run(
-      executable,
-      arguments,
-      environment: environment,
-      runInShell: runInShell,
-      workingDirectory: workingDirectory,
-    );
+    final result =
+        await Process.run(
+          executable,
+          arguments,
+          environment: environment,
+          runInShell: runInShell,
+          workingDirectory: workingDirectory,
+        );
     return ShorebirdProcessResult(
       exitCode: result.exitCode,
       stdout: result.stdout,
@@ -313,4 +309,5 @@ class ProcessWrapper {
     );
   }
 }
+
 // coverage:ignore-end
