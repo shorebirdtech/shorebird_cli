@@ -116,7 +116,15 @@ Please comment and upvote ${link(uri: Uri.parse('https://github.com/shorebirdtec
         buildProgress: buildAppBundleProgress,
       );
     } on ArtifactBuildException catch (e) {
-      buildAppBundleProgress.fail(e.message);
+      buildAppBundleProgress.fail('Failed to build app bundle');
+      logger.err(e.message);
+      if (e.fixSuggestion != null) {
+        logger.info(
+          '''
+
+${e.fixSuggestion}''',
+        );
+      }
       throw ProcessExit(ExitCode.software.code);
     }
 

@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:scoped_deps/scoped_deps.dart';
 import 'package:shorebird_cli/src/artifact_manager.dart';
+import 'package:shorebird_cli/src/logging/build_output_interpreter.dart';
 import 'package:shorebird_cli/src/logging/logging.dart';
 import 'package:shorebird_cli/src/os/operating_system_interface.dart';
 import 'package:shorebird_cli/src/platform/platform.dart';
@@ -67,13 +68,16 @@ class MacosBuildResult {
 /// {@endtemplate}
 class ArtifactBuildException implements Exception {
   /// {@macro artifact_build_exception}
-  ArtifactBuildException(this.message);
+  ArtifactBuildException(this.message, {this.fixSuggestion});
 
   /// Information about the build failure.
   final String message;
 
+  /// A suggestion for how to fix the build failure.
+  final String? fixSuggestion;
+
   @override
-  String toString() => message;
+  String toString() => '$message $fixSuggestion';
 }
 
 /// A reference to a [ArtifactBuilder] instance.
@@ -132,10 +136,12 @@ class ArtifactBuilder {
       // this format. We can use the 'Task :' line to get the current task
       // being run.
       final gradleTaskRegex = RegExp(r'^\[.*\] \> (Task :.*)$');
+      final stdoutLines = <String>[];
       buildProcess.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((line) {
+        stdoutLines.add(line);
         if (buildProgress == null) {
           return;
         }
@@ -150,9 +156,17 @@ class ArtifactBuilder {
           .transform(const LineSplitter())
           .toList();
       final stdErr = stderrLines.join('\n');
+      final (interpreted, recommendation) = BuildOutputInterpreter().interpret(
+        stdout: stdoutLines.join('\n'),
+        stderr: stdErr,
+      );
       final exitCode = await buildProcess.exitCode;
       if (exitCode != ExitCode.success.code) {
-        throw ArtifactBuildException('Failed to build: $stdErr');
+        final msg = [
+          interpreted[0].trim(),
+          ...(interpreted.skip(1).map((e) => '  $e')),
+        ].join('\n');
+        throw ArtifactBuildException(msg, fixSuggestion: recommendation);
       }
     });
 
